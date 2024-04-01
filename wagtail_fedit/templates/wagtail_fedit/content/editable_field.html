@@ -1,0 +1,11 @@
+<div class="wagtail-fedit-field-wrapper" id="wagtail-fedit-{{ field_name }}-{{model.pk}}" data-edit-url="{{ edit_url }}"> 
+    <div class="wagtail-fedit-buttons">
+        {% for item in toolbar_items %}
+            {{ item }}
+        {% endfor %}
+    </div>
+    <div class="wagtail-fedit-field-content">
+        {{ content|safe }}
+    </div>
+    <div class="wagtail-fedit-frontend-edit" id="wagtail-fedit-{{ field_name }}-{{ model.pk }}-modal"></div>
+</div>

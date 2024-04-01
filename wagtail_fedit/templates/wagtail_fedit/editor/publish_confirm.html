@@ -1,0 +1,40 @@
+{% extends "wagtailadmin/base.html" %}
+
+{% load static wagtailadmin_tags wagtailuserbar i18n %}
+
+{% block titletag %}{{view.get_header_title}}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'wagtail_fedit/css/admin.css' %}">
+{% endblock %}
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title=view.get_header_title icon=view.get_header_icon %}
+
+    <div class="nice-padding">
+        <div class="wagtail-fedit-form-wrapper{% if form.block.block.meta.fedit_full %} fedit-full{% endif %}">
+            <form id="wagtail-fedit-form" action="{{ publish_url }}" method="post">
+                {% csrf_token %}
+
+                <div class="wagtail-fedit-form-help">
+                    {% help_block status="warning" %}
+                        <p>{% blocktranslate %}Publishing this object means it will be made visible to all users on the website.{% endblocktranslate %}</p>
+                        <p>{% blocktranslate %}If this is not what you intended; please cancel to go back.{% endblocktranslate %}</p>
+                    {% endhelp_block %}
+                    <h2>{% blocktranslate with model_type=model_verbose_name%}Are you sure you want to publish {{model_type}}?{% endblocktranslate %}</h2>
+                </div>
+                <div class="wagtail-fedit-form-buttons">
+                    <button type="submit" class="button button-primary button-large bicolor button--icon" name="publish" value="1">
+                        <span class="icon-wrapper">
+                            {% icon name="upload" classname="icon" %}
+                        </span>
+                        {% translate "Publish" %}
+                    </button>
+                    <a href="{{ edit_url }}" class="button no button-large">
+                        {% translate "Cancel" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

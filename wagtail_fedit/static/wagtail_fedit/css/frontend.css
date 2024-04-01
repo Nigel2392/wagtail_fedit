@@ -1,0 +1,153 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.wagtail-fedit-buttons {
+    display: flex;
+}
+
+.wagtail-fedit-field-wrapper,
+.wagtail-fedit-block-wrapper {
+    position: relative;
+}
+.wagtail-fedit-buttons {
+    position: absolute;
+    right: 0.5em;
+    display: flex;
+    gap: 0.5em;
+    background-color: white;
+    border-radius: 0.5em;
+    padding: 0.1em 0.5em;
+    /* display: none; */
+    z-index: 1;
+}
+/* .wagtail-fedit-field-wrapper > .wagtail-fedit-buttons { */
+    /* position: relative; */
+/* } */
+.wagtail-fedit-field-wrapper > .wagtail-fedit-buttons button {
+    display: inline-block;
+}
+.wagtail-fedit-buttons button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+.wagtail-fedit-buttons button,
+.wagtail-fedit-buttons button svg,
+.wagtail-fedit-buttons > a,
+.wagtail-fedit-buttons > a svg,
+.wagtail-fedit-buttons > a:hover svg,
+.wagtail-fedit-buttons > a:visited,
+.wagtail-fedit-buttons > a:hover,
+.wagtail-fedit-buttons > a:active{
+    color: rgb(14, 49, 100) !important;
+}
+.wagtail-fedit-buttons svg {
+    vertical-align: middle;
+    color: rgb(14, 49, 100);
+}
+body:has(.wagtail-fedit-modal-wrapper .wagtail-fedit-modal) {
+    overflow: hidden;
+}
+/* *:target::after { */
+    /* content: ''; */
+    /* display: block; */
+    /* position: absolute; */
+    /* top: 0; */
+    /* left: 0; */
+    /* width: 100%; */
+    /* height: 100%; */
+    /* outline: 3px solid red; */
+    /* pointer-events: none; */
+    /* z-index: 300; */
+/* } */
+.wagtail-fedit-modal-wrapper:has(.wagtail-fedit-modal > :is(*)) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 400;
+    overflow: auto;
+}
+.wagtail-fedit-modal-wrapper .wagtail-fedit-modal.fedit-full {
+    height: 100%;
+    width: 100%;
+    /* max-width: unset; */
+    /* max-height: unset; */
+}
+.wagtail-fedit-modal-wrapper .wagtail-fedit-modal {
+    position: relative;
+    min-width: max(60dvw, 15rem);
+    min-height: max(60dvh, 15rem);
+    outline: 2px solid #333333;
+    outline-offset: -1px;
+    box-shadow: 0 0 1em rgba(0, 0, 0, 0.5);
+    border-radius: 0.25em;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: hidden;
+    display: flex;
+}
+.wagtail-fedit-modal-wrapper .wagtail-fedit-modal:not(.fedit-full) {
+    margin-top: -5%;
+}
+
+.wagtail-fedit-field-wrapper iframe,
+.wagtail-fedit-block-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex: 1;
+}
+/* .wagtail-fedit-field-wrapper .wagtail-fedit-field-content, */
+/* .wagtail-fedit-block-wrapper .wagtail-fedit-block-content { */
+    /* position: relative; */
+/* } */
+/* .wagtail-fedit-field-wrapper .wagtail-fedit-field-content:not(:has(.wagtail-fedit-block-wrapper)):hover::after, */
+/* .wagtail-fedit-block-wrapper .wagtail-fedit-block-content:not(:has(.wagtail-fedit-block-wrapper:hover)):hover::after { */
+    /* content: ''; */
+    /* display: block; */
+    /* position: absolute; */
+    /* top: 0; */
+    /* left: 0; */
+    /* width: 100%; */
+    /* height: 100%; */
+    /* background-color: rgba(0, 0, 0, 0.05); */
+    /* outline: 2px solid #333333; */
+    /* pointer-events: none; */
+    /* z-index: 300; */
+/* } */
+.wagtail-fedit-modal-wrapper .wagtail-fedit-modal .wagtail-fedit-close-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    font-size: 24px;
+    font-size: 24px;
+    border: none;
+    border-radius: 0 0 0 0.5em;
+    border: 1px solid rgb(172, 27, 27);
+    border-right-width: 0;
+    border-top-width: 0;
+    background-color: rgb(255, 255, 255);
+    color: rgb(172, 27, 27);
+    cursor: pointer;
+}
+.wagtail-fedit-modal-wrapper .wagtail-fedit-modal .wagtail-fedit-close-button:hover {
+    background-color: rgb(172, 27, 27);
+    color: rgb(235, 235, 235);
+}

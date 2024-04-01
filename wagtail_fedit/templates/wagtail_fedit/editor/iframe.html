@@ -1,0 +1,84 @@
+{% extends "wagtailadmin/admin_base.html" %}
+{% load wagtailadmin_tags i18n static %}
+
+{% block titletag %}{{view.get_header_title}}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+{{ form.media.css }}
+<link rel="stylesheet" href="{% static 'wagtail_fedit/css/furniture.css' %}">
+<base target="_blank">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% versioned_static 'wagtailadmin/js/modal-workflow.js' %}"></script>
+<script src="{% versioned_static 'wagtailimages/js/image-chooser-modal.js' %}"></script>
+<script src="{% versioned_static 'wagtailimages/js/image-chooser.js' %}"></script>
+<script src="{% versioned_static 'wagtaildocs/js/document-chooser-modal.js' %}"></script>
+<script src="{% versioned_static 'wagtaildocs/js/document-chooser.js' %}"></script>
+<script src="{% versioned_static 'wagtailadmin/js/page-chooser-modal.js' %}"></script>
+<script src="{% versioned_static 'wagtailadmin/js/page-chooser.js' %}"></script>
+
+{{ block.super }}
+{{ form.media.js }}
+{% endblock %}
+
+{% block furniture %}
+    <main class="content-wrapper w-overflow-x-hidden" id="main">
+        {% block header %}
+            <header class="nice-padding" id="modal-header">
+                <h1 id="modal-title">{{ view.get_header_title }}</h1>
+            </header>
+        {% endblock %}
+        <div class="nice-padding">
+            <div class="wagtail-fedit-form-wrapper{% if form.block.block.meta.fedit_full %} fedit-full{% endif %}">
+                {% block errors %}
+                    {% if form.errors or form.non_field_errors %}
+                        <div class="error-message">
+                            <h2>{% translate "Validation errors" %}</h2>
+                            <ul>
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endblock %}
+                <form id="wagtail-fedit-form" action="{{ edit_url }}" method="post" {% for k, v in form_attrs.items %}{{ k }}="{{ v|safe }}" {% endfor %}>
+                    {% csrf_token %}
+                    <div class="wagtail-fedit-form">
+                        {% for field in form %}
+                            {% include "./field.html" %}
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+    <aside>
+        <div class="fedit-sidebar-logo">
+            {% block sidebar_logo %}{% endblock %}
+        </div>
+        <div class="fedit-sidebar">
+            {% block sidebar %}
+                {% if admin_edit_url %}
+                    <a href="{{ admin_edit_url }}" class="fedit-menu-item fedit-sidebar-icon">
+                        {% icon name="link-external" %}
+                    </a>
+                {% endif %}
+                <button type="submit" form="wagtail-fedit-form" class="fedit-menu-item fedit-sidebar-icon wagtail-fedit-save-button bottom">
+                    {% icon name="circle-check" %}
+                </button>
+                <button type="button" class="fedit-menu-item fedit-sidebar-icon wagtail-fedit-cancel-button">
+                    {% translate "Close" as close_title %}
+                    {% icon name="logout" title=close_title %}
+                </button>
+            {% endblock %}
+        </div>
+    </aside>
+{% endblock %}
