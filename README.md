@@ -1,5 +1,5 @@
 wagtail_fedit
-================
+=============
 
 ...
 
@@ -14,5 +14,10 @@ Quick start
    'wagtail_fedit',
    ]
    ```
-
 2. ...
+
+## Caveats
+
+## Settings
+
+## Models/Methods
