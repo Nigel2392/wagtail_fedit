@@ -39,6 +39,10 @@ class SubFormWidget(forms.Widget):
 
     def format_value(self, value: Any):
         return value
+
+    @property
+    def media(self):
+        return self.form.media
     
 
 class BlockEditSubFormField(forms.Field):

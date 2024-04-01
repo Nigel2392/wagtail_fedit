@@ -3,8 +3,8 @@ wagtail_fedit
 
 ...
 
-Quick start
------------
+Getting Started
+---------------
 
 1. Add 'wagtail_fedit' to your INSTALLED_APPS setting like this:
 

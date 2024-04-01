@@ -12,13 +12,7 @@
 
 {% block extra_js %}
 <script src="{% versioned_static 'wagtailadmin/js/modal-workflow.js' %}"></script>
-<script src="{% versioned_static 'wagtailimages/js/image-chooser-modal.js' %}"></script>
-<script src="{% versioned_static 'wagtailimages/js/image-chooser.js' %}"></script>
-<script src="{% versioned_static 'wagtaildocs/js/document-chooser-modal.js' %}"></script>
-<script src="{% versioned_static 'wagtaildocs/js/document-chooser.js' %}"></script>
-<script src="{% versioned_static 'wagtailadmin/js/page-chooser-modal.js' %}"></script>
-<script src="{% versioned_static 'wagtailadmin/js/page-chooser.js' %}"></script>
-
+{% include "wagtailadmin/pages/_editor_js.html" %}
 {{ block.super }}
 {{ form.media.js }}
 {% endblock %}
