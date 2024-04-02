@@ -26,6 +26,7 @@ Getting Started
    Example:
 
    ```django-html
+   {% load fedit static %} {# Load the required template tag libraries #}
    <!DOCTYPE html>
    <html lang="en">
    <head>
@@ -35,8 +36,6 @@ Getting Started
        <link rel="stylesheet" href="{% static 'wagtail_fedit/css/frontend.css' %}">
    </head>
    <body>
-       {% load fedit %} {# Load the template tag library #}
-
        {# Pass in the field_name and the model instance on which that field resides. #}
        <h1>{% fedit_field "title" self %}</h1>
 
