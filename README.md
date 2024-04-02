@@ -80,6 +80,19 @@ Getting Started
 
    Your content will then automatically be rendered with that method when need be by using `{% fedit_field "content" self %}`
 
+## Revisions
+
+Revision support is included out of the box.
+If your model inherits from a `RevisionMixin`, we will automatically create drafts for you.
+These will not be published (If the model inherits from `DraftStateMixin`) until you choose to do so.
+
+## Logs
+
+Logs are also included out of the box.  
+We will automatically update your model's history; including possible revisions.
+This will allow you to backtrack each change made on the frontend.
+This however does mean that a possibly large amount of data will be stored in your database.
+
 ## Caveats
 
 Wagtail does not always make it's `id` attribute available.
