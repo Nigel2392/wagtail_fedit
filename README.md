@@ -26,7 +26,7 @@ Getting Started
    Example:
 
    ```django-html
-   {% load fedit static %} {# Load the required template tag libraries #}
+   {% load fedit static wagtailuserbar %} {# Load the required template tag libraries #}
    <!DOCTYPE html>
    <html lang="en">
    <head>
@@ -43,6 +43,8 @@ Getting Started
        <main class="my-streamfield-content">
            {% fedit_field "content" self %}
        </main>
+
+       {% wagtailuserbar %}
 
        <script src="{% static 'wagtail_fedit/js/frontend.js' %}"></script>
    </body>
@@ -77,8 +79,13 @@ Getting Started
            return render_to_string("myapp/render_my_field.html", self.get_context(request))
    ```
 
-   Your content will then automatically be rendered with that method when need be by using `{% fedit_field "content" self %}`
+   Your content will then automatically be rendered with that method when need be by using `{% fedit_field "content" self %} `
 
+4. **But wait?! I go to my template and I do not see a way to edit!**  
+   That is true! We try to protect any styling on your actual page; we do not want to interfere.  
+   Instead; we serve the editing interface on a different URL, accessible by clicking `Frontend Editing` in the Wagtail userbar.  
+   Keep an eye on that userbar! It is also used for publishing if your model inherits from `DraftStateMixin`.
+   
 ## Revisions
 
 Revision support is included out of the box.
@@ -87,7 +94,7 @@ These will not be published (If the model inherits from `DraftStateMixin`) until
 
 ## Logs
 
-Logs are also included out of the box.  
+Logs are also included out of the box.
 We will automatically update your model's history; including possible revisions.
 This will allow you to backtrack each change made on the frontend.
 This however does mean that a possibly large amount of data will be stored in your database.
