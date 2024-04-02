@@ -17,7 +17,7 @@ from wagtail.models import (
     PreviewableMixin,
     DraftStateMixin,
 )
-from .. import block_forms as block_forms
+from .. import forms as block_forms
 from ..utils import (
     FEDIT_PREVIEW_VAR,
     USERBAR_MODEL_VAR,

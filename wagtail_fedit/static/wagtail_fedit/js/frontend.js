@@ -30,6 +30,10 @@ class iFrame {
         return this.element.contentWindow.document;
     }
 
+    get window() {
+        return this.element.contentWindow;
+    }
+
     get mainElement() {
         return this.document.querySelector("#main");
     }
@@ -163,6 +167,12 @@ class WagtailFeditEditor {
                             newElement.innerHTML = response.html;
                             this.iframe.mainElement.innerHTML = newElement.querySelector("#main").innerHTML;
                             this.iframe.formElement.onsubmit = onSubmit;
+
+                            const uninitializedBlock = this.iframe.mainElement.querySelector("#value[data-block]");
+                            if (uninitializedBlock) {
+                                this.iframe.window.initBlockWidget(uninitializedBlock.id);
+                            }
+
                             const cancelButton = this.iframe.document.querySelector("button.wagtail-fedit-cancel-button");
                             cancelButton.addEventListener("click", this.closeModal.bind(this));
                             return;
@@ -191,10 +201,8 @@ class WagtailFeditEditor {
                 }
 
                 // Check if we should adjust the modal height to the height of the iframe form.
-                const modalheight = this.modal.getBoundingClientRect().height;
-                const formHeightDiff = modalheight - formHeight;
-                if (formHeightDiff > 0) {
-                    this.modal.style.height = `${modalheight + formHeightDiff}px`;
+                if (formHeight > this.modal.getBoundingClientRect().height) {
+                    this.modal.style.height = `${formHeight}px`;
                 }
 
                 const url = window.location.href.split("#")[0];

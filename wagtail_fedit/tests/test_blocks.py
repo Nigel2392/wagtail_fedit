@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django import forms
 from wagtail import blocks
-from .. import block_forms
+from .. import forms as block_forms
+from .. import utils
 
 TEST_BLOCK_DATA = [
     {
@@ -158,83 +159,57 @@ class TestBlocks(TestCase):
         self.stream_value = self.stream_block.to_python(TEST_BLOCK_DATA)
 
     def test_find_block(self):
-        block, contentpath = block_forms.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)
+        block, contentpath = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)
         self.assertEqual(block.value["heading"], "AWESOME!!")
         self.assertEqual(block.value["subheading"], "RIGHT?!")
 
-        block, contentpath = block_forms.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
+        block, contentpath = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
         self.assertEqual(block.value["link"]["text"], "Test Item 3")
         self.assertEqual(contentpath, ["3e9144fd-5fa5-47f8-917e-8fe87c15da01", "items", "a98a19c6-2ead-4e69-9ea2-3158c7e82976"])
 
         item = self.stream_block.get_block_by_content_path(self.stream_value, contentpath)
         self.assertEqual(item.value["link"]["text"], "Test Item 3")
 
-        block, contentpath = block_forms.find_block("invalid-id", self.stream_value)
+        block, contentpath = utils.find_block("invalid-id", self.stream_value)
         self.assertIsNone(block)
         self.assertEqual(contentpath, [])
 
     def test_get_form_class(self):
-        block = block_forms.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)[0]
-        form_class = block_forms.get_form_class(block, block.block, request=FakeRequest())
+        block = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)[0]
+        form_class = block_forms.get_block_form_class(block.block)
         self.assertIsNotNone(form_class)
 
-        fields = {
-            "heading": forms.CharField(max_length=25),
-            "subheading": forms.CharField(max_length=40)
-        }
-
-        for name, field in form_class.base_fields.items():
-            self.assertIsInstance(field, fields[name].__class__)
-
         VALID_DATA = {
-            "heading": "New Heading",
-            "subheading": "New Subheading"
+            "value-heading": "New Heading",
+            "value-subheading": "New Subheading"
         }
 
         INVALID_DATA = {
-            "heading": "New Heading",
-            "subheading": "New Subheading" * 10
+            "value-heading": "New Heading",
+            "value-subheading": "New Subheading" * 10
         }
 
-        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel(), request=FakeRequest(method="POST", POST=VALID_DATA))
+        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel())
         self.assertTrue(valid_form.is_valid())
 
-        invalid_form = form_class(data=INVALID_DATA, block=block, parent_instance=FakeModel(), request=FakeRequest(method="POST", POST=INVALID_DATA))
+        invalid_form = form_class(data=INVALID_DATA, block=block, parent_instance=FakeModel())
         self.assertFalse(invalid_form.is_valid())
 
     def test_get_subblock_form_class(self):
-        block = block_forms.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)[0]
-        form_class = block_forms.get_form_class(block, block.block, request=FakeRequest())
+        block = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)[0]
+        form_class = block_forms.get_block_form_class(block.block)
         self.assertIsNotNone(form_class)
 
-        fields = {
-            "link": block_forms.BlockEditSubFormField
-        }
-
-        subfields = {
-            "text": forms.CharField(max_length=25)
-        }
-
-        for name, field in form_class.base_fields.items():
-            self.assertIsInstance(field, fields[name])
-
-        field = form_class.declared_fields["link"]
-        self.assertIsInstance(field, block_forms.BlockEditSubFormField)
-        self.assertIsInstance(field.form, block_forms.BaseBlockEditForm)
-
-        for name, field in field.form.base_fields.items():
-            self.assertIsInstance(field, subfields[name].__class__)
-
         VALID_DATA = {
-            "link-text": "New Link Text"
+            "value-link-text": "New Link Text"
         }
 
         INVALID_DATA = {
-            "link-text": ["New Link Text" * 10]
+            "value-link-text": ["New Link Text" * 10]
         }
 
 
-        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel(), request=FakeRequest(method="POST"))
+        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel())
         if not valid_form.is_valid():
             self.fail((
                 valid_form.errors.items(),
@@ -244,20 +219,20 @@ class TestBlocks(TestCase):
         valid_form.save()
         self.assertEqual(block.value["link"]["text"], "New Link Text")
 
-        invalid_form = form_class(data=INVALID_DATA, block=block, parent_instance=FakeModel(), request=FakeRequest(method="POST"))
+        invalid_form = form_class(data=INVALID_DATA, block=block, parent_instance=FakeModel())
         self.assertFalse(invalid_form.is_valid())
 
 
     def test_block_form_save(self):
-        block = block_forms.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)[0]
-        form_class = block_forms.get_form_class(block, block.block, request=FakeRequest())
+        block = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)[0]
+        form_class = block_forms.get_block_form_class(block.block)
 
         VALID_DATA = {
-            "heading": "New Heading",
-            "subheading": "New Subheading"
+            "value-heading": "New Heading",
+            "value-subheading": "New Subheading"
         }
 
-        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel(), request=FakeRequest(method="POST"))
+        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel())
         if not valid_form.is_valid():
             self.fail((valid_form.errors.items(), valid_form.non_field_errors()))
 
@@ -267,19 +242,17 @@ class TestBlocks(TestCase):
 
 
     def test_subblock_form_save(self):
-        block = block_forms.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)[0]
-        form_class = block_forms.get_form_class(block, block.block, request=FakeRequest())
+        block = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)[0]
+        form_class = block_forms.get_block_form_class(block.block)
 
         VALID_DATA = {
-            "link-text": "New Link Text"
+            "value-link-text": "New Link Text"
         }
 
-        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel(), request=FakeRequest(method="POST"))
+        valid_form = form_class(data=VALID_DATA, block=block, parent_instance=FakeModel())
         if not valid_form.is_valid():
-            self.fail((
-                valid_form.errors.items(),
-                valid_form.non_field_errors()
-            ))
+            errors = valid_form.errors.as_data()["value"][0].as_json_data()
+            self.fail((errors, valid_form.non_field_errors()))
 
         valid_form.save()
         self.assertEqual(block.value["link"]["text"], "New Link Text")

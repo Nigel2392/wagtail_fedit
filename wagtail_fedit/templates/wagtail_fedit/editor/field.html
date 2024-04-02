@@ -1,4 +1,4 @@
-<div class="field">
+<div class="field" data-contentpath="{{ field.name }}">
     {% if field.field.form and field.field.form.errors %}
         {% for error in field.field.form.errors %}
             <p class="error">{{ error }}</p>
@@ -10,9 +10,6 @@
 
     {% else %}
         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {% if field.help_text %}
-            <p class="help">{{ field.help_text }}</p>
-        {% endif %}
         {{ field }}
     {% endif %}
 </div>

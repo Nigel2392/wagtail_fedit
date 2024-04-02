@@ -19,17 +19,14 @@ from wagtail.models import RevisionMixin, Page
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
 from wagtail.log_actions import log
 from ..templatetags.fedit import BlockEditNode
-from .. import block_forms as block_forms
-from ..utils import (
-    FeditPermissionCheck,
-    FEDIT_PREVIEW_VAR,
-)
+from .. import forms as block_forms
+from .. import utils
 
 
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
-class EditBlockView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
-    template_name = "wagtail_fedit/editor/iframe.html"
+class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View):
+    template_name = "wagtail_fedit/editor/block_iframe.html"
 
     def dispatch(self, request: HttpRequest, block_id = None, field_name = None, model_id = None, model_name = None, app_label = None) -> None:
 
@@ -59,14 +56,14 @@ class EditBlockView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
 
 
         self.streamfield: StreamValue = getattr(self.instance, self.field_name)
-        result = block_forms.find_block(self.block_id, self.streamfield)
+        result = utils.find_block(self.block_id, self.streamfield)
         if not result:
             # raise ValueError("Block not found; did you provide the correct block ID?")
             return HttpResponseBadRequest("Block not found; did you provide the correct block ID?")
 
 
         self.block, self.contentpath = result
-        self.form_class = block_forms.get_form_class(self.block, self.block.block, request)
+        self.form_class = block_forms.get_block_form_class(self.block.block)
 
 
         if not self.form_class:
@@ -162,7 +159,7 @@ class EditBlockView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
         form = self.form_class(request.POST, block=self.block, parent_instance=self.instance, request=request)
 
         # Set the preview flag to mark as editable block when re-rendering.
-        setattr(request, FEDIT_PREVIEW_VAR, True)
+        setattr(request, utils.FEDIT_PREVIEW_VAR, True)
 
         valid = form.is_valid()
         if valid:
@@ -173,7 +170,7 @@ class EditBlockView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 "success": False,
                 "errors": form.errors,
                 "html": render_to_string(
-                    "wagtail_fedit/editor/iframe.html",
+                    "wagtail_fedit/editor/block_iframe.html",
                     context=self.get_context_data(form=form),
                     request=request,
                 )

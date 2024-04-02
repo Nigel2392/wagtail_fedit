@@ -16,7 +16,6 @@ from ..toolbar import (
     FeditBlockEditButton,
     FeditFieldEditButton,
 )
-from ..block_forms.utils import can_fedit
 from ..utils import FEDIT_PREVIEW_VAR
 from ..hooks import (
     CONSTRUCT_BLOCK_TOOLBAR,
@@ -96,9 +95,6 @@ class BlockEditNode(Node):
         else:
             raise ValueError("Block or nodelist is required")
         
-        if block and not can_fedit(block):
-            return rendered
-
         # Get block id from block if bound or context.
         if not block_id and "block_id" in context:
             block_id = context["block_id"]

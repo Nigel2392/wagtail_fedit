@@ -19,9 +19,6 @@ from wagtail.models import (
     RevisionMixin, 
 )
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
-from wagtail.admin.forms import (
-    WagtailAdminModelForm,
-)
 
 import uuid
 
@@ -29,62 +26,20 @@ from ..templatetags.fedit import (
     BlockEditNode,
     render_editable_field,
 )
-from .. import block_forms as block_forms
+from ..forms import (
+    blocks as block_forms,
+    fields as field_forms,
+)
 from ..utils import (
     FeditPermissionCheck,
     use_related_form,
 )
 
 
-class PossiblePreviewForm(WagtailAdminModelForm):
-    def __init__(self, *args, request = None, **kwargs):
-        self.request = request
-        super().__init__(*args, **kwargs)
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance = save_possible_revision(instance, self.request)
-        return instance
-
-def save_possible_revision(instance: models.Model, request: HttpRequest, **kwargs) -> models.Model:
-    if isinstance(instance, RevisionMixin):
-        instance = instance.save_revision(
-            user=request.user,
-            **kwargs,
-        )
-        instance = instance.as_object()
-    else:
-        instance.save()
-
-    return instance
-
-def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) -> Type[WagtailAdminModelForm]:
-
-    if hasattr(form_model, "get_fedit_form"):
-        return form_model.get_fedit_form(form_fields)
-
-    class Form(PossiblePreviewForm):
-        class Meta:
-            model = form_model
-            fields = form_fields
-
-    return Form
-
-
-def get_model_string(instance: models.Model) -> str:
-    model_string = getattr(instance, "get_admin_display_title", None)
-    if model_string:
-        model_string = model_string()
-    else:
-        model_string = getattr(instance, "title", str(instance))
-
-    return model_string
-
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
 class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
-    template_name = "wagtail_fedit/editor/iframe.html"
+    template_name = "wagtail_fedit/editor/field_iframe.html"
 
     def dispatch(self, request: HttpRequest, field_name = None, app_label = None, model_name = None, model_id = None) -> None:
         if not all([field_name, model_name, app_label, model_id]):
@@ -118,7 +73,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             # If the field is a model, we want to edit the model itself
             # We can do this by getting the fields from the model
             self.instance = self.field_value
-            self.form_class = get_form_class_for_fields(
+            self.form_class = field_forms.get_form_class_for_fields(
                 self.meta_field.related_model,
                 getattr(
                     self.meta_field.related_model,
@@ -126,7 +81,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 ),
             )
         else:
-            self.form_class = get_form_class_for_fields(
+            self.form_class = field_forms.get_form_class_for_fields(
                 self.model,
                 [field_name],
             )
@@ -136,9 +91,9 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
     def get_page_title(self):
         meta_field: models.Field = self.model._meta.get_field(self.field_name)
 
-        model_string = get_model_string(self.original_instance)
+        model_string = field_forms.get_model_string(self.original_instance)
         if self.original_instance != self.instance:
-            instance_string = get_model_string(self.instance)
+            instance_string = field_forms.get_model_string(self.instance)
             return _("Edit model %(instance_string)s for %(model_name)s %(model_string)s") % {
                 "instance_string": instance_string,
                 "model_name": self.model._meta.verbose_name,
@@ -198,7 +153,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             # Check if we are saving a relation
             if self.instance.pk != self.original_instance.pk:
                 self.meta_field.save_form_data(self.original_instance, self.instance)
-                save_possible_revision(self.original_instance, request)
+                field_forms.save_possible_revision(self.original_instance, request)
 
             extra_log_kwargs = {}
             if isinstance(self.original_instance, RevisionMixin):
@@ -211,7 +166,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 "model_name": self.model_name,
                 "app_label": self.app_label,
                 "model_verbose": str(self.model._meta.verbose_name),
-                "model_string": str(get_model_string(self.original_instance)),
+                "model_string": str(field_forms.get_model_string(self.original_instance)),
                 "old": str(self.initial_field_value),
                 "new": str(getattr(
                     self.original_instance,
@@ -222,7 +177,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             uid = uuid.uuid4()
             if self.original_instance.pk != self.instance.pk:
                 data.update({
-                    "edited_model_string": str(get_model_string(self.instance)),
+                    "edited_model_string": str(field_forms.get_model_string(self.instance)),
                     "edited_model_verbose": str(self.instance._meta.verbose_name),
                     "edited_model_id": self.instance.pk,
                     "edited_model_name": self.instance._meta.model_name,
@@ -276,7 +231,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             "success": False,
             "errors": form.errors,
             "html": render_to_string(
-                "wagtail_fedit/editor/iframe.html",
+                "wagtail_fedit/editor/field_iframe.html",
                 context=self.get_context_data(form=form),
                 request=request,
             )

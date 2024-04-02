@@ -1,0 +1,15 @@
+{% if errors.block_errors %}
+    <ul class="errorlist">
+        {% for field, errors in errors.block_errors.items %}
+            <li>{{ field }}: {% include "wagtail_fedit/editor/base_errors.html" with errors=errors %}</li>
+        {% endfor %}
+    </ul>
+{% elif errors.error_list %}
+    <ul class="errorlist">
+        {% for error in errors.error_list %}
+            <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    {{ errors }}
+{% endif %}
