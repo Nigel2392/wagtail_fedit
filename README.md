@@ -122,7 +122,7 @@ Our new loop would then be:
 ```django-html
 {% for item in self.items.bound_blocks %}
     {# Field name and model are the same arguments as in the first example! #}
-    {% fedit_block block=item block_id=item.id field_name="content" model=self %}
+    {% fedit_block block=item block_id=item.id field_name="content" model=my_model_instance_var %}
 {% endfor %}
 ```
 
