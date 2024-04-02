@@ -20,7 +20,10 @@ from wagtail.admin.views.generic import WagtailAdminTemplateMixin
 from wagtail.log_actions import log
 from ..templatetags.fedit import BlockEditNode
 from .. import block_forms as block_forms
-from ..utils import FeditPermissionCheck
+from ..utils import (
+    FeditPermissionCheck,
+    FEDIT_PREVIEW_VAR,
+)
 
 
 
@@ -157,6 +160,10 @@ class EditBlockView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         form = self.form_class(request.POST, block=self.block, parent_instance=self.instance, request=request)
+
+        # Set the preview flag to mark as editable block when re-rendering.
+        setattr(request, FEDIT_PREVIEW_VAR, True)
+
         valid = form.is_valid()
         if valid:
             self.block = form.save()
@@ -197,6 +204,7 @@ class EditBlockView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
         )
 
         # Add the data to the context and render the block.
+
         if self.has_block:
             keys = request.GET.keys()
             data = BlockEditNode.unpack(*keys, request=request)
