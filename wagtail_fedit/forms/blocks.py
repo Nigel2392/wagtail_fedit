@@ -42,6 +42,7 @@ class BlockEditForm(forms.Form):
         self.parent_instance = parent_instance
 
         if "initial" not in kwargs:
+            # print(block.block.get_form_state(block.value))
             kwargs["initial"] = {
                 "value": block.block.get_prep_value(block.value),
             }
