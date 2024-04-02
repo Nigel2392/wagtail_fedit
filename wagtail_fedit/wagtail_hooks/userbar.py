@@ -44,6 +44,18 @@ class BaseWagtailFeditItem(BaseItem, FeditPermissionCheck):
 class WagtailFeditItem(BaseWagtailFeditItem):
     template = "wagtail_fedit/userbar/item_fedit.html"
 
+class WagtailFeditViewLiveItem(BaseWagtailFeditItem):
+    template = "wagtail_fedit/userbar/item_fedit_view_live.html"
+
+    def get_context_data(self, request):
+        context = super().get_context_data(request)
+        
+        if hasattr(self.model, "get_url"):
+            context["live_url"] = self.model.get_url(request)
+        elif hasattr(self.model, "get_absolute_url"):
+            context["live_url"] = self.model.get_absolute_url()
+
+        return context
     
 class WagtailFeditPublishItem(BaseWagtailFeditItem):
     template = "wagtail_fedit/userbar/item_fedit_publishing.html"
@@ -82,7 +94,11 @@ def add_fedit_userbar_item(request, items):
                 WagtailFeditPublishItem(model),
             )
 
-        
+        if hasattr(model, "get_absolute_url") or hasattr(model, "get_url"):
+            local_items.append(
+                WagtailFeditViewLiveItem(model),
+            )
+
     if model and not getattr(request, FEDIT_PREVIEW_VAR, False):
         local_items.append(
             WagtailFeditItem(model),
