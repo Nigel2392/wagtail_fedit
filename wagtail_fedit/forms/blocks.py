@@ -44,7 +44,7 @@ class BlockEditForm(forms.Form):
         if "initial" not in kwargs:
             # print(block.block.get_form_state(block.value))
             kwargs["initial"] = {
-                "value": block.block.get_prep_value(block.value),
+                "value": block.value,
             }
 
         super().__init__(*args, **kwargs)
