@@ -88,7 +88,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
 
         return super().dispatch(request, field_name, model_name, app_label, model_id)
 
-    def get_page_title(self):
+    def get_header_title(self):
         meta_field: models.Field = self.model._meta.get_field(self.field_name)
 
         model_string = field_forms.get_model_string(self.original_instance)
@@ -197,7 +197,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 instance=self.original_instance,
                 action="wagtail_fedit.edit_field",
                 user=request.user,
-                title=self.get_page_title(),
+                title=self.get_header_title(),
                 uuid=uid,
                 data=data,
                 content_changed=True,

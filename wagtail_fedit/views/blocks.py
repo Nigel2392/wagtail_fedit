@@ -71,7 +71,7 @@ class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View)
 
         return super().dispatch(request, block_id, field_name, model_id, model_name, app_label)
 
-    def get_page_title(self):
+    def get_header_title(self):
 
         model_string = getattr(self.instance, "get_admin_display_title", None)
         if model_string:
@@ -186,7 +186,7 @@ class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View)
             instance=self.instance,
             action="wagtail_fedit.edit_block",
             user=request.user,
-            title=self.get_page_title(),
+            title=self.get_header_title(),
             data={
                 "block_id": self.block_id,
                 "field_name": self.field_name,
