@@ -12,6 +12,8 @@ from wagtail.models import Page
 from wagtail import hooks
 from urllib.parse import urlencode
 
+import warnings
+
 from ..toolbar import (
     FeditBlockEditButton,
     FeditFieldEditButton,
@@ -26,6 +28,10 @@ from ..hooks import (
 register = library.Library()
 
 url_value_signer = signing.TimestampSigner()
+
+
+WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context for block {block.name}."
+WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for block {block.name}."
 
 
 class BlockEditNode(Node):
@@ -72,20 +78,13 @@ class BlockEditNode(Node):
         if isinstance(model, FilterExpression):
             model = model.resolve(context)
         
-        # Validation for required values.
-        if not field_name:
-            raise ValueError("Field name is required")
-
         if not block_id and "block_id" not in context and not block:
             raise ValueError("Block ID is required")
-        
-        if not model and "wagtail_fedit_instance" not in context:
-            raise ValueError("Model instance is required")
         
         # `wagtail_fedit_instance` is provided after the form is saved.
         # This allows us to easily use the same instance across multiple views.
         # Model will only be provided initially when the block is rendered.
-        model = model or context["wagtail_fedit_instance"]
+        model = model or context.get("wagtail_fedit_instance")
         context["wagtail_fedit_field_name"] = field_name
         context["wagtail_fedit_instance"] = model
         
@@ -104,6 +103,14 @@ class BlockEditNode(Node):
             self.has_block = context.get("wagtail_fedit_has_block", False)
         else:
             raise ValueError("Block or nodelist is required")
+        
+        if not field_name:
+            warnings.warn(WARNING_FIELD_NAME_NOT_AVAILABLE % {"block": block})
+            return rendered
+        
+        if not model:
+            warnings.warn(WARNING_MODEL_INSTANCE_NOT_AVAILABLE % {"block": block})
+            return rendered
         
         # Get block id from block if bound or context.
         if not block_id and "block_id" in context:
@@ -313,6 +320,9 @@ def do_render_fedit_field(context, field_name, model, content=None, **kwargs):
         else:
             content = getattr(model, field_name)
 
+    context["wagtail_fedit_field_name"] = field_name
+    context["wagtail_fedit_instance"] = model
+
     if hasattr(context, "flatten"):
         context = context.flatten()
 
@@ -357,6 +367,9 @@ def render_editable_field(request, content, field_name, model, context, **kwargs
 
     items = [item.render(request) for item in items]
     items = list(filter(None, items))
+
+    kwargs["wagtail_fedit_field_name"] = field_name
+    kwargs["wagtail_fedit_instance"] = model
 
     return render_to_string(
         "wagtail_fedit/content/editable_field.html",
