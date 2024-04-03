@@ -371,7 +371,7 @@ def render_editable_field(request, content, field_name, model, context, **kwargs
             "content": content,
             "parent_context": context,
             "toolbar_items": items,
-            "inline": kwargs.get("inline", False),
+            "inline": str(kwargs.get("inline", False)).lower() == "true",
             **kwargs,
         },
         request=request,
