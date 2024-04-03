@@ -12,16 +12,17 @@ html, body {
     position: relative;
 }
 .wagtail-fedit-buttons {
-    position: absolute;
-    right: 0.5em;
     display: flex;
     gap: 0.5em;
     background-color: white;
     border-radius: 0.5em;
     padding: 0.1em 0.5em;
+    position: absolute;
+    right: 0.5em;
     /* display: none; */
     z-index: 1;
 }
+
 /* .wagtail-fedit-field-wrapper > .wagtail-fedit-buttons { */
     /* position: relative; */
 /* } */
@@ -47,7 +48,7 @@ html, body {
     vertical-align: middle;
     color: rgb(14, 49, 100);
 }
-body:has(.wagtail-fedit-modal-wrapper .wagtail-fedit-modal) {
+body:has(.wagtail-fedit-modal) {
     overflow: hidden;
 }
 /* *:target::after { */
@@ -102,8 +103,7 @@ body:has(.wagtail-fedit-modal-wrapper .wagtail-fedit-modal) {
     margin-top: -5%;
 }
 
-.wagtail-fedit-field-wrapper iframe,
-.wagtail-fedit-block-wrapper iframe {
+.wagtail-fedit-modal-wrapper iframe {
     width: 100%;
     height: 100%;
     border: none;

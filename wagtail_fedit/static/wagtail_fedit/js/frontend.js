@@ -200,11 +200,6 @@ class WagtailFeditEditor {
                     this.modal.classList.add("fedit-full");
                 }
 
-                // Check if we should adjust the modal height to the height of the iframe form.
-                if (formHeight > this.modal.getBoundingClientRect().height) {
-                    this.modal.style.height = `${formHeight}px`;
-                }
-
                 const url = window.location.href.split("#")[0];
                 window.history.pushState(null, this.iframe.document.title, url + `#${this.wrapperElement.id}`);
                 document.title = this.iframe.document.title;
@@ -230,13 +225,21 @@ class WagtailFeditEditor {
     }
 
     closeModal() {
-        this.modalWrapper.innerHTML = "";
+        this.modalWrapper.remove();
         window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
         document.title = this.initialTitle;
     }
 
     get modalWrapper() {
-        return this.wrapperElement.querySelector(".wagtail-fedit-frontend-edit");
+        const modalWrapper = document.querySelector("#wagtail-fedit-modal-wrapper");
+        if (modalWrapper) {
+            return modalWrapper;
+        }
+        const wrapper = document.createElement("div");
+        wrapper.id = "wagtail-fedit-modal-wrapper";
+        wrapper.classList.add("wagtail-fedit-modal-wrapper");
+        document.body.appendChild(wrapper);
+        return wrapper;
     }
 
     init() {
