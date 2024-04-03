@@ -4,6 +4,12 @@
 
 {% block content %}
     <div class="wagtail-fedit-form-wrapper{% if form.block.block.meta.fedit_full %} fedit-full{% endif %}">
+        {% if not is_draft_capable %}
+            {% help_block status="info" %}
+                <p>{% translate "The object you are editing does not support drafts." %}</p>
+                <p>{% translate "You are not required to publish this object to make this change visible." %}</p>
+            {% endhelp_block %}
+        {% endif %}
         {% block errors %}
             {% if form.errors or form.non_field_errors %}
                 <div class="error-message">

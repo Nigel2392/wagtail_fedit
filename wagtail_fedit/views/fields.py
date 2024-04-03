@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any
 from django.db import models
 from django.shortcuts import render
 from django.template.loader import render_to_string
@@ -16,6 +16,7 @@ from django.apps import apps
 
 from wagtail.log_actions import log
 from wagtail.models import (
+    DraftStateMixin,
     RevisionMixin, 
 )
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
@@ -133,6 +134,8 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 "data-is-relation": self.meta_field.is_relation\
                     and isinstance(self.field_value, models.Model),
             },
+            "is_draft_capable": issubclass(self.model, RevisionMixin)\
+                and issubclass(self.model, DraftStateMixin),
             "meta_field": self.meta_field,
             "field_name": self.field_name,
         }
