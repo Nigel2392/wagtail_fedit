@@ -133,6 +133,8 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 "data-is-relation": self.meta_field.is_relation\
                     and isinstance(self.field_value, models.Model),
             },
+            "meta_field": self.meta_field,
+            "field_name": self.field_name,
         }
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:

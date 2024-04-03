@@ -137,7 +137,11 @@ class WagtailFeditEditor {
     }
 
     focus() {
-        this.wrapperElementContent.focus();
+        const content = this.wrapperElementContent;
+        if (content) {
+            content.focus();
+            return;
+        }
     }
 
     makeModal() {
@@ -327,6 +331,11 @@ function initFEditors() {
             window.addEventListener("scroll", () => {
                 setScrollParams(editButton);
                 setScrollParams(liveButton);
+
+                const windowURL = new URL(window.location.href);
+                windowURL.searchParams.set("scrollY", window.scrollY);
+                windowURL.searchParams.set("scrollX", window.scrollX);
+                window.history.replaceState(null, "", windowURL.toString());
             });
         }
     }

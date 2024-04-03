@@ -24,7 +24,7 @@
         <form id="wagtail-fedit-form" action="{{ edit_url }}" method="post" {% for k, v in form_attrs.items %}{{ k }}="{{ v|safe }}" {% endfor %}>
             {% csrf_token %}
             {% block form %}
-                {% panel id="wagtail-fedit-editor" icon="draft" heading=block.label %}
+                {% panel id="wagtail-fedit-editor" icon="draft" heading=meta_field.verbose_name %}
                     <div class="wagtail-fedit-form">
                         {% for field in form %}
                             {% include "./field.html" %}

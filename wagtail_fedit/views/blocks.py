@@ -100,6 +100,7 @@ class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View)
             "instance": self.instance,
             "streamfield": self.streamfield,
             "has_block": self.has_block,
+            "label": self.block.block.label,
             "wagtail_fedit_instance": self.instance,
             "wagtail_fedit_has_block": self.has_block,
             "edit_url": BlockEditNode.get_edit_url(

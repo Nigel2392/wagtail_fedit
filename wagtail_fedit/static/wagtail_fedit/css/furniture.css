@@ -148,6 +148,21 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
     right: 0;
     z-index: 100;
 }
+#wagtail-fedit-editor-section .w-panel__anchor {
+    display: none;
+}
+#wagtail-fedit-editor-section .w-panel__toggle {
+    align-content: center;
+    border-radius: 100%;
+    color: var(--w-color-icon-primary);
+    display: inline-grid;
+    height: 1.5rem;
+    justify-content: center;
+    margin: 0;
+    outline-offset: -3px;
+    padding: 0;
+    width: 1.5rem;
+}
 /* .content-wrapper.content-wrapper:has(.nice-padding > .fedit-full)  .buttons { */
     /* justify-content: flex-start; */
 /* } */
