@@ -25,6 +25,7 @@ import uuid
 from ..templatetags.fedit import (
     BlockEditNode,
     render_editable_field,
+    _renderer_map,
 )
 from ..forms import (
     blocks as block_forms,
@@ -33,6 +34,7 @@ from ..forms import (
 from ..utils import (
     FeditPermissionCheck,
     use_related_form,
+    get_field_content,
 )
 
 
@@ -204,16 +206,12 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 **extra_log_kwargs,
             )
 
-            # Check for a rendering method if it exists
-            if hasattr(self.original_instance, f"render_fedit_{self.field_name}"):
-                content = getattr(self.original_instance, f"render_fedit_{self.field_name}")(self.request, context=context)
-            else:
-                content = getattr(self.original_instance, self.field_name)
-
-            # The content might be a streamblock etc, we can render it as a block
-            # if isinstance(content, (blocks.BoundBlock, blocks.StructValue)):
-            if hasattr(content, "render_as_block"):
-                content = content.render_as_block(context)
+            content = get_field_content(
+                request,
+                self.original_instance,
+                self.field_name,
+                context
+            )
 
             # Render the frame HTML
             html = render_editable_field(

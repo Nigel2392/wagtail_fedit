@@ -18,7 +18,7 @@ from ..toolbar import (
     FeditBlockEditButton,
     FeditFieldEditButton,
 )
-from ..utils import FEDIT_PREVIEW_VAR
+from ..utils import FEDIT_PREVIEW_VAR, get_field_content
 from ..hooks import (
     CONSTRUCT_BLOCK_TOOLBAR,
     CONSTRUCT_FIELD_TOOLBAR,
@@ -26,17 +26,7 @@ from ..hooks import (
 )
 
 
-def _look_for_renderers():
-    global _looked_for_renderers
-    if not _looked_for_renderers:
-        for hook in hooks.get_hooks(REGISTER_TYPE_RENDERER):
-            hook(_renderer_map)
-        _looked_for_renderers = True
-
-
 register = library.Library()
-_renderer_map = {}
-_looked_for_renderers = False
 url_value_signer = signing.TimestampSigner()
 
 
@@ -322,28 +312,14 @@ def do_render_fedit_field(context, field_name, model, content=None, **kwargs):
     for key, value in kwargs.items():
         extra[key] = value
 
-        
     request = context.get("request")
-    if not content:
-        if hasattr(model, f"render_fedit_{field_name}"):
-            content = getattr(model, f"render_fedit_{field_name}")(request)
-        else:
-            content = getattr(model, field_name)
-
-    context["wagtail_fedit_field_name"] = field_name
-    context["wagtail_fedit_instance"] = model
-
-    for k, v in _renderer_map.items():
-        if isinstance(content, k):
-            content = v(request, context, content)
-            break
-
-    if hasattr(context, "flatten"):
-        context = context.flatten()
-
-    if hasattr(content, "render_as_block"):
-        context.update(kwargs)
-        content = content.render_as_block(context)
+    content = get_field_content(
+        request,
+        model,
+        field_name,
+        context,
+        value=content,
+    )
 
     if request:
         if (

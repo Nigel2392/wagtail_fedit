@@ -6,7 +6,10 @@ from wagtail.blocks.stream_block import StreamValue
 from wagtail.blocks.list_block import ListValue
 from wagtail import blocks
 
-from .hooks import EXCLUDE_FROM_RELATED_FORMS
+from .hooks import (
+    EXCLUDE_FROM_RELATED_FORMS,
+    REGISTER_TYPE_RENDERER,
+)
 
 
 FEDIT_PREVIEW_VAR = "_wagtail_fedit_preview"
@@ -103,3 +106,37 @@ def find_block(block_id, field, contentpath=None):
 
     # Return None and the current path if no block is found at this level.
     return None, contentpath
+
+
+
+
+def _look_for_renderers():
+    global _looked_for_renderers
+    if not _looked_for_renderers:
+        for hook in hooks.get_hooks(REGISTER_TYPE_RENDERER):
+            hook(_renderer_map)
+        _looked_for_renderers = True
+
+_renderer_map = {}
+_looked_for_renderers = False
+
+def get_field_content(request, model_instance, field_name, context, content=None):
+
+    if not content:
+        # Check for a rendering method if it exists
+        if hasattr(model_instance, f"render_fedit_{field_name}"):
+            content = getattr(model_instance, f"render_fedit_{field_name}")(request, context=context)
+        else:
+            content = getattr(model_instance, field_name)
+
+    for k, v in _renderer_map.items():
+        if isinstance(content, k):
+            content = v(request, context, content)
+
+    # The content might be a streamblock etc, we can render it as a block
+    # if isinstance(content, (blocks.BoundBlock, blocks.StructValue)):
+    if hasattr(content, "render_as_block"):
+        content = content.render_as_block(context)
+
+    return content
+
