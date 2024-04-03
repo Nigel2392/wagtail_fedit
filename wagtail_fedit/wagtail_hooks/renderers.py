@@ -2,7 +2,7 @@ from wagtail.templatetags.wagtailcore_tags import richtext
 from wagtail.rich_text import RichText
 from wagtail import hooks
 
-from .hooks import REGISTER_TYPE_RENDERER
+from ..hooks import REGISTER_TYPE_RENDERER
 
 
 @hooks.register(REGISTER_TYPE_RENDERER)
