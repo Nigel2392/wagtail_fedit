@@ -287,7 +287,7 @@ def do_render_fedit_block(parser: Parser, token: Token):
 
 
 @register.simple_tag(takes_context=True, name="fedit_field")
-def do_render_fedit_field(context, field_name, model, content=None, **kwargs):
+def do_render_fedit_field(context, field_name, model, content=None, inline: bool = False, **kwargs):
     """
     This tag is used to render an editable field.
 
@@ -334,6 +334,7 @@ def do_render_fedit_field(context, field_name, model, content=None, **kwargs):
         field_name, model,
         context,
         **extra,
+        inline=inline,
     )
 
 def render_editable_field(request, content, field_name, model, context, **kwargs):
@@ -370,6 +371,7 @@ def render_editable_field(request, content, field_name, model, context, **kwargs
             "content": content,
             "parent_context": context,
             "toolbar_items": items,
+            "inline": kwargs.get("inline", False),
             **kwargs,
         },
         request=request,

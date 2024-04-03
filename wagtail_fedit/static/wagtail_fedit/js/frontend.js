@@ -137,10 +137,7 @@ class WagtailFeditEditor {
     }
 
     focus() {
-        const rect = this.wrapperElementContent.getBoundingClientRect();
-        if ((rect.top + rect.height) > window.innerHeight) {
-            window.scrollTo(0, rect.top);
-        }
+        this.wrapperElementContent.focus();
     }
 
     makeModal() {

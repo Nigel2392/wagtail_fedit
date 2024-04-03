@@ -217,6 +217,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 self.request, content,
                 self.field_name, self.original_instance,
                 context=context,
+                **self.data,
             )
 
             return JsonResponse({
