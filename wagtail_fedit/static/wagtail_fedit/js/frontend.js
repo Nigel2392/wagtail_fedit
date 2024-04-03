@@ -253,6 +253,7 @@ class WagtailFeditEditor {
 
         this.editBtn.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
             this.makeModal();
         });
     }
@@ -268,7 +269,7 @@ class WagtailFeditEditor {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function initFEditors() {
     const wagtailFeditBlockEditors = document.querySelectorAll(".wagtail-fedit-block-wrapper");
     const wagtailFeditFieldEditors = document.querySelectorAll(".wagtail-fedit-field-wrapper");
     for (const editor of wagtailFeditBlockEditors) {
@@ -295,5 +296,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     observer.observe(document.body, {childList: true, subtree: true});
-});
+
+    const url = new URL(window.location.href);
+    const scrollY = url.searchParams.get("scrollY") || 0;
+    const scrollX = url.searchParams.get("scrollX") || 0;
+    if (scrollY > 0 || scrollX > 0) {
+        window.scrollTo(scrollX, scrollY);
+    }
+
+    const userbar = document.querySelector("wagtail-userbar");
+    if (userbar) {
+        const editButton = userbar.shadowRoot.querySelector("#wagtail-fedit-editor-button");
+        const liveButton = userbar.shadowRoot.querySelector("#wagtail-fedit-live-button");
+
+        function setScrollParams(button) {
+            if (!button) {
+                return;
+            }
+            const url = new URL(button.href);
+            if (window.scrollY > 100) {
+                url.searchParams.set("scrollY", window.scrollY);
+            }
+            if (window.scrollX > 100) {
+                url.searchParams.set("scrollX", window.scrollX);
+            }
+            button.href = url.toString();
+        }
+
+        if (editButton || liveButton) {
+            window.addEventListener("scroll", () => {
+                setScrollParams(editButton);
+                setScrollParams(liveButton);
+            });
+        }
+    }
+}
+
+document.addEventListener("DOMContentLoaded", initFEditors);
 

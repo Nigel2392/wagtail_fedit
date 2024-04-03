@@ -133,6 +133,9 @@ def get_field_content(request, instance, meta_field: models.Field, context, cont
     if isinstance(meta_field, str):
         meta_field = instance._meta.get_field(meta_field)
 
+    if hasattr(context, "flatten"):
+        context = context.flatten()
+
     if not content:
         # Check for a rendering method if it exists
         if hasattr(instance, f"render_fedit_{meta_field.name}"):
