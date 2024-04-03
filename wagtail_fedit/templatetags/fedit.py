@@ -317,7 +317,7 @@ def do_render_fedit_field(context, field_name, model, content=None, **kwargs):
         model,
         field_name,
         context,
-        value=content,
+        content=content,
     )
 
     if request:
