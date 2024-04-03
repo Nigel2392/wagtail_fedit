@@ -208,7 +208,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             content = get_field_content(
                 request,
                 self.original_instance,
-                self.field_name,
+                self.meta_field,
                 context
             )
 

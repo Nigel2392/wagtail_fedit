@@ -9,6 +9,7 @@ from wagtail import blocks
 from .hooks import (
     EXCLUDE_FROM_RELATED_FORMS,
     REGISTER_TYPE_RENDERER,
+    REGISTER_FIELD_RENDERER,
 )
 
 
@@ -109,30 +110,45 @@ def find_block(block_id, field, contentpath=None):
 
 
 
+_renderer_map = {}
+_field_renderer_map = {}
+_looked_for_renderers = False
+
 
 def _look_for_renderers():
     global _looked_for_renderers
     if not _looked_for_renderers:
         for hook in hooks.get_hooks(REGISTER_TYPE_RENDERER):
             hook(_renderer_map)
+
+        for hook in hooks.get_hooks(REGISTER_FIELD_RENDERER):
+            hook(_field_renderer_map)
+
         _looked_for_renderers = True
 
-_renderer_map = {}
-_looked_for_renderers = False
 
-def get_field_content(request, instance, field_name, context, content=None):
+def get_field_content(request, instance, meta_field: models.Field, context, content=None):
     _look_for_renderers()
+
+    if isinstance(meta_field, str):
+        meta_field = instance._meta.get_field(meta_field)
 
     if not content:
         # Check for a rendering method if it exists
-        if hasattr(instance, f"render_fedit_{field_name}"):
-            content = getattr(instance, f"render_fedit_{field_name}")(request, context=context)
+        if hasattr(instance, f"render_fedit_{meta_field.name}"):
+            content = getattr(instance, f"render_fedit_{meta_field.name}")(request, context=context)
         else:
-            content = getattr(instance, field_name)
+            content = getattr(instance, meta_field.name)
+
+    for k, v in _field_renderer_map.items():
+        if isinstance(meta_field, k):
+            content = v(request, context, instance, meta_field, content)
+            break
 
     for k, v in _renderer_map.items():
         if isinstance(content, k):
             content = v(request, context, instance, content)
+            break
 
     # The content might be a streamblock etc, we can render it as a block
     # if isinstance(content, (blocks.BoundBlock, blocks.StructValue)):
