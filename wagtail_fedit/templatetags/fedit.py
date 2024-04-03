@@ -82,6 +82,10 @@ class BlockEditNode(Node):
         if not model and "wagtail_fedit_instance" not in context:
             raise ValueError("Model instance is required")
         
+        # `wagtail_fedit_instance` is provided after the form is saved.
+        # This allows us to easily use the same instance across multiple views.
+        # Model will only be provided initially when the block is rendered.
+        model = model or context["wagtail_fedit_instance"]
         context["wagtail_fedit_field_name"] = field_name
         context["wagtail_fedit_instance"] = model
         
@@ -108,11 +112,6 @@ class BlockEditNode(Node):
             block_id = block.id
         elif not block_id:
             raise ValueError("Block ID is required")
-
-        # `wagtail_fedit_instance` is provided after the form is saved.
-        # This allows us to easily use the same instance across multiple views.
-        # Model will only be provided initially when the block is rendered.
-        model = model or context["wagtail_fedit_instance"]
 
         # Check if the user has permission to edit the block.
         request = context.get("request")
