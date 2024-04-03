@@ -252,6 +252,7 @@ class WagtailFeditEditor {
         }
 
         this.editBtn.addEventListener("click", (e) => {
+            e.preventDefault();
             this.makeModal();
         });
     }
