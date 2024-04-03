@@ -120,18 +120,18 @@ def _look_for_renderers():
 _renderer_map = {}
 _looked_for_renderers = False
 
-def get_field_content(request, model_instance, field_name, context, content=None):
+def get_field_content(request, instance, field_name, context, content=None):
 
     if not content:
         # Check for a rendering method if it exists
-        if hasattr(model_instance, f"render_fedit_{field_name}"):
-            content = getattr(model_instance, f"render_fedit_{field_name}")(request, context=context)
+        if hasattr(instance, f"render_fedit_{field_name}"):
+            content = getattr(instance, f"render_fedit_{field_name}")(request, context=context)
         else:
-            content = getattr(model_instance, field_name)
+            content = getattr(instance, field_name)
 
     for k, v in _renderer_map.items():
         if isinstance(content, k):
-            content = v(request, context, content)
+            content = v(request, context, instance, content)
 
     # The content might be a streamblock etc, we can render it as a block
     # if isinstance(content, (blocks.BoundBlock, blocks.StructValue)):
