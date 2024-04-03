@@ -60,6 +60,9 @@ class BlockEditNode(Node):
             if isinstance(e, FilterExpression):
                 extra[k] = e.resolve(context)
 
+        if not field_name and "wagtail_fedit_field_name" in context:
+            field_name = context["wagtail_fedit_field_name"]
+
         if isinstance(block, FilterExpression):
             block = block.resolve(context)
         if isinstance(block_id, FilterExpression):
@@ -78,7 +81,10 @@ class BlockEditNode(Node):
         
         if not model and "wagtail_fedit_instance" not in context:
             raise ValueError("Model instance is required")
-
+        
+        context["wagtail_fedit_field_name"] = field_name
+        context["wagtail_fedit_instance"] = model
+        
         # Render the block or nodelist
         # This allows us to use the block as a block tag or as a simple tag.
         if block:
@@ -160,6 +166,8 @@ class BlockEditNode(Node):
                 "content": rendered,
                 "field_name": field_name,
                 "parent_context": context,
+                "wagtail_fedit_field_name": field_name,
+                "wagtail_fedit_instance": model,
                 "toolbar_items": items,
             }
         )
@@ -251,8 +259,6 @@ def do_render_fedit_block(parser: Parser, token: Token):
     ]
 
     kwargs = get_kwargs(parser, kwargs_names, tokens)
-    if "field_name" not in kwargs:
-        raise ValueError("Field name is required")
     
     if "block" not in kwargs:
         nodelist = parser.parse(("unfedit_block",))
