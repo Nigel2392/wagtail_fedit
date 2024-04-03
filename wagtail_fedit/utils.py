@@ -142,7 +142,7 @@ def get_field_content(request, instance, meta_field: models.Field, context, cont
 
     for k, v in _field_renderer_map.items():
         if isinstance(meta_field, k):
-            content = v(request, context, instance, meta_field, content)
+            content = v(request, context, instance, content)
             break
 
     for k, v in _renderer_map.items():
