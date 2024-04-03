@@ -121,6 +121,7 @@ _renderer_map = {}
 _looked_for_renderers = False
 
 def get_field_content(request, instance, field_name, context, content=None):
+    _look_for_renderers()
 
     if not content:
         # Check for a rendering method if it exists

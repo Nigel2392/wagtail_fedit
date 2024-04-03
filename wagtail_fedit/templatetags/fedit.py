@@ -22,7 +22,6 @@ from ..utils import FEDIT_PREVIEW_VAR, get_field_content
 from ..hooks import (
     CONSTRUCT_BLOCK_TOOLBAR,
     CONSTRUCT_FIELD_TOOLBAR,
-    REGISTER_TYPE_RENDERER,
 )
 
 

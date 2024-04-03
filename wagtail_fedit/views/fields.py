@@ -25,7 +25,6 @@ import uuid
 from ..templatetags.fedit import (
     BlockEditNode,
     render_editable_field,
-    _renderer_map,
 )
 from ..forms import (
     blocks as block_forms,
