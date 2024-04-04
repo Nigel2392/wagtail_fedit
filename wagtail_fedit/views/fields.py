@@ -135,7 +135,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                 and is_draft_capable(self.instance)\
                 and saving_relation(self.instance, self.original_instance):
             return {
-                "status": "info",
+                "status": "warning",
                 "heading": FeditIFrameMixin.HEADING_SUPPORTS_DRAFTS,
                 "title": FeditIFrameMixin.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(_("You must publish %(model)s and the related object of type %(related_verbose_name)s (%(related_model)s) to make any changes visible.") % {
@@ -149,7 +149,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                 and not is_draft_capable(self.instance)\
                 and saving_relation(self.instance, self.original_instance):
             return {
-                "status": "info",
+                "status": "warning",
                 "heading": FeditIFrameMixin.HEADING_SUPPORTS_DRAFTS,
                 "title": FeditIFrameMixin.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(FeditIFrameMixin.TEXT_PUBLISH_DRAFTS % {
@@ -161,7 +161,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                 and is_draft_capable(self.instance)\
                 and saving_relation(self.instance, self.original_instance):
             return {
-                "status": "info",
+                "status": "warning",
                 "heading": _("Publishing related object required."),
                 "title": _("The object you are editing supports drafts."),
                 "text": mark_safe(_("You must publish the related object of type %(type)s (%(model)s) to make any changes visible.") % {

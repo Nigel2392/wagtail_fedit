@@ -62,7 +62,7 @@ class FeditIFrameMixin:
         # No relations. Maybe draft support.
         if is_draft_capable(self.instance):
             return {
-                "status": "info",
+                "status": "warning",
                 "heading": self.HEADING_SUPPORTS_DRAFTS,
                 "title": self.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(self.TEXT_PUBLISH_DRAFTS % {
