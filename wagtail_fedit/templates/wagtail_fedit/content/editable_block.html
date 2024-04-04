@@ -1,0 +1,7 @@
+<div class="wagtail-fedit-block-wrapper" id="wagtail-fedit-{{ block_id }}" data-block-id="{{block_id}}" data-edit-url="{{ edit_url }}"> 
+    <div class="wagtail-fedit-buttons">
+        {% for item in toolbar_items %}
+            {{ item }}
+        {% endfor %}
+    </div>{{ content|safe }}
+</div>
