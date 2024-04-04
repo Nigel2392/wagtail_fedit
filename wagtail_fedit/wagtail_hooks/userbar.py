@@ -15,7 +15,9 @@ from wagtail.models import (
 )
 from wagtail import hooks
 from ..views.editable import (
-    FeditablePublishView,
+    ActionPublishComponent,
+    ActionUnpublishComponent,
+    ActionSubmitComponent,
 )
 from ..utils import (
     is_draft_capable,
@@ -26,6 +28,18 @@ from ..utils import (
     user_can_unpublish,
     user_can_submit_for_moderation,
 )
+
+
+class UserBarActionPublishComponent(ActionPublishComponent):
+    template_name = "wagtail_fedit/userbar/publish/buttons/publish.html"
+    check_for_changes = False
+    
+class UserBarActionUnpublishComponent(ActionUnpublishComponent):
+    template_name = "wagtail_fedit/userbar/publish/buttons/unpublish.html"
+    
+class UserBarActionSubmitComponent(ActionSubmitComponent):
+    template_name = "wagtail_fedit/userbar/publish/buttons/submit.html"
+    check_for_changes = False
 
 
 class BaseWagtailFeditItem(BaseItem, FeditPermissionCheck):
@@ -73,10 +87,10 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
 
     def render(self, request):
 
-        self.can_publish = user_can_publish(self.model, request.user)
+        self.can_publish = user_can_publish(self.model, request.user, check_for_changes=False)
         self.can_unpublish = user_can_unpublish(self.model, request.user)
         self.can_submit_for_moderation = user_can_submit_for_moderation(
-            self.model, request.user
+            self.model, request.user, check_for_changes=False,
         )
 
         if not self.can_publish\
@@ -88,10 +102,14 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
 
     def get_context_data(self, request):
 
-        buttons = []
+        buttons = [
+            UserBarActionPublishComponent(self.model),
+            UserBarActionSubmitComponent(self.model),
+            UserBarActionUnpublishComponent(self.model),
+        ]
 
-        for button in FeditablePublishView.buttons:
-            buttons.append(button(self.model).render(request))
+        for i, button in enumerate(buttons):
+            buttons[i] = button.render(request)
 
         buttons = list(filter(None, buttons))
 
@@ -99,6 +117,8 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
             "buttons": buttons,
             "can_publish": self.can_publish,
             "can_unpublish": self.can_unpublish,
+            "hidden": self.can_publish or self.can_submit_for_moderation\
+                and self.model.has_unpublished_changes,
             "publish_url": reverse(
                 "wagtail_fedit:publish",
                 args=[self.model.pk, self.model._meta.app_label, self.model._meta.model_name],

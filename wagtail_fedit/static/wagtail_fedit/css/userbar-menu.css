@@ -26,3 +26,6 @@
     fill: var(--w-color-critical-200);
     opacity: 1;
 }
+.wagtail-fedit-userbar-button.initially-hidden {
+    display: none;
+}

@@ -189,6 +189,13 @@ class WagtailFeditEditor {
                         this.setWrapperHtml(response.html);
                         this.initNewEditors();
                         this.closeModal();
+
+                        const event = new CustomEvent("wagtail-fedit:change", {
+                            detail: {
+                                element: this.wrapperElement,
+                            }
+                        });
+                        document.dispatchEvent(event);
                     });
                 };
                 this.iframe.formElement.onsubmit = onSubmit;
@@ -285,16 +292,29 @@ class WagtailFeditEditor {
     }
 }
 
-class WagtailFeditPublisher {
-    constructor(options) {
-        const {
-            publishUrl,
-            publishButton,
-        } = options;
-
-        this.publishUrl = publishUrl;
+class WagtailFeditPublishMenu {
+    constructor(publishButton) {
         this.publishButton = publishButton;
         this.publishForm = publishButton.parentElement.querySelector("form");
+        const buttons = this.publishForm.querySelectorAll("button");
+        let initialIsHidden = false;
+        for (const button of buttons) {
+            if (button.classList.contains("initially-hidden")) {
+                initialIsHidden = true;
+                break;
+            }
+        }
+
+        if (initialIsHidden) {
+            document.addEventListener("wagtail-fedit:change", (e) => {
+                for (const button of buttons) {
+                    if (button.classList.contains("initially-hidden")) {
+                        button.classList.remove("initially-hidden");
+                    }
+                }
+            })
+        }
+
         this.init();
     }
 
@@ -368,7 +388,7 @@ function initFEditors() {
     if (userbar) {
         const editButton = userbar.shadowRoot.querySelector("#wagtail-fedit-editor-button");
         const liveButton = userbar.shadowRoot.querySelector("#wagtail-fedit-live-button");
-        const publishButton = userbar.shadowRoot.querySelector("#wagtail-fedit-publish-button");
+        const publishMenu = userbar.shadowRoot.querySelector("#wagtail-fedit-publish-menu");
 
         function setScrollParams(button) {
             if (!button) {
@@ -404,11 +424,8 @@ function initFEditors() {
         }
 
 
-        if (publishButton) {
-            const publisher = new WagtailFeditPublisher({
-                publishUrl: publishButton.href,
-                publishButton: publishButton,
-            });
+        if (publishMenu) {
+            const publisher = new WagtailFeditPublishMenu(publishMenu);
         }
     }
 }

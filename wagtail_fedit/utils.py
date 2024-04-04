@@ -265,11 +265,12 @@ def get_model_string(instance: models.Model, publish_url: bool = False, request:
 
     return model_string
 
-def user_can_publish(instance, user):
+def user_can_publish(instance, user, check_for_changes: bool = True):
     if not isinstance(instance, DraftStateMixin):
         return False
     
-    if not instance.has_unpublished_changes:
+    if not instance.has_unpublished_changes\
+        and check_for_changes:
         return False
 
     if hasattr(instance, "permission_policy"):
@@ -289,8 +290,12 @@ def user_can_unpublish(instance, user):
     
     return instance.permissions_for_user(user).can_unpublish()
 
-def user_can_submit_for_moderation(instance, user):
+def user_can_submit_for_moderation(instance, user, check_for_changes: bool = True):
     if not getattr(settings, "WAGTAIL_WORKFLOW_ENABLED", True):
+        return False
+
+    if not instance.has_unpublished_changes\
+        and check_for_changes:
         return False
 
     if not isinstance(instance, WorkflowMixin):

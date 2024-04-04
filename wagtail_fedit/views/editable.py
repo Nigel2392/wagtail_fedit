@@ -63,16 +63,22 @@ class FeditableModelComponent(FeditToolbarComponent):
 
 
 class ActionPublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/userbar/publish/buttons/publish.html"
+    template_name = "wagtail_fedit/editor/buttons/publish.html"
+    check_for_changes: bool = True
+
+    def get_context_data(self, request):
+        return super().get_context_data(request) | {
+            "hidden": not self.instance.has_unpublished_changes,
+        }
     
     def is_shown(self, request):
         if not super().is_shown(request):
             return False
         
-        return user_can_publish(self.instance, request.user)
+        return user_can_publish(self.instance, request.user, check_for_changes=self.check_for_changes)
 
 class ActionUnpublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/userbar/publish/buttons/unpublish.html"
+    template_name = "wagtail_fedit/editor/buttons/unpublish.html"
     
     def is_shown(self, request):
         if not super().is_shown(request):
@@ -81,13 +87,19 @@ class ActionUnpublishComponent(FeditableModelComponent):
         return user_can_unpublish(self.instance, request.user)
     
 class ActionSubmitComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/userbar/publish/buttons/submit.html"
-    
+    template_name = "wagtail_fedit/editor/buttons/submit.html"
+    check_for_changes: bool = True
+
+    def get_context_data(self, request):
+        return super().get_context_data(request) | {
+            "hidden": not self.instance.has_unpublished_changes,
+        }
+
     def is_shown(self, request):
         if not super().is_shown(request):
             return False
         
-        return user_can_submit_for_moderation(self.instance, request.user)
+        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=self.check_for_changes)
 
 class BaseFeditView(FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
@@ -276,9 +288,6 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
         if hasattr(self.object, "get_url"):
             return redirect(self.object.get_url(request))
         
-        elif hasattr(self.object, "url"):
-            return redirect(self.object.url)
-        
         elif hasattr(self.object, "get_absolute_url"):
             return redirect(self.object.get_absolute_url())
         
@@ -288,18 +297,12 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
         ))
 
     def redirect_to_failsafe_url(self, request: HttpRequest) -> HttpResponse:
-        finder = AdminURLFinder(request.user)
-        edit_url = finder.get_edit_url(self.object)
-        return redirect(edit_url)
-
-    def _get_page_edit_message_button(self):
-        return messages.button(
-            reverse("wagtailadmin_pages:edit", args=(self.model_object.id,)), _("Edit")
-        )
-
-    def _get_page_view_draft_message_button(self):
-        return messages.button(
-            reverse("wagtailadmin_pages:view_draft", args=(self.model_object.id,)),
-            _("View draft"),
-            new_window=False,
-        )
+        try:
+            finder = AdminURLFinder(request.user)
+            edit_url = finder.get_edit_url(self.object)
+            return redirect(edit_url)
+        except Exception:
+            return redirect(reverse(
+                "wagtail_fedit:editable",
+                args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
+            ))

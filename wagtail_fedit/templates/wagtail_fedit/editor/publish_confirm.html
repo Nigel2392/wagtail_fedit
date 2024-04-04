@@ -6,20 +6,24 @@
 
 {% block content %}
     <div class="wagtail-fedit-form-wrapper{% if form.block.block.meta.fedit_full %} fedit-full{% endif %}">
-        <form id="wagtail-fedit-form" class="wagtail-fedit-form wagtail-fedit-publish-form" action="{{ publish_url }}" method="post">
+        <form id="wagtail-fedit-form" action="{{ publish_url }}" method="post">
             {% csrf_token %}
 
-            {% comment %} <div class="wagtail-fedit-form-help"> {% endcomment %}
-                {% comment %} {% help_block status="warning" %} {% endcomment %}
-                    {% comment %} <p>{% blocktranslate %}Publishing this object means it will be made visible to all users on the website.{% endblocktranslate %}</p> {% endcomment %}
-                    {% comment %} <p>{% blocktranslate %}If this is not what you intended; please cancel to go back.{% endblocktranslate %}</p> {% endcomment %}
-                {% comment %} {% endhelp_block %} {% endcomment %}
-                {% comment %} <h2>{% blocktranslate with model_type=model_verbose_name%}Are you sure you want to publish {{model_type}}?{% endblocktranslate %}</h2> {% endcomment %}
-            {% comment %} </div> {% endcomment %}
+            <div class="wagtail-fedit-form-help">
+                {% help_block status="warning" %}
+                    <p>{% blocktranslate %}Publishing this object means it will be made visible to all users on the website.{% endblocktranslate %}</p>
+                    <p>{% blocktranslate %}If this is not what you intended; please cancel to go back.{% endblocktranslate %}</p>
+                {% endhelp_block %}
+                <h2>{% blocktranslate with model_type=model_verbose_name%}Are you sure you want to publish {{model_type}}?{% endblocktranslate %}</h2>
+            </div>
+
             <div class="wagtail-fedit-form-buttons">
                 {% for button in buttons %}
                     {{ button }}
                 {% endfor %}
+                <a href="{{ edit_url }}" class="button no button-large wagtail-fedit-cancel-button" target="_self">
+                    {% translate "Cancel" %}
+                </a>
             </div>
         </form>
     </div>
