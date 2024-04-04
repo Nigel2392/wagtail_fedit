@@ -135,8 +135,8 @@ class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTempla
                 and saving_relation(self.instance, self.original_instance):
             return {
                 "status": "info",
-                "heading": _("Publishing required."),
-                "title": _("The objects you are editing support drafts."),
+                "heading": FeditHelpTextMixin.HEADING_SUPPORTS_DRAFTS,
+                "title": FeditHelpTextMixin.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(_("You must publish %(model)s and the related object of type %(related_verbose_name)s (%(related_model)s) to make any changes visible.") % {
                     "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
                     "related_verbose_name": self.instance._meta.verbose_name,
@@ -149,9 +149,9 @@ class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTempla
                 and saving_relation(self.instance, self.original_instance):
             return {
                 "status": "info",
-                "heading": _("Publishing required."),
-                "title": _("The object you are editing supports drafts."),
-                "text": mark_safe(_("You must publish %(model)s to make any changes visible.") % {
+                "heading": FeditHelpTextMixin.HEADING_SUPPORTS_DRAFTS,
+                "title": FeditHelpTextMixin.TITLE_SUPPORTS_DRAFTS,
+                "text": mark_safe(FeditHelpTextMixin.TEXT_PUBLISH_DRAFTS % {
                     "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
                 })
             }
