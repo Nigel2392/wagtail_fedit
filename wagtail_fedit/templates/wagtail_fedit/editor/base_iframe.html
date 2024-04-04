@@ -20,7 +20,7 @@
 {% block furniture %}
     <main class="content-wrapper w-overflow-x-hidden" id="main">
         {% block header %}
-            <header class="nice-padding" id="modal-header">
+            <header id="modal-header">
                 <h1 id="modal-title">{{ view.get_header_title }}</h1>
             </header>
         {% endblock %}
@@ -33,7 +33,21 @@
                     {% endhelp_block %}
                 {% endpanel %}
             {% endif %}
-            {% block content %}{% endblock %}
+            {% block content %}
+                {% block errors %}
+                    {% if form.errors or form.non_field_errors %}
+                        <div class="error-message">
+                            <h2>{{ view.get_error_title }}</h2>
+                            <ul>
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                                {{ form.errors.as_ul }}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endblock %}
+            {% endblock %}
         </div>
     </main>
     <aside>

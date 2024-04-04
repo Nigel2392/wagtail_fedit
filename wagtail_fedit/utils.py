@@ -37,7 +37,9 @@ class FeditPermissionCheck:
         return True
 
 
-class FeditHelpTextMixin:
+class FeditIFrameMixin:
+    ERROR_TITLE = _("Validation Errors")
+
     HEADING_SUPPORTS_DRAFTS = _("Publishing Required")
     TITLE_SUPPORTS_DRAFTS = _("The object you are editing supports drafts.")
     TEXT_PUBLISH_DRAFTS = _("You must publish %(model)s to make any changes visible.")
@@ -46,6 +48,15 @@ class FeditHelpTextMixin:
     TITLE_NO_DRAFTS = _("The object you are editing does not support drafts.")
     TEXT_NO_DRAFTS = _("You are not required to publish this object to make this change visible.")
 
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["help_text"] = self.get_help_text()
+        context["error_title"] = self.get_error_title()
+        return context
+    
+    def get_error_title(self) -> str:
+        return self.ERROR_TITLE
 
     def get_help_text(self) -> str:
         # No relations. Maybe draft support.

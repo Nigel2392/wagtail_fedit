@@ -34,7 +34,7 @@ from ..forms import (
 )
 from ..utils import (
     FeditPermissionCheck,
-    FeditHelpTextMixin,
+    FeditIFrameMixin,
     use_related_form,
     get_field_content,
     saving_relation,
@@ -45,8 +45,9 @@ from ..utils import (
 
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
-class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTemplateMixin, View):
+class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplateMixin, View):
     template_name = "wagtail_fedit/editor/field_iframe.html"
+    ERROR_TITLE = _("Validation Errors")
 
     def dispatch(self, request: HttpRequest, field_name = None, app_label = None, model_name = None, model_id = None) -> None:
         if not all([field_name, model_name, app_label, model_id]):
@@ -135,8 +136,8 @@ class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTempla
                 and saving_relation(self.instance, self.original_instance):
             return {
                 "status": "info",
-                "heading": FeditHelpTextMixin.HEADING_SUPPORTS_DRAFTS,
-                "title": FeditHelpTextMixin.TITLE_SUPPORTS_DRAFTS,
+                "heading": FeditIFrameMixin.HEADING_SUPPORTS_DRAFTS,
+                "title": FeditIFrameMixin.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(_("You must publish %(model)s and the related object of type %(related_verbose_name)s (%(related_model)s) to make any changes visible.") % {
                     "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
                     "related_verbose_name": self.instance._meta.verbose_name,
@@ -149,9 +150,9 @@ class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTempla
                 and saving_relation(self.instance, self.original_instance):
             return {
                 "status": "info",
-                "heading": FeditHelpTextMixin.HEADING_SUPPORTS_DRAFTS,
-                "title": FeditHelpTextMixin.TITLE_SUPPORTS_DRAFTS,
-                "text": mark_safe(FeditHelpTextMixin.TEXT_PUBLISH_DRAFTS % {
+                "heading": FeditIFrameMixin.HEADING_SUPPORTS_DRAFTS,
+                "title": FeditIFrameMixin.TITLE_SUPPORTS_DRAFTS,
+                "text": mark_safe(FeditIFrameMixin.TEXT_PUBLISH_DRAFTS % {
                     "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
                 })
             }
@@ -170,7 +171,6 @@ class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTempla
             }
 
         return super().get_help_text()
-
         
     
     def get_context_data(self, **kwargs):
@@ -193,7 +193,6 @@ class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTempla
                     and issubclass(self.model, DraftStateMixin),
                 "object": self.instance,
             },
-            "help_text": self.get_help_text(),
             "meta_field": self.meta_field,
             "field_name": self.field_name,
         }

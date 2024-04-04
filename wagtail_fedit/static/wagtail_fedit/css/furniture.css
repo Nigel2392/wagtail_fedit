@@ -133,6 +133,9 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
 #djDebug {
     display: none;
 }
+#modal-header > #modal-title {
+    padding-left: 1.3rem;
+}
 #modal-header > #modal-title,
 #modal-header {
     background-color: var(--w-color-surface-menus);
@@ -150,6 +153,7 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
 }
 #wagtail-fedit-help-text-section {
     margin-bottom: 0;
+    margin-top: 0.5em;
 }
 #wagtail-fedit-help-text-section .w-panel__anchor,
 #wagtail-fedit-editor-section .w-panel__anchor {
