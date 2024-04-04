@@ -1,0 +1,15 @@
+<div class="field" data-contentpath="{{ field.name }}">
+    {% if field.field.form and field.field.form.errors %}
+        {% for error in field.field.form.errors %}
+            <p class="error">{{ error }}</p>
+        {% endfor %}
+
+        {% for field in field.field.form %}
+            {% include "wagtail_fedit/field.html" %}
+        {% endfor %}
+
+    {% else %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+    {% endif %}
+</div>

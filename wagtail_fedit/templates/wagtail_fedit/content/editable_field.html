@@ -1,0 +1,7 @@
+<div class="wagtail-fedit-field-wrapper {% if inline %}wagtail-fedit-inline{% endif %}" id="wagtail-fedit-{{ field_name }}-{{model.pk}}" data-edit-url="{{ edit_url }}"> 
+    <div class="wagtail-fedit-buttons">
+        {% for item in toolbar_items %}
+            {{ item }}
+        {% endfor %}
+    </div>{{ content|safe }}
+</div>
