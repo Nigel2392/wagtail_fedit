@@ -138,7 +138,7 @@ body:has(.wagtail-fedit-modal) {
     border: none;
     flex: 1;
 }
-.wagtail-fedit-modal-wrapper .wagtail-fedit-modal .wagtail-fedit-close-button {
+.wagtail-fedit-modal-wrapper .wagtail-fedit-close-button {
     position: absolute;
     right: 0;
     top: 0;
@@ -158,7 +158,23 @@ body:has(.wagtail-fedit-modal) {
     color: rgb(172, 27, 27);
     cursor: pointer;
 }
-.wagtail-fedit-modal-wrapper .wagtail-fedit-modal .wagtail-fedit-close-button:hover {
+.wagtail-fedit-modal-wrapper .wagtail-fedit-close-button:hover {
     background-color: rgb(172, 27, 27);
     color: rgb(235, 235, 235);
+}
+
+.wagtail-fedit-banner-modal {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 400;
+    overflow: auto;
+}
+.wagtail-fedit-banner-modal iframe {
+    min-height: 280px;
 }

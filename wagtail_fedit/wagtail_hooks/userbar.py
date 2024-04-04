@@ -1,4 +1,7 @@
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
+from django.templatetags.static import static
 from wagtail.admin.userbar import (
     BaseItem,
     AddPageItem,
@@ -11,6 +14,9 @@ from wagtail.models import (
     WorkflowMixin,
 )
 from wagtail import hooks
+from ..views.editable import (
+    FeditablePublishView,
+)
 from ..utils import (
     is_draft_capable,
     FeditPermissionCheck,
@@ -18,6 +24,7 @@ from ..utils import (
     FEDIT_PREVIEW_VAR,
     user_can_publish,
     user_can_unpublish,
+    user_can_submit_for_moderation,
 )
 
 
@@ -62,23 +69,37 @@ class WagtailFeditViewLiveItem(BaseWagtailFeditItem):
         return context
     
 class WagtailFeditPublishItem(BaseWagtailFeditItem):
-    template = "wagtail_fedit/userbar/item_fedit_publishing.html"
+    template = "wagtail_fedit/userbar/publish/item_fedit_publishing.html"
 
     def render(self, request):
 
         self.can_publish = user_can_publish(self.model, request.user)
         self.can_unpublish = user_can_unpublish(self.model, request.user)
+        self.can_submit_for_moderation = user_can_submit_for_moderation(
+            self.model, request.user
+        )
 
-        if not self.can_publish and not self.can_unpublish:
+        if not self.can_publish\
+                and not self.can_unpublish\
+                and not self.can_submit_for_moderation:
             return ""
 
         return super().render(request)
 
     def get_context_data(self, request):
+
+        buttons = []
+
+        for button in FeditablePublishView.buttons:
+            buttons.append(button(self.model).render(request))
+
+        buttons = list(filter(None, buttons))
+
         return super().get_context_data(request) | {
+            "buttons": buttons,
             "can_publish": self.can_publish,
             "can_unpublish": self.can_unpublish,
-            "edit_url": reverse(
+            "publish_url": reverse(
                 "wagtail_fedit:publish",
                 args=[self.model.pk, self.model._meta.app_label, self.model._meta.model_name],
             ),
@@ -94,6 +115,12 @@ def retrieve_page_model(items):
             return item.page
     return None
 
+@hooks.register("insert_global_admin_css")
+def fedit_admin_js():
+    return mark_safe(format_html(
+        '<link rel="stylesheet" href="{}">',
+        static("wagtail_fedit/css/userbar-menu.css"),
+    ))
 
 @hooks.register("construct_wagtail_userbar")
 def add_fedit_userbar_item(request, items):

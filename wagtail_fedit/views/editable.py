@@ -1,8 +1,10 @@
 from typing import Any, Union, Type
-from django.views.generic import TemplateView
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.generic import TemplateView
 from django.shortcuts import redirect
-from django.contrib import messages
 from django.urls import reverse
 from django.apps import apps
 from django.http import (
@@ -10,6 +12,8 @@ from django.http import (
     HttpResponseBadRequest,
     HttpResponse,
 )
+from wagtail.admin import messages
+from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.actions.publish_page_revision import PublishPageRevisionAction
 from wagtail.actions.publish_revision import PublishRevisionAction
 from wagtail.actions.unpublish_page import UnpublishPageAction
@@ -20,6 +24,8 @@ from wagtail.models import (
     RevisionMixin,
     PreviewableMixin,
     DraftStateMixin,
+    WorkflowMixin,
+    WorkflowState,
     Page,
 )
 from .. import forms as block_forms
@@ -30,6 +36,7 @@ from ..utils import (
     with_userbar_model,
     user_can_publish,
     user_can_unpublish,
+    user_can_submit_for_moderation,
 )
 
 from ..toolbar import (
@@ -56,7 +63,7 @@ class FeditableModelComponent(FeditToolbarComponent):
 
 
 class ActionPublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/editor/buttons/publish.html"
+    template_name = "wagtail_fedit/userbar/publish/buttons/publish.html"
     
     def is_shown(self, request):
         if not super().is_shown(request):
@@ -65,13 +72,22 @@ class ActionPublishComponent(FeditableModelComponent):
         return user_can_publish(self.instance, request.user)
 
 class ActionUnpublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/editor/buttons/unpublish.html"
+    template_name = "wagtail_fedit/userbar/publish/buttons/unpublish.html"
     
     def is_shown(self, request):
         if not super().is_shown(request):
             return False
         
         return user_can_unpublish(self.instance, request.user)
+    
+class ActionSubmitComponent(FeditableModelComponent):
+    template_name = "wagtail_fedit/userbar/publish/buttons/submit.html"
+    
+    def is_shown(self, request):
+        if not super().is_shown(request):
+            return False
+        
+        return user_can_submit_for_moderation(self.instance, request.user)
 
 class BaseFeditView(FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
@@ -124,13 +140,16 @@ class FEditableView(BaseFeditView):
         })
     
 
+@method_decorator(xframe_options_sameorigin, name="dispatch")
 class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
     template_name = "wagtail_fedit/editor/publish_confirm.html"
     buttons: list[Type[FeditToolbarComponent]] = [
         ActionPublishComponent,
+        ActionSubmitComponent,
         ActionUnpublishComponent,
     ]
     object: DraftStateMixin
+
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
 
@@ -166,11 +185,37 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
 
         policy = self.object.permissions_for_user(request.user)
 
-        if request.POST.get("action-publish") == "1" and policy.can_publish():
+        if not isinstance(self.object, DraftStateMixin):
+            raise ValueError("Model {} does not inherit from DraftStateMixin, cannot publish.".format(self.model))
+        
+        if getattr(settings, "WAGTAIL_WORKFLOW_ENABLED", True) and issubclass(self.model, WorkflowMixin):
+            # Retrieve current workflow state if set, default to last workflow state
+            self.workflow_state = (
+                self.object.current_workflow_state
+                or self.object.workflow_states.order_by("created_at").last()
+            )
+        else:
+            self.workflow_state = None
+
+
+        if request.POST.get("action-publish") == "1"\
+                and policy.can_publish()\
+                and self.object.has_unpublished_changes:
             return self.publish(request)
         
         if request.POST.get("action-unpublish") == "1" and policy.can_unpublish():
             return self.unpublish(request)
+        
+        if request.POST.get("action-submit") == "1"\
+                and policy.can_submit_for_moderation()\
+                and isinstance(self.object, WorkflowMixin)\
+                and self.object.has_unpublished_changes:
+            return self.submit_for_moderation(request)
+        
+        if request.POST.get("action-cancel") == "1"\
+                and self.workflow_state\
+                and self.workflow_state.user_can_cancel(self.request.user):
+            return self.cancel_workflow(request)
         
         messages.error(request, _("Invalid form submission"))
         return self.get(request, *args, **kwargs)
@@ -198,13 +243,34 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
             return self.get(request)
         
         action = get_unpublish_action(self.object)(
-            object=self.object,
+            self.object,
             user=request.user,
         )
 
         action.execute()
 
+        return self.redirect_to_failsafe_url(request)
+    
+    def submit_for_moderation(self, request: HttpRequest) -> HttpResponse:
+        if (
+            self.workflow_state
+            and self.workflow_state.status == WorkflowState.STATUS_NEEDS_CHANGES
+        ):
+            # If the workflow was in the needs changes state, resume the existing workflow on submission
+            self.workflow_state.resume(self.request.user)
+        else:
+            # Otherwise start a new workflow
+            workflow = self.object.get_workflow()
+            workflow.start(self.object, self.request.user)
+
         return self.redirect_to_success_url(request)
+
+    def cancel_workflow(self, request: HttpRequest) -> HttpResponse:
+        if self.workflow_state:
+            self.workflow_state.cancel(user=self.request.user)
+            return self.redirect_to_success_url(request)
+        
+        return self.get(request)
 
     def redirect_to_success_url(self, request: HttpRequest) -> HttpResponse:
         if hasattr(self.object, "get_url"):
@@ -220,3 +286,20 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
             "wagtail_fedit:editable",
             args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
         ))
+
+    def redirect_to_failsafe_url(self, request: HttpRequest) -> HttpResponse:
+        finder = AdminURLFinder(request.user)
+        edit_url = finder.get_edit_url(self.object)
+        return redirect(edit_url)
+
+    def _get_page_edit_message_button(self):
+        return messages.button(
+            reverse("wagtailadmin_pages:edit", args=(self.model_object.id,)), _("Edit")
+        )
+
+    def _get_page_view_draft_message_button(self):
+        return messages.button(
+            reverse("wagtailadmin_pages:view_draft", args=(self.model_object.id,)),
+            _("View draft"),
+            new_window=False,
+        )

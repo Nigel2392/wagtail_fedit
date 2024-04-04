@@ -8,6 +8,7 @@ class iFrame {
             className,
             onLoad = () => {},
             onError = () => {},
+            onCancel = () => {},
         } = options;
 
 
@@ -16,6 +17,7 @@ class iFrame {
         this.className = className;
         this.onLoad = onLoad;
         this.onError = onError;
+        this.onCancel = onCancel;
         this.render();
     }
 
@@ -69,6 +71,10 @@ class iFrame {
         iframe.id = this.id;
         iframe.className = this.className;
         iframe.onload = () => {
+            const cancelButton = this.document.querySelector(".wagtail-fedit-cancel-button");
+            if (cancelButton) {
+                cancelButton.addEventListener("click", this.onCancel);
+            }
             onLoad({ newFrame: iframe});
         };
         iframe.onerror = () => {
@@ -77,6 +83,7 @@ class iFrame {
         return iframe;
     }
 }
+
 
 const modalHtml = `
 <div class="wagtail-fedit-modal-wrapper">
@@ -174,7 +181,7 @@ class WagtailFeditEditor {
                                 this.iframe.window.initBlockWidget(uninitializedBlock.id);
                             }
 
-                            const cancelButton = this.iframe.document.querySelector("button.wagtail-fedit-cancel-button");
+                            const cancelButton = this.iframe.document.querySelector(".wagtail-fedit-cancel-button");
                             cancelButton.addEventListener("click", this.closeModal.bind(this));
                             return;
                         }
@@ -184,9 +191,8 @@ class WagtailFeditEditor {
                         this.closeModal();
                     });
                 };
-                const cancelButton = this.iframe.document.querySelector("button.wagtail-fedit-cancel-button");
-                cancelButton.addEventListener("click", this.closeModal.bind(this));
                 this.iframe.formElement.onsubmit = onSubmit;
+                this.iframe.onCancel = this.closeModal.bind(this);
                 
                 // Check if we need to apply the fedit-full class to the modal
                 const formHeight = this.iframe.formElement.getBoundingClientRect().height;
@@ -204,6 +210,12 @@ class WagtailFeditEditor {
                 const url = window.location.href.split("#")[0];
                 window.history.pushState(null, this.iframe.document.title, url + `#${this.wrapperElement.id}`);
                 document.title = this.iframe.document.title;
+            },
+            onError: () => {
+                this.closeModal();
+            },
+            onCancel: () => {
+                this.closeModal();
             },
         });
         this.modal.appendChild(this.iframe.element);
@@ -273,6 +285,50 @@ class WagtailFeditEditor {
     }
 }
 
+class WagtailFeditPublisher {
+    constructor(options) {
+        const {
+            publishUrl,
+            publishButton,
+        } = options;
+
+        this.publishUrl = publishUrl;
+        this.publishButton = publishButton;
+        this.publishForm = publishButton.parentElement.querySelector("form");
+        this.init();
+    }
+
+    init() {
+        this.publishButton.addEventListener("click", (e) => {
+            if (this.publishForm.classList.contains("open")) {
+                const anim = this.publishForm.animate([
+                    {opacity: 1, height: `${this.publishForm.scrollHeight}px`},
+                    {opacity: 0, height: "0px"},
+                ], {
+                    duration: 500,
+                    easing: "ease-in-out",
+                });
+                anim.onfinish = () => {
+                    this.publishForm.classList.remove("open");
+                };
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            const anim = this.publishForm.animate([
+                {opacity: 0, height: "0px"},
+                {opacity: 1, height: `${this.publishForm.scrollHeight}px`}
+            ], {
+                duration: 500,
+                easing: "ease-in-out",
+            });
+            anim.onfinish = () => {
+                this.publishForm.classList.add("open");
+            };
+        });
+    }
+}
+
 function initFEditors() {
     const wagtailFeditBlockEditors = document.querySelectorAll(".wagtail-fedit-block-wrapper");
     const wagtailFeditFieldEditors = document.querySelectorAll(".wagtail-fedit-field-wrapper");
@@ -312,6 +368,7 @@ function initFEditors() {
     if (userbar) {
         const editButton = userbar.shadowRoot.querySelector("#wagtail-fedit-editor-button");
         const liveButton = userbar.shadowRoot.querySelector("#wagtail-fedit-live-button");
+        const publishButton = userbar.shadowRoot.querySelector("#wagtail-fedit-publish-button");
 
         function setScrollParams(button) {
             if (!button) {
@@ -328,14 +385,29 @@ function initFEditors() {
         }
 
         if (editButton || liveButton) {
-            window.addEventListener("scroll", () => {
-                setScrollParams(editButton);
-                setScrollParams(liveButton);
+            let timer = null;
 
-                const windowURL = new URL(window.location.href);
-                windowURL.searchParams.set("scrollY", window.scrollY);
-                windowURL.searchParams.set("scrollX", window.scrollX);
-                window.history.replaceState(null, "", windowURL.toString());
+            window.addEventListener("scroll", () => {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                timer = setTimeout(() => {
+                    setScrollParams(editButton);
+                    setScrollParams(liveButton);
+    
+                    const windowURL = new URL(window.location.href);
+                    windowURL.searchParams.set("scrollY", window.scrollY);
+                    windowURL.searchParams.set("scrollX", window.scrollX);
+                    window.history.replaceState(null, "", windowURL.toString());
+                }, 50);
+            });
+        }
+
+
+        if (publishButton) {
+            const publisher = new WagtailFeditPublisher({
+                publishUrl: publishButton.href,
+                publishButton: publishButton,
             });
         }
     }

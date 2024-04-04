@@ -114,6 +114,9 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
     display: flex;
     flex-direction: column;
 }
+.wagtail-fedit-form-wrapper .wagtail-fedit-publish-form {
+    justify-content: center;
+}
 .wagtail-fedit-form-wrapper .buttons {
     display: flex;
     flex-direction: row;
@@ -135,6 +138,9 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
 }
 #modal-header > #modal-title {
     padding-left: 1.3rem;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 #modal-header > #modal-title,
 #modal-header {

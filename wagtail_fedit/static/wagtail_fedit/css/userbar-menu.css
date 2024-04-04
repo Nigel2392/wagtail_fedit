@@ -1,0 +1,28 @@
+.wagtail-fedit-publish-menu {
+
+}
+.wagtail-fedit-publish-menu .wagtail-fedit-form {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: height 0.3s;
+}
+.wagtail-fedit-publish-menu .wagtail-fedit-form.open {
+    height: auto;
+    opacity: 1;
+}
+.wagtail-fedit-userbar-button + .wagtail-fedit-userbar-button.wagtail-fedit-userbar-button {
+    margin-inline-start: 0;
+}
+.wagtail-fedit-userbar-button svg.w-action-icon {
+    margin: 0;
+    transition: all 0.2s;
+}
+[name="action-publish"]:hover svg {
+    fill: var(--w-color-positive-100);
+    opacity: 1;
+}
+[name="action-unpublish"]:hover svg {
+    fill: var(--w-color-critical-200);
+    opacity: 1;
+}

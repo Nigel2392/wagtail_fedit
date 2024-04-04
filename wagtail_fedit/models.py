@@ -4,6 +4,7 @@ from wagtail.models import (
     RevisionMixin,
     PreviewableMixin,
     DraftStateMixin,
+    WorkflowMixin,
     LockableMixin,
 )
 
@@ -83,3 +84,16 @@ class FeditPermissionTester:
             return False
 
         return self.user.is_superuser or ("publish" in self.permissions)
+    
+    def can_submit_for_moderation(self):
+        if not isinstance(self.model_instance, LockableMixin):
+            return False
+        
+        if not isinstance(self.model_instance, WorkflowMixin):
+            return False
+
+        return (
+            not self.is_locked()
+            and self.model_instance.has_workflow
+            and not self.model_instance.workflow_in_progress
+        )

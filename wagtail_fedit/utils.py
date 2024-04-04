@@ -3,10 +3,14 @@ from django.db import models
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from django.urls import reverse
 
 from wagtail import hooks
-from wagtail.models import DraftStateMixin
+from wagtail.models import (
+    DraftStateMixin,
+    WorkflowMixin,
+)
 from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.blocks.stream_block import StreamValue
 from wagtail.blocks.list_block import ListValue
@@ -265,6 +269,9 @@ def user_can_publish(instance, user):
     if not isinstance(instance, DraftStateMixin):
         return False
     
+    if not instance.has_unpublished_changes:
+        return False
+
     if hasattr(instance, "permission_policy"):
         return instance.permission_policy.user_has_permission(user, "publish")
     
@@ -281,3 +288,15 @@ def user_can_unpublish(instance, user):
         return False
     
     return instance.permissions_for_user(user).can_unpublish()
+
+def user_can_submit_for_moderation(instance, user):
+    if not getattr(settings, "WAGTAIL_WORKFLOW_ENABLED", True):
+        return False
+
+    if not isinstance(instance, WorkflowMixin):
+        return False
+    
+    if not hasattr(instance, "permissions_for_user"):
+        return False
+    
+    return instance.permissions_for_user(user).can_submit_for_moderation()
