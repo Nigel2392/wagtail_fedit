@@ -183,16 +183,6 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                 "data-is-relation": self.meta_field.is_relation\
                     and isinstance(self.field_value, models.Model),
             },
-            "original_instance": {
-                "is_draft_capable": issubclass(self.model, RevisionMixin)\
-                    and issubclass(self.model, DraftStateMixin),
-                "object": self.original_instance,
-            },
-            "instance": {
-                "is_draft_capable": issubclass(self.model, RevisionMixin)\
-                    and issubclass(self.model, DraftStateMixin),
-                "object": self.instance,
-            },
             "meta_field": self.meta_field,
             "field_name": self.field_name,
         }
