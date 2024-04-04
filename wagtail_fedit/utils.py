@@ -1,7 +1,13 @@
 from typing import Any
-from django.http import HttpRequest
 from django.db import models
+from django.http import HttpRequest
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
+
 from wagtail import hooks
+from wagtail.models import DraftStateMixin
+from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.blocks.stream_block import StreamValue
 from wagtail.blocks.list_block import ListValue
 from wagtail import blocks
@@ -29,6 +35,32 @@ class FeditPermissionCheck:
             return False
         
         return True
+
+
+class FeditHelpTextMixin:
+    TITLE_SUPPORTS_DRAFTS = _("The object you are editing supports drafts.")
+    TEXT_PUBLISH_DRAFTS = _("You must publish %(model)s to make any changes visible.")
+
+    TITLE_NO_DRAFTS = _("The object you are editing does not support drafts.")
+    TEXT_NO_DRAFTS = _("You are not required to publish this object to make this change visible.")
+
+
+    def get_help_text(self) -> str:
+        # No relations. Maybe draft support.
+        if is_draft_capable(self.instance):
+            return {
+                "status": "info",
+                "title": self.TITLE_SUPPORTS_DRAFTS,
+                "text": mark_safe(self.TEXT_PUBLISH_DRAFTS % {
+                    "model": get_model_string(self.instance, publish_url=True, request=self.request),
+                })
+            }
+        
+        return {
+            "status": "info",
+            "title": self.TITLE_NO_DRAFTS,
+            "text": mark_safe(self.TEXT_NO_DRAFTS)
+        }
 
 
 def use_related_form(field: models.Field) -> bool:
@@ -159,4 +191,58 @@ def get_field_content(request, instance, meta_field: models.Field, context, cont
         content = content.render_as_block(context)
 
     return content
+
+def is_draft_capable(model):
+    return isinstance(model, DraftStateMixin)\
+        or type(model) == type\
+        and issubclass(model, DraftStateMixin)
+
+def saving_relation(m1, m2):
+    return not (
+        m1._meta.app_label == m2._meta.app_label
+        and m1._meta.model_name == m2._meta.model_name\
+        and m1.pk == m2.pk
+    )
+
+
+def get_model_string(instance: models.Model, publish_url: bool = False, request: HttpRequest = None, target = "_blank") -> str:
+    """
+    Get a string representation of a model instance. If the instance has a
+    `get_admin_display_title` method, it will be used to get the string
+    representation.
+    If that method does not exist, the `title` attribute will be used.
+    If the `title` attribute does not exist, the string representation of the
+    instance will be used.
+    If `publish_url` is True, the string will be wrapped in an anchor tag
+    linking to the publish view for the instance.
+    Permissions will not be checked. This is the responsibility of the caller.
+    """
+    model_string = getattr(instance, "get_admin_display_title", None)
+    if model_string:
+        model_string = model_string()
+    else:
+        model_string = getattr(instance, "title", str(instance))
+
+    if publish_url:
+
+        if is_draft_capable(instance):
+            admin_url = reverse(
+                "wagtail_fedit:publish",
+                args=[
+                    instance.pk,
+                    instance._meta.app_label,
+                    instance._meta.model_name
+                ],
+            )
+
+        else:
+            finder = AdminURLFinder(request)
+            admin_url = finder.get_edit_url(instance)
+
+        if admin_url:
+            model_string = mark_safe(
+                f'<a href="{admin_url}" target="{target}">{model_string}</a>'
+            )
+
+    return model_string
 

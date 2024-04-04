@@ -1,8 +1,4 @@
 
-
-REGISTER_BLOCK_HOOK_NAME = "wagtail_fedit.register_block_conversion"
-
-
 CONSTRUCT_BLOCK_TOOLBAR  = "wagtail_fedit.construct_block_toolbar"
 
 

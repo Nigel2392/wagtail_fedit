@@ -11,6 +11,7 @@ from wagtail.models import (
 )
 from wagtail import hooks
 from ..utils import (
+    is_draft_capable,
     FeditPermissionCheck,
     access_userbar_model,
     FEDIT_PREVIEW_VAR,
@@ -89,7 +90,7 @@ def add_fedit_userbar_item(request, items):
     local_items = []
     
     if getattr(request, FEDIT_PREVIEW_VAR, False):
-        if isinstance(model, DraftStateMixin):
+        if is_draft_capable(model):
             local_items.append(
                 WagtailFeditPublishItem(model),
             )

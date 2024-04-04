@@ -25,6 +25,12 @@
             </header>
         {% endblock %}
         <div class="nice-padding">
+            {% if help_text %}
+                {% help_block status=help_text.status %}
+                    <p><strong>{{ help_text.title }}</strong></p>
+                    <p>{{ help_text.text }}</p>
+                {% endhelp_block %}
+            {% endif %}
             {% block content %}{% endblock %}
         </div>
     </main>

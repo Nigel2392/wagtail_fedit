@@ -9,8 +9,9 @@ from wagtail.admin.forms import (
     WagtailAdminModelForm,
 )
 from wagtail.models import (
-    RevisionMixin, 
+    RevisionMixin,
 )
+
 
 
 class PossiblePreviewForm(WagtailAdminModelForm):
@@ -47,13 +48,3 @@ def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) 
             fields = form_fields
 
     return Form
-
-
-def get_model_string(instance: models.Model) -> str:
-    model_string = getattr(instance, "get_admin_display_title", None)
-    if model_string:
-        model_string = model_string()
-    else:
-        model_string = getattr(instance, "title", str(instance))
-
-    return model_string

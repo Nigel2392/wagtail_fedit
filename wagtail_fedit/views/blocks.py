@@ -25,7 +25,7 @@ from .. import utils
 
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
-class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View):
+class EditBlockView(utils.FeditHelpTextMixin, utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View):
     template_name = "wagtail_fedit/editor/block_iframe.html"
 
     def dispatch(self, request: HttpRequest, block_id = None, field_name = None, model_id = None, model_name = None, app_label = None) -> None:
@@ -84,7 +84,7 @@ class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View)
             "model_name": self.model._meta.verbose_name,
             "model_string": model_string,
         }
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         must = {
@@ -103,6 +103,7 @@ class EditBlockView(utils.FeditPermissionCheck, WagtailAdminTemplateMixin, View)
             "label": self.block.block.label,
             "wagtail_fedit_instance": self.instance,
             "wagtail_fedit_has_block": self.has_block,
+            "help_text": self.get_help_text(),
             "edit_url": BlockEditNode.get_edit_url(
                 self.block_id, self.field_name, self.instance,
             ),

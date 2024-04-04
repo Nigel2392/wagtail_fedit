@@ -1,9 +1,10 @@
 from typing import Any
 from django.db import models
 from django.shortcuts import render
-from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.utils.decorators import method_decorator
+from django.template.loader import render_to_string
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import View
 from django.http import (
@@ -33,14 +34,18 @@ from ..forms import (
 )
 from ..utils import (
     FeditPermissionCheck,
+    FeditHelpTextMixin,
     use_related_form,
     get_field_content,
+    saving_relation,
+    is_draft_capable,
+    get_model_string,
 )
 
 
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
-class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
+class EditFieldView(FeditHelpTextMixin, FeditPermissionCheck, WagtailAdminTemplateMixin, View):
     template_name = "wagtail_fedit/editor/field_iframe.html"
 
     def dispatch(self, request: HttpRequest, field_name = None, app_label = None, model_name = None, model_id = None) -> None:
@@ -93,9 +98,9 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
     def get_header_title(self):
         meta_field: models.Field = self.model._meta.get_field(self.field_name)
 
-        model_string = field_forms.get_model_string(self.original_instance)
+        model_string = get_model_string(self.original_instance)
         if self.original_instance != self.instance:
-            instance_string = field_forms.get_model_string(self.instance)
+            instance_string = get_model_string(self.instance)
             return _("Edit model %(instance_string)s for %(model_name)s %(model_string)s") % {
                 "instance_string": instance_string,
                 "model_name": self.model._meta.verbose_name,
@@ -124,6 +129,47 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             context,
         )
     
+    def get_help_text(self):
+        if is_draft_capable(self.original_instance)\
+                and is_draft_capable(self.instance)\
+                and saving_relation(self.instance, self.original_instance):
+            return {
+                "status": "info",
+                "title": _("The objects you are editing support drafts."),
+                "text": mark_safe(_("You must publish %(model)s and the related object of type %(related_verbose_name)s (%(related_model)s) to make any changes visible.") % {
+                    "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
+                    "related_verbose_name": self.instance._meta.verbose_name,
+                    "related_model": get_model_string(self.instance, publish_url=True, request=self.request),
+                })
+            }
+
+        elif is_draft_capable(self.original_instance)\
+                and not is_draft_capable(self.instance)\
+                and saving_relation(self.instance, self.original_instance):
+            return {
+                "status": "info",
+                "title": _("The object you are editing supports drafts."),
+                "text": mark_safe(_("You must publish %(model)s to make any changes visible.") % {
+                    "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
+                })
+            }
+        
+        elif not is_draft_capable(self.original_instance)\
+                and is_draft_capable(self.instance)\
+                and saving_relation(self.instance, self.original_instance):
+            return {
+                "status": "info",
+                "title": _("The object you are editing supports drafts."),
+                "text": mark_safe(_("You must publish the related object of type %(type)s (%(model)s) to make any changes visible.") % {
+                    "type": self.original_instance._meta.verbose_name,
+                    "model": get_model_string(self.original_instance, publish_url=True, request=self.request),
+                })
+            }
+
+        return super().get_help_text()
+
+        
+    
     def get_context_data(self, **kwargs):
         return super().get_context_data(**kwargs) | {
             "form_attrs": {
@@ -134,8 +180,17 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 "data-is-relation": self.meta_field.is_relation\
                     and isinstance(self.field_value, models.Model),
             },
-            "is_draft_capable": issubclass(self.model, RevisionMixin)\
-                and issubclass(self.model, DraftStateMixin),
+            "original_instance": {
+                "is_draft_capable": issubclass(self.model, RevisionMixin)\
+                    and issubclass(self.model, DraftStateMixin),
+                "object": self.original_instance,
+            },
+            "instance": {
+                "is_draft_capable": issubclass(self.model, RevisionMixin)\
+                    and issubclass(self.model, DraftStateMixin),
+                "object": self.instance,
+            },
+            "help_text": self.get_help_text(),
             "meta_field": self.meta_field,
             "field_name": self.field_name,
         }
@@ -157,7 +212,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             context = self.get_context_data(form=form, **self.data)
 
             # Check if we are saving a relation
-            if self.instance.pk != self.original_instance.pk:
+            if saving_relation(self.instance, self.original_instance):
                 self.meta_field.save_form_data(self.original_instance, self.instance)
                 field_forms.save_possible_revision(self.original_instance, request)
 
@@ -172,7 +227,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
                 "model_name": self.model_name,
                 "app_label": self.app_label,
                 "model_verbose": str(self.model._meta.verbose_name),
-                "model_string": str(field_forms.get_model_string(self.original_instance)),
+                "model_string": str(get_model_string(self.original_instance)),
                 "old": str(self.initial_field_value),
                 "new": str(getattr(
                     self.original_instance,
@@ -183,7 +238,7 @@ class EditFieldView(FeditPermissionCheck, WagtailAdminTemplateMixin, View):
             uid = uuid.uuid4()
             if self.original_instance.pk != self.instance.pk:
                 data.update({
-                    "edited_model_string": str(field_forms.get_model_string(self.instance)),
+                    "edited_model_string": str(get_model_string(self.instance)),
                     "edited_model_verbose": str(self.instance._meta.verbose_name),
                     "edited_model_id": self.instance.pk,
                     "edited_model_name": self.instance._meta.model_name,
