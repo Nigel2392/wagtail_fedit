@@ -26,10 +26,12 @@
         {% endblock %}
         <div class="nice-padding">
             {% if help_text %}
-                {% help_block status=help_text.status %}
-                    <p><strong>{{ help_text.title }}</strong></p>
-                    <p>{{ help_text.text }}</p>
-                {% endhelp_block %}
+                {% panel id="wagtail-fedit-help-text" icon="help" heading=help_text.heading %}
+                    {% help_block status=help_text.status %}
+                        <p><strong>{{ help_text.title }}</strong></p>
+                        <p>{{ help_text.text }}</p>
+                    {% endhelp_block %}
+                {% endpanel %}
             {% endif %}
             {% block content %}{% endblock %}
         </div>

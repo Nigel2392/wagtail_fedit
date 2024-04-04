@@ -148,9 +148,14 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
     right: 0;
     z-index: 100;
 }
+#wagtail-fedit-help-text-section {
+    margin-bottom: 0;
+}
+#wagtail-fedit-help-text-section .w-panel__anchor,
 #wagtail-fedit-editor-section .w-panel__anchor {
     display: none;
 }
+#wagtail-fedit-help-text-section .w-panel__toggle,
 #wagtail-fedit-editor-section .w-panel__toggle {
     align-content: center;
     border-radius: 100%;

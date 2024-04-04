@@ -38,9 +38,11 @@ class FeditPermissionCheck:
 
 
 class FeditHelpTextMixin:
+    HEADING_SUPPORTS_DRAFTS = _("Publishing Required")
     TITLE_SUPPORTS_DRAFTS = _("The object you are editing supports drafts.")
     TEXT_PUBLISH_DRAFTS = _("You must publish %(model)s to make any changes visible.")
 
+    HEADING_NO_DRAFTS = _("No Publishing Required")
     TITLE_NO_DRAFTS = _("The object you are editing does not support drafts.")
     TEXT_NO_DRAFTS = _("You are not required to publish this object to make this change visible.")
 
@@ -50,6 +52,7 @@ class FeditHelpTextMixin:
         if is_draft_capable(self.instance):
             return {
                 "status": "info",
+                "heading": self.HEADING_SUPPORTS_DRAFTS,
                 "title": self.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(self.TEXT_PUBLISH_DRAFTS % {
                     "model": get_model_string(self.instance, publish_url=True, request=self.request),
@@ -58,6 +61,7 @@ class FeditHelpTextMixin:
         
         return {
             "status": "info",
+            "heading": self.HEADING_NO_DRAFTS,
             "title": self.TITLE_NO_DRAFTS,
             "text": mark_safe(self.TEXT_NO_DRAFTS)
         }
