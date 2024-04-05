@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
     HttpResponse,
 )
@@ -46,9 +47,9 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
             self.has_block = False
 
         try:
-            self.model = apps.get_model(self.app_label, self.model_name)
+            self.model = apps.get_model(app_label, model_name)
             if not self.has_perms(request, self.model):
-                return HttpResponseBadRequest("You do not have permission to view this page")
+                return HttpResponseForbidden("You do not have permission to view this page")
         except LookupError:
             return HttpResponseBadRequest("Invalid model")
 

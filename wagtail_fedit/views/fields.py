@@ -55,9 +55,9 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
             return HttpResponseBadRequest("Missing required parameters")
 
         try:
-            self.model = apps.get_model(self.app_label, self.model_name)
+            self.model = apps.get_model(app_label, model_name)
             if not self.has_perms(request, self.model):
-                return HttpResponseBadRequest("You do not have permission to view this page")
+                return HttpResponseForbidden("You do not have permission to view this page")
         except LookupError:
             return HttpResponseBadRequest("Invalid model")
 

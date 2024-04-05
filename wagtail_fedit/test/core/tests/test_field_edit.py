@@ -64,7 +64,7 @@ class TestFieldEdit(BaseFEditTest):
                 }
             )
 
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 403, msg=f"Expected 403, got {response.status_code} ({response.content})")
 
             model.refresh_from_db()
 
