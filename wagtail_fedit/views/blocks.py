@@ -95,7 +95,6 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         context = super().get_context_data(**kwargs)
         must = {
             "request": self.request,
-            # "wagtail_fedit_instance": instance,
             "contentpath": self.contentpath,
             "block_id": self.block_id,
             "field_name": self.field_name,
@@ -108,6 +107,7 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
             "has_block": self.has_block,
             "label": self.block.block.label,
             "wagtail_fedit_instance": self.instance,
+            "wagtail_fedit_field_name": self.field_name,
             "wagtail_fedit_has_block": self.has_block,
             "edit_url": BlockEditNode.get_edit_url(
                 self.block_id, self.field_name, self.instance,
@@ -145,6 +145,8 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
 
         extra.update({
             "success": success,
+            "locked": self.lock is not None,
+            "locked_for_user": self.locked_for_user,
         })
 
         context.update(extra)
@@ -159,7 +161,9 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         form = self.form_class(block=self.block, parent_instance=self.instance, request=request)
         # Safe to omit data from context - we are not rendering the content.
         return self.render_to_response(
-            self.get_context_data(form=form, locked=self.locked_for_user),
+            self.get_context_data(
+                form=form,
+            ),
             success=True,
         )
 
@@ -172,6 +176,7 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         valid = form.is_valid()
         if valid and not self.locked_for_user:
             self.block = form.save()
+
         else:
             # We are not rendering the content, so we can omit data from context.
             return JsonResponse({
@@ -180,7 +185,9 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
                 "locked": self.locked_for_user,
                 "html": render_to_string(
                     "wagtail_fedit/editor/block_iframe.html",
-                    context=self.get_context_data(form=form, locked=self.locked_for_user),
+                    context=self.get_context_data(
+                        form=form,
+                    ),
                     request=request,
                 )
             }, status=423 if self.locked_for_user else 400)
@@ -229,9 +236,10 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
             context = self.get_context_data()
             html = node.render(context)
         else:
+
             keys = request.GET.keys()
             data = BlockEditNode.unpack(*keys, request=request)
-            html = self.block.block.render(self.block.value, self.get_context_data(**dict(data)))
+            html = self.block.block.render(self.block.value, self.get_context_data(**data))
 
         return JsonResponse({
             "success": True,

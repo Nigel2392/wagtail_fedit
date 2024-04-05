@@ -51,21 +51,42 @@
                     {% endhelp_block %}
                 {% endpanel %}
             {% endif %}
-            {% block content %}
-                {% block errors %}
-                    {% if form.errors or form.non_field_errors %}
-                        <div class="error-message">
-                            <h2>{{ view.get_error_title }}</h2>
-                            <ul>
-                                {% for error in form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                                {{ form.errors.as_ul }}
-                            </ul>
-                        </div>
-                    {% endif %}
+
+            {% translate "Locked" as locked_heading %}
+            {% if locked and not locked_for_user %}
+                {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
+                    {% help_block status=info %}
+                        <p>{% translate "This object is locked" %}</p>
+                        <p>{% translate "You are still able to edit this object." %}</p>
+                    {% endhelp_block %}
+                {% endpanel %}
+            {% endif %}
+
+            {% if locked_for_user %}
+                {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
+                    {% help_block status=info %}
+                        <p>{% translate "This object is locked and cannot be edited." %}</p>
+                    {% endhelp_block %}
+                {% endpanel %}
+            {% else %}
+            
+                {% block content %}
+                    {% block errors %}
+                        {% if form.errors or form.non_field_errors %}
+                            <div class="error-message">
+                                <h2>{{ view.get_error_title }}</h2>
+                                <ul>
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                    {{ form.errors.as_ul }}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    {% endblock %}
                 {% endblock %}
-            {% endblock %}
+                
+            {% endif %}
         </div>
     </main>
     {% block sidebar_root %}

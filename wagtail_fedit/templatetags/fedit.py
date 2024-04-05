@@ -29,8 +29,8 @@ register = library.Library()
 url_value_signer = signing.TimestampSigner()
 
 
-WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context for block {block.name}."
-WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for block {block.name}."
+WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context for field %(field)s."
+WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for block %(block)s."
 
 
 class BlockEditNode(Node):
@@ -99,16 +99,16 @@ class BlockEditNode(Node):
             self.has_block = True
         elif self.nl:
             rendered = self.nl.render(context)
-            self.has_block = context.get("wagtail_fedit_has_block", False)
+            self.has_block = False
         else:
             raise ValueError("Block or nodelist is required")
         
         if not field_name:
-            warnings.warn(WARNING_FIELD_NAME_NOT_AVAILABLE % {"block": block})
+            warnings.warn(WARNING_FIELD_NAME_NOT_AVAILABLE % {"field": field_name})
             return rendered
         
         if not model:
-            warnings.warn(WARNING_MODEL_INSTANCE_NOT_AVAILABLE % {"block": block})
+            warnings.warn(WARNING_MODEL_INSTANCE_NOT_AVAILABLE % {"block": block.label})
             return rendered
         
         # Get block id from block if bound or context.
@@ -145,7 +145,7 @@ class BlockEditNode(Node):
         else:
             admin_edit_url = None
 
-        extra.setdefault("has_block", self.has_block)
+        extra["has_block"] = self.has_block
 
         items = [
             FeditBlockEditButton(),

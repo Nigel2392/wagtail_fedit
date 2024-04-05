@@ -192,6 +192,8 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
             },
             "meta_field": self.meta_field,
             "field_name": self.field_name,
+            "locked": self.lock is not None,
+            "locked_for_user": self.locked_for_user,
         }
 
 
@@ -199,7 +201,9 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
         # Can omit data from context - we are not rendering the content.
         form = self.form_class(request=request, instance=self.instance)
         return self.render_to_response(
-            self.get_context_data(form=form, locked=self.locked_for_user),
+            self.get_context_data(
+                form=form,
+            ),
             success=True,
         )
 
@@ -213,7 +217,9 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                 "locked": self.locked_for_user,
                 "html": render_to_string(
                     "wagtail_fedit/editor/field_iframe.html",
-                    context=self.get_context_data(form=form, locked=self.locked_for_user),
+                    context=self.get_context_data(
+                        form=form,
+                    ),
                     request=request,
                 )
             }, status=423 if self.locked_for_user else 400)
