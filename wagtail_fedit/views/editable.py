@@ -212,7 +212,7 @@ class BaseActionView(LockViewMixin, BaseFeditView):
             return self.get(request, *args, **kwargs)
         
         if request.POST["action"] != self.get_action_value():
-            messages.error(request, _("Invalid action specified"))
+            messages.error(request, _("Invalid action specified: {}").format(request.POST["action"]))
             return self.get(request, *args, **kwargs)
         
         return self.action(request)
@@ -283,20 +283,20 @@ class UnpublishView(BaseActionView):
         
         if not self.object.live:
             raise ValueError("Object is not live")
-    
+ 
     def action(self, request: HttpRequest) -> HttpResponse:
-        if (
-            self.workflow_state
-            and self.workflow_state.status == WorkflowState.STATUS_NEEDS_CHANGES
-        ):
-            # If the workflow was in the needs changes state, resume the existing workflow on submission
-            self.workflow_state.resume(self.request.user)
-        else:
-            # Otherwise start a new workflow
-            workflow = self.object.get_workflow()
-            workflow.start(self.object, self.request.user)
+        if not self.object.live:
+            messages.error(request, _("This object is not live"))
+            return self.get(request)
+        
+        action = get_unpublish_action(self.object)(
+            self.object,
+            user=request.user,
+        )
 
-        return self.redirect_to_success_url(request)
+        action.execute()
+
+        return self.redirect_to_failsafe_url(request)
 
 
 class SubmitView(BaseActionView):
@@ -318,20 +318,20 @@ class SubmitView(BaseActionView):
         
         if not self.object.has_unpublished_changes:
             raise ValueError("Object has no unpublished changes")
-
+   
     def action(self, request: HttpRequest) -> HttpResponse:
-        if not self.object.live:
-            messages.error(request, _("This object is not live"))
-            return self.get(request)
-        
-        action = get_unpublish_action(self.object)(
-            self.object,
-            user=request.user,
-        )
+        if (
+            self.workflow_state
+            and self.workflow_state.status == WorkflowState.STATUS_NEEDS_CHANGES
+        ):
+            # If the workflow was in the needs changes state, resume the existing workflow on submission
+            self.workflow_state.resume(self.request.user)
+        else:
+            # Otherwise start a new workflow
+            workflow = self.object.get_workflow()
+            workflow.start(self.object, self.request.user)
 
-        action.execute()
-
-        return self.redirect_to_failsafe_url(request)
+        return self.redirect_to_success_url(request)
 
 
 class CancelView(BaseActionView):
