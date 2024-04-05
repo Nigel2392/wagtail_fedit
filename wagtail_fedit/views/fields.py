@@ -50,9 +50,13 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
     template_name = "wagtail_fedit/editor/field_iframe.html"
     ERROR_TITLE = _("Validation Errors")
 
-    def dispatch(self, request: HttpRequest, field_name = None, app_label = None, model_name = None, model_id = None) -> None:
-        if not all([field_name, model_name, app_label, model_id]):
-            return HttpResponseBadRequest("Missing required parameters")
+    def dispatch(self, 
+            request:    HttpRequest,
+            field_name: str = None,
+            app_label:  str = None,
+            model_name: str = None,
+            model_id:   Any = None,
+        ) -> None:
 
         try:
             self.model = apps.get_model(app_label, model_name)
@@ -68,6 +72,9 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
             self.instance = model_instance.latest_revision.as_object()
         else:
             self.instance = model_instance
+
+        if not hasattr(self.instance, field_name):
+            return HttpResponseBadRequest("Invalid field")
 
         self.field_name = field_name
         self.model_name = model_name

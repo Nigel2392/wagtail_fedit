@@ -1,6 +1,6 @@
 from django.template import library, Node, NodeList
 from django.template.loader import render_to_string
-from django.template.base import Parser, Token, TokenType
+from django.template.base import Parser, Token
 from django.template.base import FilterExpression
 from django.utils.safestring import mark_safe
 from django.urls import reverse

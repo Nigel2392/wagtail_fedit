@@ -14,6 +14,12 @@ urlpatterns = [
     # path("cancel/<str:object_id>/<str:app_label>/<str:model_name>/", views.CancelView.as_view(), name="cancel"),
 
     # Frontend Editing
-    path("field/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", views.EditFieldView.as_view(), name="edit_field"),
-    path("block/<str:block_id>/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", views.EditBlockView.as_view(), name="edit_block"),
+    path(
+        "field/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", 
+        views.EditFieldView.as_view(), name="edit_field"
+    ),
+    path(
+        "block/<str:block_id>/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", 
+        views.EditBlockView.as_view(), name="edit_block"
+    ),
 ]
