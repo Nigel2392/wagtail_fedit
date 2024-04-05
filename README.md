@@ -80,12 +80,41 @@ Getting Started
    ```
 
    Your content will then automatically be rendered with that method when need be by using `{% fedit_field "content" self %} `
+4. **But wait?! I go to my template and I do not see a way to edit!**That is true! We try to protect any styling on your actual page; we do not want to interfere.Instead; we serve the editing interface on a different URL, accessible by clicking `Frontend Editing` in the Wagtail userbar.Keep an eye on that userbar! It is also used for publishing if your model inherits from `DraftStateMixin`.
 
-4. **But wait?! I go to my template and I do not see a way to edit!**  
-   That is true! We try to protect any styling on your actual page; we do not want to interfere.  
-   Instead; we serve the editing interface on a different URL, accessible by clicking `Frontend Editing` in the Wagtail userbar.  
-   Keep an eye on that userbar! It is also used for publishing if your model inherits from `DraftStateMixin`.
-   
+## Permissions
+
+We have the following basic permission requirements:
+
+* You must have `wagtailadmin.access_admin` to edit a block/field.
+* You must have the appropriate `app_label.change_*` permission for the model.
+
+This however only applies to editing.
+
+We use separate permissions for publishing and submitting workflows, etc.
+
+Models which you want to allow the publish view for should also implement a `PermissionTester`- like object.
+
+Example of how you should implement the `Tester` object and all required permissions. (More details in `models.py`)
+
+```python
+
+class MyModel(...):
+    def permissions_for_user(self, user):
+        return MyModelPermissionTester(self, user)
+
+class MyModelPermissionTester(...):
+    def can_unpublish(self):
+        """ Can the user unpublish this object? """
+  
+    def can_publish(self):
+        """ Can the user publish this object? """  
+  
+    def can_submit_for_moderation(self):
+        """ Can the user submit this object for moderation? """
+
+```
+
 ## Revisions
 
 Revision support is included out of the box.
