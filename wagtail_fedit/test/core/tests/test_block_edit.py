@@ -14,7 +14,7 @@ class TestBlockEdit(BaseFEditTest):
 
         BLOCK_ID = "c757f54d-0df5-4b35-8a06-4174f180ec41"
         
-        for i, model in self.models:
+        for i, model in enumerate(self.models):
             
             if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 0)

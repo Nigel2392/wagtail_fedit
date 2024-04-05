@@ -9,7 +9,7 @@ class TestFieldEdit(BaseFEditTest):
     def test_field_edited(self):
         self.client.force_login(self.admin_user)
         
-        for i, model in self.models:
+        for i, model in enumerate(self.models):
             
             if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 0)
