@@ -1,7 +1,6 @@
-from .base import (
-    BaseFEditTest,
+from wagtail.models import (
+    RevisionMixin,
 )
-
 from wagtail_fedit.utils import (
     find_block,
 )
@@ -15,15 +14,9 @@ class TestBlockEdit(BaseFEditTest):
 
         BLOCK_ID = "c757f54d-0df5-4b35-8a06-4174f180ec41"
         
-        for i, (model, has_revision_support) in enumerate([
-            (self.full_model, True),
-            (self.draft_model, True),
-            (self.revision_model, True),
-            (self.preview_model, False),
-            (self.basic_model, False),
-        ]):
+        for i, model in self.models:
             
-            if has_revision_support:
+            if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 0)
             else:
                 with self.assertRaises(AttributeError):
@@ -48,7 +41,7 @@ class TestBlockEdit(BaseFEditTest):
             self.assertEqual(response.status_code, 200)
             model.refresh_from_db()
 
-            if has_revision_support:
+            if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 1)
                 chk = model.latest_revision.as_object()
             else:

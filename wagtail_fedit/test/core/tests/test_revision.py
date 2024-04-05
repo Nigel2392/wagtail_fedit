@@ -1,3 +1,6 @@
+from wagtail.models import (
+    RevisionMixin,
+)
 from ..models import (
     EditableFullModel,
     EditableDraftModel,
@@ -13,15 +16,9 @@ class TestRevisions(BaseFEditTest):
     def test_revision_creation(self):
         self.client.force_login(self.admin_user)
         
-        for i, (model, has_revision_support) in enumerate([
-            (self.full_model, True),
-            (self.draft_model, True),
-            (self.revision_model, True),
-            (self.preview_model, False),
-            (self.basic_model, False),
-        ]):
+        for i, model in self.models:
             
-            if has_revision_support:
+            if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 0)
             else:
                 with self.assertRaises(AttributeError):
@@ -43,7 +40,7 @@ class TestRevisions(BaseFEditTest):
 
             model.refresh_from_db()
 
-            if has_revision_support:
+            if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 1)
                 self.assertEqual(model.title, initial_title)
                 chk = model.latest_revision.as_object()
@@ -53,7 +50,6 @@ class TestRevisions(BaseFEditTest):
                 chk = model
 
             self.assertEqual(chk.title, f"{initial_title} test case {i + 1}")
-
 
 
 

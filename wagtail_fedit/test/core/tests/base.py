@@ -131,6 +131,15 @@ class BaseFEditTest(TestCase):
             body="Basic Model Body",
             content=TEST_BLOCK_DATA,
         )
+
+        self.models = [
+            self.full_model,
+            self.draft_model,
+            self.revision_model,
+            self.preview_model,
+            self.basic_model,
+        ]
+
         self.admin_user = User.objects.create_superuser(
             username="admin",
             email="admin@localhost",
