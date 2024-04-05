@@ -45,10 +45,12 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         else:
             self.has_block = False
 
-
-        self.model = apps.get_model(self.app_label, self.model_name)
-        if not self.has_perms(request, self.model):
-            return HttpResponseBadRequest("You do not have permission to view this page")
+        try:
+            self.model = apps.get_model(self.app_label, self.model_name)
+            if not self.has_perms(request, self.model):
+                return HttpResponseBadRequest("You do not have permission to view this page")
+        except LookupError:
+            return HttpResponseBadRequest("Invalid model")
 
 
         self.model_instance = self.model._default_manager.get(pk=self.model_id)

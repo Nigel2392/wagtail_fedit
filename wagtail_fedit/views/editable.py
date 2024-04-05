@@ -108,8 +108,10 @@ class BaseFeditView(FeditPermissionCheck, TemplateView):
         try:
             self.model = apps.get_model(app_label, model_name)
             self.model_object = self.model._default_manager.get(pk=object_id)
-        except (self.model.DoesNotExist, LookupError):
+        except (LookupError):
             return HttpResponseBadRequest("Invalid model provided")
+        except (self.model.DoesNotExist):
+            return HttpResponseBadRequest("Model not found")
 
         if not self.has_perms(request, self.model):
             return HttpResponseForbidden("You do not have permission to view this page")

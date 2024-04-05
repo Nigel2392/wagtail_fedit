@@ -54,9 +54,12 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
         if not all([field_name, model_name, app_label, model_id]):
             return HttpResponseBadRequest("Missing required parameters")
 
-        self.model = apps.get_model(app_label, model_name)
-        if not self.has_perms(request, self.model):
-            return HttpResponseForbidden("Permission denied")
+        try:
+            self.model = apps.get_model(self.app_label, self.model_name)
+            if not self.has_perms(request, self.model):
+                return HttpResponseBadRequest("You do not have permission to view this page")
+        except LookupError:
+            return HttpResponseBadRequest("Invalid model")
 
         # Only fetch latest reivision if it exists
         # If not; it will be automatically created by the form.
