@@ -12,14 +12,11 @@
             </svg>
             {% trans "Revision Management" %}
         </button>
-        <form id="wagtail-fedit-form" class="wagtail-fedit-form wagtail-fedit-publish-form" action="{{ publish_url }}" method="post">
-            {% csrf_token %}
-            <div class="wagtail-fedit-form-buttons">
-                {% for button in buttons %}
-                    {{ button }}
-                {% endfor %}
-            </div>
-        </form>
+        <div class="wagtail-fedit-form-buttons">
+            {% for button in buttons %}
+                {{ button }}
+            {% endfor %}
+        </div>
     </div>
 
 {% endblock %}

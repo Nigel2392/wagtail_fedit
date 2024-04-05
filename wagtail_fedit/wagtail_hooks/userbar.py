@@ -8,16 +8,9 @@ from wagtail.admin.userbar import (
     ExplorePageItem,
     EditPageItem,
 )
-from wagtail.models import (
-    DraftStateMixin,
-    PreviewableMixin,
-    WorkflowMixin,
-)
 from wagtail import hooks
-from ..views.editable import (
-    ActionPublishComponent,
-    ActionUnpublishComponent,
-    ActionSubmitComponent,
+from ..toolbar import (
+    FeditToolbarComponent,
 )
 from ..utils import (
     is_draft_capable,
@@ -29,17 +22,50 @@ from ..utils import (
     user_can_submit_for_moderation,
 )
 
+class FeditableModelComponent(FeditToolbarComponent):
+    def __init__(self, instance):
+        self.instance = instance
 
-class UserBarActionPublishComponent(ActionPublishComponent):
+    def get_context_data(self, request):
+        return super().get_context_data(request) | {
+            "hidden": not self.instance.has_unpublished_changes,
+            "action_url": reverse(
+                self.action_url,
+                args=[self.instance.pk, self.instance._meta.app_label, self.instance._meta.model_name],
+            ),
+        }
+
+class UserBarActionPublishComponent(FeditableModelComponent):
     template_name = "wagtail_fedit/userbar/publish/buttons/publish.html"
+    action_url = "wagtail_fedit:publish"
     check_for_changes = False
     
-class UserBarActionUnpublishComponent(ActionUnpublishComponent):
+    def is_shown(self, request):
+        if not super().is_shown(request):
+            return False
+        
+        return user_can_publish(self.instance, request.user, check_for_changes=self.check_for_changes)
+
+class UserBarActionUnpublishComponent(FeditableModelComponent):
     template_name = "wagtail_fedit/userbar/publish/buttons/unpublish.html"
-    
-class UserBarActionSubmitComponent(ActionSubmitComponent):
+    action_url = "wagtail_fedit:unpublish"
+        
+    def is_shown(self, request):
+        if not super().is_shown(request):
+            return False
+        
+        return user_can_unpublish(self.instance, request.user)
+
+class UserBarActionSubmitComponent(FeditableModelComponent):
     template_name = "wagtail_fedit/userbar/publish/buttons/submit.html"
+    action_url = "wagtail_fedit:submit"
     check_for_changes = False
+
+    def is_shown(self, request):
+        if not super().is_shown(request):
+            return False
+        
+        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=self.check_for_changes)
 
 
 class BaseWagtailFeditItem(BaseItem, FeditPermissionCheck):

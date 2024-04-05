@@ -295,8 +295,8 @@ class WagtailFeditEditor {
 class WagtailFeditPublishMenu {
     constructor(publishButton) {
         this.publishButton = publishButton;
-        this.publishForm = publishButton.parentElement.querySelector("form");
-        const buttons = this.publishForm.querySelectorAll("button");
+        this.publishButtonsWrapper = publishButton.parentElement.querySelector(".wagtail-fedit-form-buttons");
+        const buttons = this.publishButtonsWrapper.querySelectorAll(".wagtail-fedit-userbar-button");
         let initialIsHidden = false;
         for (const button of buttons) {
             if (button.classList.contains("initially-hidden")) {
@@ -320,30 +320,30 @@ class WagtailFeditPublishMenu {
 
     init() {
         this.publishButton.addEventListener("click", (e) => {
-            if (this.publishForm.classList.contains("open")) {
-                const anim = this.publishForm.animate([
-                    {opacity: 1, height: `${this.publishForm.scrollHeight}px`},
+            if (this.publishButtonsWrapper.classList.contains("open")) {
+                const anim = this.publishButtonsWrapper.animate([
+                    {opacity: 1, height: `${this.publishButtonsWrapper.scrollHeight}px`},
                     {opacity: 0, height: "0px"},
                 ], {
                     duration: 500,
                     easing: "ease-in-out",
                 });
                 anim.onfinish = () => {
-                    this.publishForm.classList.remove("open");
+                    this.publishButtonsWrapper.classList.remove("open");
                 };
                 return;
             }
             e.preventDefault();
             e.stopPropagation();
-            const anim = this.publishForm.animate([
+            const anim = this.publishButtonsWrapper.animate([
                 {opacity: 0, height: "0px"},
-                {opacity: 1, height: `${this.publishForm.scrollHeight}px`}
+                {opacity: 1, height: `${this.publishButtonsWrapper.scrollHeight}px`}
             ], {
                 duration: 500,
                 easing: "ease-in-out",
             });
             anim.onfinish = () => {
-                this.publishForm.classList.add("open");
+                this.publishButtonsWrapper.classList.add("open");
             };
         });
     }

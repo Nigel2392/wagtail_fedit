@@ -171,7 +171,7 @@ Function PYPI_Upload {
     )
 
     $distFile = _PYPI_DistName -Version $Version
-    py -m twine upload "./dist/${distFile}"
+    python3 -m twine upload "./dist/${distFile}"
 }
 
 if ($Tag) {

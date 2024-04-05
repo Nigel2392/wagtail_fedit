@@ -1,4 +1,4 @@
-from typing import Any, Union, Type
+from typing import Any, Type
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.decorators import method_decorator
@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.apps import apps
+from django.core.exceptions import PermissionDenied
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
@@ -26,7 +27,6 @@ from wagtail.models import (
     DraftStateMixin,
     WorkflowMixin,
     WorkflowState,
-    LockableMixin,
     Page,
 )
 from .. import forms as block_forms
@@ -41,10 +41,10 @@ from ..utils import (
     lock_info,
 )
 
-from ..toolbar import (
-    FeditToolbarComponent,
+from .mixins import (
+    ObjectViewMixin,
+    LockViewMixin,
 )
-
 
 
 def get_unpublish_action(object):
@@ -59,80 +59,24 @@ def get_publish_action(object):
     return PublishRevisionAction
 
 
-class FeditableModelComponent(FeditToolbarComponent):
-    def __init__(self, instance):
-        self.instance = instance
-
-
-class ActionPublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/editor/buttons/publish.html"
-    check_for_changes: bool = True
-
-    def get_context_data(self, request):
-        return super().get_context_data(request) | {
-            "hidden": not self.instance.has_unpublished_changes,
-        }
-    
-    def is_shown(self, request):
-        if not super().is_shown(request):
-            return False
-        
-        return user_can_publish(self.instance, request.user, check_for_changes=self.check_for_changes)
-
-class ActionUnpublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/editor/buttons/unpublish.html"
-    
-    def is_shown(self, request):
-        if not super().is_shown(request):
-            return False
-        
-        return user_can_unpublish(self.instance, request.user)
-    
-class ActionSubmitComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/editor/buttons/submit.html"
-    check_for_changes: bool = True
-
-    def get_context_data(self, request):
-        return super().get_context_data(request) | {
-            "hidden": not self.instance.has_unpublished_changes,
-        }
-
-    def is_shown(self, request):
-        if not super().is_shown(request):
-            return False
-        
-        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=self.check_for_changes)
-
-class BaseFeditView(FeditPermissionCheck, TemplateView):
+class BaseFeditView(ObjectViewMixin, FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
-        try:
-            self.model = apps.get_model(app_label, model_name)
-            self.model_object = self.model._default_manager.get(pk=object_id)
-        except (LookupError):
-            return HttpResponseBadRequest("Invalid model provided")
-        except (self.model.DoesNotExist):
-            return HttpResponseBadRequest("Model not found")
 
-        if not self.has_perms(request, self.model):
+        if not self.has_perms(request, self.object):
             return HttpResponseForbidden("You do not have permission to view this page")
 
-        if issubclass(self.model, RevisionMixin) and self.model_object.latest_revision_id:
-            instance: RevisionMixin  = self.model_object
+        if issubclass(self.model, RevisionMixin) and self.object.latest_revision_id:
+            instance: RevisionMixin  = self.object
             revision: RevisionMixin = instance.latest_revision
             self.object = revision.as_object()
             self.is_preview = True
         else:
-            self.object = self.model_object
             self.is_preview = False
 
         try:
             self.checks(request, self.object)
         except ValueError as e:
             return HttpResponseForbidden(str(e))
-
-        self.lock, self.locked_for_user = lock_info(
-            self.object, request.user,
-        )
 
         return super().dispatch(request, object_id, app_label, model_name)
     
@@ -165,53 +109,83 @@ class FEditableView(BaseFeditView):
         })
     
 
-@method_decorator(xframe_options_sameorigin, name="dispatch")
-class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
-    template_name = "wagtail_fedit/editor/publish_confirm.html"
-    buttons: list[Type[FeditToolbarComponent]] = [
-        ActionPublishComponent,
-        ActionSubmitComponent,
-        ActionUnpublishComponent,
-    ]
-    object: DraftStateMixin
+class BaseActionView(LockViewMixin, BaseFeditView):
+    template_name         = "wagtail_fedit/editor/action_confirm.html"
+    required_superclasses = [DraftStateMixin]
+    action_text            = None
+    title_format           = None
+    action_help_text_title = None
+    action_help_text       = None
 
+    def get_action(self) -> str:
+        return self.action_text
+    
+    def get_action_value(self) -> str:
+        return f"{self.__class__.__name__.lower()}"
+
+    def get_action_title(self) -> str:
+        return self.title_format.format(self.object)
+    
+    def get_action_help_text_title(self) -> str:
+        return self.action_help_text_title
+    
+    def get_action_help_text(self) -> str:
+        return self.action_help_text
+
+    def redirect_to_success_url(self, request: HttpRequest) -> HttpResponse:
+        if hasattr(self.object, "get_url"):
+            return redirect(self.object.get_url(request))
+        
+        elif hasattr(self.object, "get_absolute_url"):
+            return redirect(self.object.get_absolute_url())
+        
+        return redirect(reverse(
+            "wagtail_fedit:editable",
+            args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
+        ))
+    
+    def setup(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
+        super().setup(request, object_id, app_label, model_name)
+        self.policy = self.object.permissions_for_user(request.user)
+
+        if not isinstance(self.object, tuple(self.required_superclasses)):
+            self.error_response = HttpResponseBadRequest(
+                "Model {} does not inherit from {}".format(
+                    self.model.__name__, ", ".join([cls.__name__ for cls in self.required_superclasses])
+                )
+            )
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-
-        buttons = []
-
-        for button in self.buttons:
-            buttons.append(button(self.object).render(self.request))
-
-        buttons = list(filter(None, buttons))
-
         return super().get_context_data(**kwargs) | {
-            "buttons": buttons,
-            "object": self.object,
-            "model_verbose_name": self.object._meta.verbose_name,
-            "publish_url": reverse(
-                "wagtail_fedit:publish",
-                args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
-            ),
-            "edit_url": reverse(
+            "action": self.get_action_value(),  # e.g. "publishview"
+            "action_text": self.get_action(),
+            "action_title": self.get_action_title(),
+            "action_help_text_title": self.get_action_help_text_title(),
+            "action_help_text": self.get_action_help_text(),
+            "cancel_url": reverse(
                 "wagtail_fedit:editable",
                 args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
             ),
         }
-    
-    def get_header_title(self):
-        return _("Publishing {} \"{}\"").format(self.object._meta.verbose_name, self.object)
 
-    def checks(self, request: HttpRequest, object: Any) -> None:
-        if not isinstance(self.object, DraftStateMixin):
-            raise ValueError("Model {} does not inherit from DraftStateMixin, cannot publish.".format(self.model))
+    def redirect_to_failsafe_url(self, request: HttpRequest) -> HttpResponse:
+        try:
+            finder = AdminURLFinder(request.user)
+            edit_url = finder.get_edit_url(self.object)
+            return redirect(edit_url)
+        except Exception:
+            return redirect(reverse(
+                "wagtail_fedit:editable",
+                args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
+            ))
+        
+    def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
+        pass
+
+    def action(self, request: HttpRequest) -> HttpResponse:
+        raise NotImplementedError("Subclasses must implement this method")
     
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-
-        policy = self.object.permissions_for_user(request.user)
-
-        if not isinstance(self.object, DraftStateMixin):
-            raise ValueError("Model {} does not inherit from DraftStateMixin, cannot publish.".format(self.model))
         
         if getattr(settings, "WAGTAIL_WORKFLOW_ENABLED", True) and issubclass(self.model, WorkflowMixin):
             # Retrieve current workflow state if set, default to last workflow state
@@ -222,34 +196,57 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
         else:
             self.workflow_state = None
 
+        try:
+            self.check_policy(request, self.policy)
+        except ValueError as e:
+            messages.error(request, str(e))
+            return self.get(request, *args, **kwargs)
+
         # Check if lock applies to this user
         if self.locked_for_user:
-            messages.error(request, _("This object is locked. It cannot be published."))
+            messages.error(request, _("This object is locked. It cannot be acted upon."))
             return self.redirect_to_failsafe_url(request)
+        
+        if "action" not in request.POST:
+            messages.error(request, _("No action specified"))
+            return self.get(request, *args, **kwargs)
+        
+        if request.POST["action"] != self.get_action_value():
+            messages.error(request, _("Invalid action specified"))
+            return self.get(request, *args, **kwargs)
+        
+        return self.action(request)
 
-        if request.POST.get("action-publish") == "1"\
-                and policy.can_publish()\
-                and self.object.has_unpublished_changes:
-            return self.publish(request)
+
+class PublishView(BaseActionView):
+    required_superclasses = [DraftStateMixin]
+    action_text = _("Publish")
+
+    def get_action_title(self):
+        return _("Publishing {} \"{}\"").format(self.object._meta.verbose_name, self.object)
+
+    def get_action_help_text_title(self):
+        return _("About publishing")
+
+    def get_action_help_text(self):
+        s = [
+            _("Publishing this object will make it visible to users on the site."),
+            _("That means that any changes you make will be immediately visible to everyone."),
+        ]
+
+        if self.policy.can_unpublish():
+            s.append(_("You can always choose to unpublish it."))
+
+        return s
+
+    def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
+        if not policy.can_publish():
+            raise ValueError("User does not have permission to publish")
         
-        if request.POST.get("action-unpublish") == "1" and policy.can_unpublish():
-            return self.unpublish(request)
-        
-        if request.POST.get("action-submit") == "1"\
-                and policy.can_submit_for_moderation()\
-                and isinstance(self.object, WorkflowMixin)\
-                and self.object.has_unpublished_changes:
-            return self.submit_for_moderation(request)
-        
-        if request.POST.get("action-cancel") == "1"\
-                and self.workflow_state\
-                and self.workflow_state.user_can_cancel(self.request.user):
-            return self.cancel_workflow(request)
-        
-        messages.error(request, _("Invalid form submission"))
-        return self.get(request, *args, **kwargs)
-    
-    def publish(self, request: HttpRequest) -> HttpResponse:
+        if not self.object.has_unpublished_changes:
+            raise ValueError("Object has no unpublished changes")
+
+    def action(self, request: HttpRequest) -> HttpResponse:
         latest_revision = None
         if isinstance(self.object, RevisionMixin):
             latest_revision = self.object.latest_revision
@@ -265,22 +262,29 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
             self.object = latest_revision.as_object()
 
         return self.redirect_to_success_url(request)
+
+
+class UnpublishView(BaseActionView):
+    required_superclasses = [DraftStateMixin]
+    action_text = _("Unpublish")
+    action_help_text_title = _("About unpublishing")
+    action_help_text = [
+        _("Unpublishing this object will make it invisible to users on the site."),
+        _("That means that it will no longer be visible to anyone."),
+        _("You can always choose to publish it again."),
+    ]
+
+    def get_action_title(self):
+        return _("Unpublishing {} \"{}\"").format(self.object._meta.verbose_name, self.object)
     
-    def unpublish(self, request: HttpRequest) -> HttpResponse:
-        if not self.object.live:
-            messages.error(request, _("This object is not live"))
-            return self.get(request)
+    def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
+        if not policy.can_unpublish():
+            raise ValueError("User does not have permission to unpublish")
         
-        action = get_unpublish_action(self.object)(
-            self.object,
-            user=request.user,
-        )
-
-        action.execute()
-
-        return self.redirect_to_failsafe_url(request)
+        if not self.object.live:
+            raise ValueError("Object is not live")
     
-    def submit_for_moderation(self, request: HttpRequest) -> HttpResponse:
+    def action(self, request: HttpRequest) -> HttpResponse:
         if (
             self.workflow_state
             and self.workflow_state.status == WorkflowState.STATUS_NEEDS_CHANGES
@@ -294,32 +298,65 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
 
         return self.redirect_to_success_url(request)
 
-    def cancel_workflow(self, request: HttpRequest) -> HttpResponse:
+
+class SubmitView(BaseActionView):
+    required_superclasses = [DraftStateMixin, WorkflowMixin]
+    action_text = _("Submit for moderation")
+    action_help_text_title = _("About submitting for moderation")
+    action_help_text = [
+        _("Submitting this object for moderation will make it invisible to users on the site."),
+        _("That means that it will no longer be visible to anyone."),
+        _("You can always choose to publish it again."),
+    ]
+
+    def get_action_title(self):
+        return _("Submitting {} \"{}\" for moderation").format(self.object._meta.verbose_name, self.object)
+
+    def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
+        if not policy.can_submit_for_moderation():
+            raise ValueError("User does not have permission to submit for moderation")
+        
+        if not self.object.has_unpublished_changes:
+            raise ValueError("Object has no unpublished changes")
+
+    def action(self, request: HttpRequest) -> HttpResponse:
+        if not self.object.live:
+            messages.error(request, _("This object is not live"))
+            return self.get(request)
+        
+        action = get_unpublish_action(self.object)(
+            self.object,
+            user=request.user,
+        )
+
+        action.execute()
+
+        return self.redirect_to_failsafe_url(request)
+
+
+class CancelView(BaseActionView):
+    template_name = "wagtail_fedit/editor/cancel_confirm.html"
+    required_superclasses = [DraftStateMixin, WorkflowMixin]
+    action_text = _("Cancel")
+    action_help_text_title = _("About cancelling")
+    action_help_text = [
+        _("Cancelling this object will make it visible to users on the site."),
+        _("That means that any changes you make will be immediately visible to everyone."),
+    ]
+
+    def get_action_title(self):
+        return _("Cancelling workflow for {} \"{}\"").format(self.object._meta.verbose_name, self.object)
+
+    def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
+        if not self.workflow_state:
+            raise ValueError("No workflow state found")
+        
+        if not self.workflow_state.user_can_cancel(request.user):
+            raise ValueError("User does not have permission to cancel this workflow")
+
+    def action(self, request: HttpRequest) -> HttpResponse:
         if self.workflow_state:
             self.workflow_state.cancel(user=self.request.user)
             return self.redirect_to_success_url(request)
         
         return self.get(request)
-
-    def redirect_to_success_url(self, request: HttpRequest) -> HttpResponse:
-        if hasattr(self.object, "get_url"):
-            return redirect(self.object.get_url(request))
-        
-        elif hasattr(self.object, "get_absolute_url"):
-            return redirect(self.object.get_absolute_url())
-        
-        return redirect(reverse(
-            "wagtail_fedit:editable",
-            args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
-        ))
-
-    def redirect_to_failsafe_url(self, request: HttpRequest) -> HttpResponse:
-        try:
-            finder = AdminURLFinder(request.user)
-            edit_url = finder.get_edit_url(self.object)
-            return redirect(edit_url)
-        except Exception:
-            return redirect(reverse(
-                "wagtail_fedit:editable",
-                args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
-            ))

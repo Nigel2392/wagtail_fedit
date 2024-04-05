@@ -1,5 +1,5 @@
 {% load wagtailadmin_tags i18n %}
-<button type="submit" class="wagtail-fedit-userbar-button button bicolor button--icon" name="action-unpublish" value="1">
+<a href="{{action_url}}" class="wagtail-fedit-userbar-button button bicolor button--icon" name="action-unpublish" value="1">
     <span class="icon-wrapper">
         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="w-action-icon" viewBox="0 0 16 16">
             <!-- The MIT License (MIT) -->
@@ -9,4 +9,4 @@
         </svg>
     </span>
     {% translate "Unpublish" %}
-</button>
+</a>

@@ -1,13 +1,13 @@
 .wagtail-fedit-publish-menu {
 
 }
-.wagtail-fedit-publish-menu .wagtail-fedit-form {
+.wagtail-fedit-publish-menu .wagtail-fedit-form-buttons {
     height: 0;
     opacity: 0;
     overflow: hidden;
     transition: height 0.3s;
 }
-.wagtail-fedit-publish-menu .wagtail-fedit-form.open {
+.wagtail-fedit-publish-menu .wagtail-fedit-form-buttons.open {
     height: auto;
     opacity: 1;
 }
@@ -28,4 +28,18 @@
 }
 .wagtail-fedit-userbar-button.initially-hidden {
     display: none;
+}
+.w-userbar__item a.wagtail-fedit-userbar-button {
+    background-color: initial;
+    padding-bottom: unset;
+    padding-top: unset;
+    outline: none;
+    border: none;
+}
+.w-userbar__item a.wagtail-fedit-userbar-button .icon-wrapper {
+    background-color: var(--w-color-surface-menu-item-active);
+}
+.w-userbar__item a.wagtail-fedit-userbar-button:hover {
+    background-color: var(--w-color-surface-menu-item-active);
+    color: var(--w-color-text-label-menus-default);
 }
