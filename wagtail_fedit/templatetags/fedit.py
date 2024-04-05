@@ -286,56 +286,104 @@ def do_render_fedit_block(parser: Parser, token: Token):
     )
 
 
-@register.simple_tag(takes_context=True, name="fedit_field")
-def do_render_fedit_field(context, field_name, model, content=None, inline: bool = False, **kwargs):
+class FieldEditNode(Node):
+    def __init__(self, model: models.Model, getters: list[str], inline: bool = False, **kwargs):
+        self.model = model
+        self.field = getters[len(getters)-1]
+        self.getters = getters
+        self.inline = inline
+        self.kwargs = kwargs
+
+    def render(self, context):
+        getters = self.getters
+        model = self.model
+        inline = self.inline
+
+        if isinstance(model, FilterExpression):
+            model = model.resolve(context)
+
+        if isinstance(inline, FilterExpression):
+            inline = inline.resolve(context)
+
+        obj = model
+        for i in range(len(getters) - 1):
+            getter = getters[i]
+            try:
+                obj = getattr(obj, getter)
+            except AttributeError:
+                raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
+
+        request = context.get("request")
+        content = get_field_content(
+            request,
+            obj,
+            obj._meta.get_field(self.field),
+            context,
+        )
+
+        if request:
+            if (
+                not request.user.is_authenticated\
+                or not request.user.has_perm("wagtailadmin.access_admin")\
+                or not request.user.has_perm(f"{obj._meta.app_label}.change_{obj._meta.model_name}")\
+                or not getattr(request, FEDIT_PREVIEW_VAR, False)
+            ):
+                return content
+            
+        return render_editable_field(
+            request=request, 
+            content=content,
+            field_name=self.field, 
+            model=obj,
+            context=context,
+            inline=inline,
+            **self.kwargs,
+        )
+    
+
+
+@register.tag(name="fedit_field")
+def do_render_fedit_field(parser: Parser, token: Token):
     """
     This tag is used to render an editable field.
 
     This field will be wrapped and is able to be edited by the user on the frontend.
 
-    We will require the field_name of the field and the model instance.
-
     Usage example:
         ```python
-        {% fedit_field my_field_name page_instance %}
+        {% fedit_field mymodel.myfield inline=(default: False) key1=value1 key2=value2 %}
         ```
 
     Optionally your model can define a `render_fedit_{field_name}` method that will be used to render the field.
     This will allow you to use custom rendering logic if need be.
     """
+    tokens = token.split_contents()
+    _ = tokens.pop(0)
+    model__field = tokens.pop(0)
+    model_tokens = model__field.split(".")
 
-    if not all([field_name, model]):
-        raise ValueError("Field name, and model are required")
+    if len(model_tokens) < 2:
+        raise ValueError("Model and field name are required")
+    
+    # mymodel.myfield
+    # mymodel.related_field.myfield
+    model = parser.compile_filter(model_tokens.pop(0))
 
-    extra = {}
-    for key, value in kwargs.items():
-        extra[key] = value
+    if tokens:
+        kwargs_names = [
+            "inline",
+        ]
 
-    request = context.get("request")
-    content = get_field_content(
-        request,
-        model,
-        field_name,
-        context,
-        content=content,
+        kwargs = get_kwargs(parser, kwargs_names, tokens)
+    else:
+        kwargs = {}
+
+    return FieldEditNode(
+        model=model,
+        getters=model_tokens,
+        **kwargs,
     )
 
-    if request:
-        if (
-            not request.user.is_authenticated\
-            or not request.user.has_perm("wagtailadmin.access_admin")\
-            or not request.user.has_perm(f"{model._meta.app_label}.change_{model._meta.model_name}")\
-            or not getattr(request, FEDIT_PREVIEW_VAR, False)
-        ):
-            return content
-
-    return render_editable_field(
-        request, content,
-        field_name, model,
-        context,
-        **extra,
-        inline=inline,
-    )
 
 def render_editable_field(request, content, field_name, model, context, **kwargs):
     edit_url = reverse(

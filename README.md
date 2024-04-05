@@ -36,12 +36,12 @@ Getting Started
        <link rel="stylesheet" href="{% static 'wagtail_fedit/css/frontend.css' %}">
    </head>
    <body>
-       {# Pass in the field_name and the model instance on which that field resides. #}
-       <h1>{% fedit_field "title" self %}</h1>
+       {# Adress the model.field or model.my.related.field you wish to edit. #}
+       <h1>{% fedit_field self.title %}</h1>
 
        {# Pass in the field_name and the model instance on which that field resides. #}
        <main class="my-streamfield-content">
-           {% fedit_field "content" self %}
+           {% fedit_field self.content %}
        </main>
 
        {% wagtailuserbar %}
@@ -167,7 +167,7 @@ Our new loop would then be:
 {% endfor %}
 ```
 
-**Note:** If the parent block is wrapped with `fedit_block` or `fedit_field` the field_name and model argument can be omitted.  
+**Note:** If the parent block is wrapped with `fedit_block` or `fedit_field` the field_name and model argument can be omitted.
 The parent- blocktag will share these variables through context.
 This makes it possibly to easily use editable sub-blocks across multiple different model types.
 If your model **ISN'T** capable of editing; or these variables aren't shared - your block will be rendered as normal.
