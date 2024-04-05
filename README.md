@@ -178,4 +178,7 @@ If your model **ISN'T** capable of editing; or these variables aren't shared - y
 * Locked Support
 * Draft Support
 * Preview Support
+* Workflow Support
+* Permissions
+* Audit Logs
 * Full block capabilities on Frontend Editing
