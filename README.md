@@ -39,9 +39,9 @@ Getting Started
        {# Adress the model.field or model.my.related.field you wish to edit. #}
        <h1>{% fedit_field self.title %}</h1>
 
-       {# Pass in the field_name and the model instance on which that field resides. #}
+       {# Pass in the field_name and the model instance on which that field resides if you are using `wagtail_fedit <= 1.3.8` #}
        <main class="my-streamfield-content">
-           {% fedit_field self.content %}
+           {% fedit_field "content" self%}
        </main>
 
        {% wagtailuserbar %}
