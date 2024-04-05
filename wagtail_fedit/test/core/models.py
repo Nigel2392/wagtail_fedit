@@ -6,6 +6,7 @@ from wagtail import blocks
 from wagtail.fields import StreamField
 from wagtail.models import (
     Page,
+    LockableMixin,
     RevisionMixin,
     PreviewableMixin,
     DraftStateMixin,
@@ -87,3 +88,11 @@ class EditablePreviewModel(BaseEditableMixin, PreviewableMixin, models.Model):
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
 
+@register_snippet
+class EditableLockModel(BaseEditableMixin, LockableMixin, RevisionMixin, DraftStateMixin, models.Model):
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    content = StreamField([
+        ("heading_component", HeadingComponent()),
+        ("flat_menu_component", FlatMenuComponent())
+    ], use_json_field=True)

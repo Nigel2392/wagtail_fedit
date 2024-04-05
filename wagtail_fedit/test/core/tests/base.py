@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import (
     User,
@@ -10,6 +11,7 @@ from ..models import (
     EditableDraftModel,
     EditableRevisionModel,
     EditablePreviewModel,
+    EditableLockModel,
 )
 
 TEST_BLOCK_DATA = [
@@ -104,8 +106,12 @@ TEST_BLOCK_DATA = [
 
 
 class BaseFEditTest(TestCase):
+    # Block ID for a sub-block present in test data.
+    BLOCK_ID = "c757f54d-0df5-4b35-8a06-4174f180ec41"
+    
     def setUp(self):
         super().setUp()
+
         self.full_model = EditableFullModel.objects.create(
             title="Full Model",
             body="Full Model Body",
@@ -132,7 +138,7 @@ class BaseFEditTest(TestCase):
             content=TEST_BLOCK_DATA,
         )
 
-        self.models = [
+        self.models: list[models.Model] = [
             self.full_model,
             self.draft_model,
             self.revision_model,
@@ -140,6 +146,7 @@ class BaseFEditTest(TestCase):
             self.basic_model,
         ]
 
+        # Additional models for other functionality - not tested in a loop.
         self.admin_user = User.objects.create_superuser(
             username="admin",
             email="admin@localhost",
@@ -149,6 +156,13 @@ class BaseFEditTest(TestCase):
             username="regular",
             email="regular@localhost",
             password="regular"
+        )
+        self.lock_model = EditableLockModel.objects.create(
+            title="Lock Model",
+            body="Lock Model Body",
+            content=TEST_BLOCK_DATA,
+            locked=True,
+            locked_by=self.admin_user,
         )
 
         self.regular_user.user_permissions.add(Permission.objects.get(

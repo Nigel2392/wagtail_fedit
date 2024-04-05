@@ -11,8 +11,6 @@ from .base import (
 class TestBlockEdit(BaseFEditTest):
     def test_block_edited(self):
         self.client.force_login(self.admin_user)
-
-        BLOCK_ID = "c757f54d-0df5-4b35-8a06-4174f180ec41"
         
         for i, model in enumerate(self.models):
             
@@ -22,12 +20,12 @@ class TestBlockEdit(BaseFEditTest):
                 with self.assertRaises(AttributeError):
                     model.revisions.count()
 
-            bound, _ = find_block(block_id=BLOCK_ID, field=model.content)
+            bound, _ = find_block(block_id=self.BLOCK_ID, field=model.content)
             initial_content = bound.value["link"]["text"]
 
             response = self.client.post(
                 self.get_block_url(
-                    BLOCK_ID,
+                    self.BLOCK_ID,
                     "content",
                     model._meta.app_label,
                     model._meta.model_name,
@@ -49,7 +47,7 @@ class TestBlockEdit(BaseFEditTest):
                     model.revisions.count()
                 chk = model
 
-            bound, contentpath = find_block(block_id=BLOCK_ID, field=chk.content)
+            bound, contentpath = find_block(block_id=self.BLOCK_ID, field=chk.content)
             self.assertEqual(bound.value["link"]["text"], f"{initial_content} test case {i + 1}",
                 msg=f"Block: {bound.block} does not contain the expected value: {initial_content} test case {i + 1}"
             )
@@ -92,3 +90,26 @@ class TestBlockEdit(BaseFEditTest):
                 chk = model
 
             self.assertEqual(chk.content.get_prep_value(), initial_content.get_prep_value())
+
+    def test_lock_unchanged(self):
+        self.client.force_login(self.admin_user)
+        initial_content = self.lock_model.content
+        bound, _ = find_block(block_id=self.BLOCK_ID, field=self.lock_model.content)
+
+        response = self.client.post(
+            self.get_block_url(
+                self.BLOCK_ID,
+                "content",
+                self.lock_model._meta.app_label,
+                self.lock_model._meta.model_name,
+                self.lock_model.pk,
+            ),
+            {
+                "value-link-text": f"{bound.value['link']['text']} test case"
+            }
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.lock_model.refresh_from_db()
+
+        self.assertEqual(self.lock_model.content.get_prep_value(), initial_content.get_prep_value())
