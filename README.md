@@ -109,13 +109,13 @@ class MyModel(...):
 
 class MyModelPermissionTester(...):
     def can_unpublish(self):
-        """ Can the user unpublish this object? """
+        """ Can the user unpublish this object? (Required for un-publishing"""
   
     def can_publish(self):
-        """ Can the user publish this object? """  
+        """ Can the user publish this object? (Required for publishing)"""  
   
     def can_submit_for_moderation(self):
-        """ Can the user submit this object for moderation? """
+        """ Can the user submit this object for moderation? (Optional) """
 
 ```
 
@@ -124,6 +124,12 @@ class MyModelPermissionTester(...):
 Revision support is included out of the box.
 If your model inherits from a `RevisionMixin`, we will automatically create drafts for you.
 These will not be published (If the model inherits from `DraftStateMixin`) until you choose to do so.
+
+## Workflows
+
+We include a `WorkFlow` to submit this object for moderation.
+
+More workflow support will be included in the future.
 
 ## Logs
 
