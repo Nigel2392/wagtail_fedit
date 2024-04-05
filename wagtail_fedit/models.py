@@ -25,7 +25,7 @@ class FEditableMixin(DraftStateMixin, RevisionMixin, WorkflowMixin, PreviewableM
     
     def permissions_for_user(self, user):
         return FeditPermissionTester(
-            model=self,
+            self,
             user=user,
             policy=self.get_permissions_policy()
         )
@@ -37,7 +37,7 @@ class FeditPermissionTester:
     def __init__(self, model_instance, user, policy = Type[ModelPermissionPolicy]):
         self.user = user
         self.model = model_instance.__class__
-        self.policy: ModelPermissionPolicy = policy(model=self.model)
+        self.policy: ModelPermissionPolicy = policy
         self.model_instance: FEditableMixin = model_instance
 
         # From wagtail.models.PagePermissionTester.__init__
@@ -86,10 +86,8 @@ class FeditPermissionTester:
         return self.user.is_superuser or ("publish" in self.permissions)
     
     def can_submit_for_moderation(self):
-        if not isinstance(self.model_instance, LockableMixin):
-            return False
-        
-        if not isinstance(self.model_instance, WorkflowMixin):
+        if not isinstance(self.model_instance, WorkflowMixin)\
+            and not isinstance(self.model_instance, LockableMixin):
             return False
 
         return (
@@ -97,3 +95,4 @@ class FeditPermissionTester:
             and self.model_instance.has_workflow
             and not self.model_instance.workflow_in_progress
         )
+    

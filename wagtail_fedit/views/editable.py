@@ -131,18 +131,6 @@ class BaseActionView(LockViewMixin, BaseFeditView):
     
     def get_action_help_text(self) -> str:
         return self.action_help_text
-
-    def redirect_to_success_url(self, request: HttpRequest) -> HttpResponse:
-        if hasattr(self.object, "get_url"):
-            return redirect(self.object.get_url(request))
-        
-        elif hasattr(self.object, "get_absolute_url"):
-            return redirect(self.object.get_absolute_url())
-        
-        return redirect(reverse(
-            "wagtail_fedit:editable",
-            args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
-        ))
     
     def setup(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
         super().setup(request, object_id, app_label, model_name)
@@ -167,6 +155,18 @@ class BaseActionView(LockViewMixin, BaseFeditView):
                 args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
             ),
         }
+
+    def redirect_to_success_url(self, request: HttpRequest) -> HttpResponse:
+        if hasattr(self.object, "get_url"):
+            return redirect(self.object.get_url(request))
+        
+        elif hasattr(self.object, "get_absolute_url"):
+            return redirect(self.object.get_absolute_url())
+        
+        return redirect(reverse(
+            "wagtail_fedit:editable",
+            args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
+        ))
 
     def redirect_to_failsafe_url(self, request: HttpRequest) -> HttpResponse:
         try:
@@ -219,7 +219,7 @@ class BaseActionView(LockViewMixin, BaseFeditView):
 
 
 class PublishView(BaseActionView):
-    required_superclasses = [DraftStateMixin]
+    required_superclasses = [DraftStateMixin, RevisionMixin]
     action_text = _("Publish")
 
     def get_action_title(self):
@@ -247,9 +247,12 @@ class PublishView(BaseActionView):
             raise ValueError("Object has no unpublished changes")
 
     def action(self, request: HttpRequest) -> HttpResponse:
-        latest_revision = None
-        if isinstance(self.object, RevisionMixin):
-            latest_revision = self.object.latest_revision
+        latest_revision = self.object.latest_revision
+
+        if not latest_revision:
+            latest_revision = self.object.save_revision(
+                user=request.user,
+            )
 
         action = get_publish_action(self.object)(
             revision=latest_revision,
@@ -300,7 +303,7 @@ class UnpublishView(BaseActionView):
 
 
 class SubmitView(BaseActionView):
-    required_superclasses = [DraftStateMixin, WorkflowMixin]
+    required_superclasses = [DraftStateMixin, WorkflowMixin, RevisionMixin]
     action_text = _("Submit for moderation")
     action_help_text_title = _("About submitting for moderation")
     action_help_text = [
@@ -320,6 +323,13 @@ class SubmitView(BaseActionView):
             raise ValueError("Object has no unpublished changes")
    
     def action(self, request: HttpRequest) -> HttpResponse:
+        
+        latest_revision = getattr(self.object, "latest_revision", None)
+        if not latest_revision:
+            latest_revision = self.object.save_revision(
+                user=request.user,
+            )
+
         if (
             self.workflow_state
             and self.workflow_state.status == WorkflowState.STATUS_NEEDS_CHANGES

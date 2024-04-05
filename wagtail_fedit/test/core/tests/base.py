@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.db import models
 from django.urls import reverse
+from django.test import RequestFactory
 from django.contrib.auth.models import (
     User,
     Permission,
@@ -112,6 +113,8 @@ class BaseFEditTest(TestCase):
     def setUp(self):
         super().setUp()
 
+        self.request_factory = RequestFactory()
+
         self.full_model = EditableFullModel.objects.create(
             title="Full Model",
             body="Full Model Body",
@@ -187,17 +190,15 @@ class BaseFEditTest(TestCase):
             }
         )
 
-    def get_publish_url(self, object_id, app_label, model_name):
-        url_name = "publish"
+    def get_url_for(self, url_name, app_label, model_name, model_id):
         return reverse(
             f"wagtail_fedit:{url_name}",
             kwargs={
-                "object_id": object_id,
+                "object_id": model_id,
                 "app_label": app_label,
-                "model_name": model_name
+                "model_name": model_name,
             }
         )
-
 
     def get_field_url(self, field_name, app_label, model_name, model_id):
         url_name = "edit_field"
