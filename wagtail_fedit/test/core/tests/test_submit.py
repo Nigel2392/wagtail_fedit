@@ -82,12 +82,11 @@ class TestSubmitViews(BaseFEditTest):
         wf = self.full_model.get_workflow()
         self.assertIsNotNone(wf)
         self.assertEqual(wf, workflow)
-        self.assertFalse(wf.active)
+        self.assertFalse(not not self.full_model.workflow_states)
 
         self.makeRequest("submit", self.full_model, SubmitView)
 
         self.full_model.refresh_from_db()
         workflow: Workflow = self.full_model.get_workflow()
-        self.assertIsNotNone(workflow, msg="Workflow was not created.")
-        self.assertTrue(workflow.active)
+        self.assertTrue(not not self.full_model.workflow_states)
         
