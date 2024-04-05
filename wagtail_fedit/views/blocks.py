@@ -40,7 +40,10 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         self.model_id = model_id
         self.model_name = model_name
         self.app_label = app_label
-        self.has_block = BlockEditNode.unpack("has_block", request=request)["has_block"].lower() == "true"
+        if "has_block" in request.GET:
+            self.has_block = BlockEditNode.unpack("has_block", request=request)["has_block"].lower() == "true"
+        else:
+            self.has_block = False
 
 
         self.model = apps.get_model(self.app_label, self.model_name)
@@ -48,12 +51,11 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
             return HttpResponseBadRequest("You do not have permission to view this page")
 
 
-        if issubclass(self.model, RevisionMixin):
-            self.model_instance = self.model.objects.get(pk=self.model_id)
+        self.model_instance = self.model._default_manager.get(pk=self.model_id)
+        if issubclass(self.model, RevisionMixin) and self.model_instance.latest_revision_id:
             self.instance = self.model_instance.latest_revision.as_object()
         else:
-            self.instance = self.model._default_manager.get(pk=self.model_id)
-            self.model_instance = self.instance
+            self.instance = self.model_instance
 
 
         self.streamfield: StreamValue = getattr(self.instance, self.field_name)
@@ -123,7 +125,7 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
             )
             admin_edit_url = f"{admin_edit_url}#block-{self.block_id}-section"
         else:
-            None
+            admin_edit_url = None
 
 
         must["admin_edit_url"] = admin_edit_url
@@ -177,7 +179,7 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
                     context=self.get_context_data(form=form),
                     request=request,
                 )
-            })
+            }, status=400)
         
         extra_log_kwargs = {}
         if isinstance(self.instance, RevisionMixin):

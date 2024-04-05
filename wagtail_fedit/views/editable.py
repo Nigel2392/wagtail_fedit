@@ -10,6 +10,7 @@ from django.apps import apps
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     HttpResponse,
 )
 from wagtail.admin import messages
@@ -103,16 +104,18 @@ class ActionSubmitComponent(FeditableModelComponent):
 
 class BaseFeditView(FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
-
-        self.model = apps.get_model(app_label, model_name)
-        self.model_object = self.model._default_manager.get(pk=object_id)
+        try:
+            self.model = apps.get_model(app_label, model_name)
+            self.model_object = self.model._default_manager.get(pk=object_id)
+        except (self.model.DoesNotExist, LookupError):
+            return HttpResponseBadRequest("Invalid model provided")
 
         if not self.has_perms(request, self.model):
-            return HttpResponseBadRequest("You do not have permission to view this page")
+            return HttpResponseForbidden("You do not have permission to view this page")
 
-        if issubclass(self.model, (RevisionMixin, PreviewableMixin)):
+        if issubclass(self.model, RevisionMixin) and self.model_object.latest_revision_id:
             instance: RevisionMixin  = self.model_object
-            revision: Union[PreviewableMixin, RevisionMixin] = instance.latest_revision
+            revision: RevisionMixin = instance.latest_revision
             self.object = revision.as_object()
             self.is_preview = True
         else:
@@ -122,7 +125,7 @@ class BaseFeditView(FeditPermissionCheck, TemplateView):
         try:
             self.checks(request, self.object)
         except ValueError as e:
-            return HttpResponseBadRequest(str(e))
+            return HttpResponseForbidden(str(e))
 
         return super().dispatch(request, object_id, app_label, model_name)
     

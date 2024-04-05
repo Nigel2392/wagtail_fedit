@@ -9,7 +9,7 @@ from wagtail.models import (
 )
 
 
-class FEditableMixin(DraftStateMixin, RevisionMixin, PreviewableMixin):
+class FEditableMixin(DraftStateMixin, RevisionMixin, WorkflowMixin, PreviewableMixin):
 
     class Meta:
         abstract = True

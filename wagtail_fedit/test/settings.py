@@ -31,9 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'core',
-
     'wagtail_fedit',
+    'wagtail_fedit.test.core',
 
     'wagtail',
     'wagtail.sites',
@@ -90,7 +89,7 @@ WSGI_APPLICATION = 'testapp.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR  / 'test' / 'db.sqlite3',
     }
 }
 

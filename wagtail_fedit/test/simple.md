@@ -8,7 +8,7 @@
 
 **Install relevant packages**
 
-`py -m pip install python-docx django wagtail`
+`py -m pip install wagtail_fedit django wagtail`
 
 **Install package to test**
 

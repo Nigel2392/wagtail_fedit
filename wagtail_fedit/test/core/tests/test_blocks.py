@@ -1,115 +1,12 @@
 from django.test import TestCase
-from django import forms
 from wagtail import blocks
-from .. import forms as block_forms
-from .. import utils
-
-TEST_BLOCK_DATA = [
-    {
-        "type": "heading_component",
-        "value": {
-            "heading": "This is pretty cool!!!",
-            "subheading": "RIGHT?! FUCK YES!"
-        },
-        "id": "0bc9f67e-f116-48a6-9ca1-6c11d39b54e8"
-    },
-    {
-        "type": "heading_component",
-        "value": {
-            "heading": "AWESOME!!",
-            "subheading": "RIGHT?!"
-        },
-        "id": "d543a6bf-34dc-4365-a3fa-d302561930ae"
-    },
-    {
-        "type": "heading_component",
-        "value": {
-            "heading": "WORKS NOW!",
-            "subheading": "!!!!!!!!!!!!1"
-        },
-        "id": "c49abcae-3c66-4fc7-979d-35407226b9f5"
-    },
-    {
-        "type": "heading_component",
-        "value": {
-            "heading": "Heading!!!!",
-            "subheading": "Subheading"
-        },
-        "id": "7bd7bc3a-1d2d-4182-8726-b257beace968"
-    },
-    {
-        "type": "heading_component",
-        "value": {
-            "heading": "Hey!",
-            "subheading": "Subheading!"
-        },
-        "id": "74a94baa-acf4-49ab-be5f-9c8a70cbc623"
-    },
-    {
-        "type": "flat_menu_component",
-        "value": {
-            "title": "Test Title123123! HAHA!",
-            "subtitle": "<p data-block-key=\"306j3\">i am so<b><i> happy</i></b></p>",
-            "items": [
-                {
-                    "type": "item",
-                    "value": {
-                        "link": {
-                            "text": "Test Item 1"
-                        }
-                    },
-                    "id": "c757f54d-0df5-4b35-8a06-4174f180ec41"
-                },
-                {
-                    "type": "item",
-                    "value": {
-                        "link": {
-                            "text": "Test Item 2"
-                        }
-                    },
-                    "id": "ec3d73d1-fd01-49ba-840a-d44586ac0025"
-                },
-                {
-                    "type": "item",
-                    "value": {
-                        "link": {
-                            "text": "Test Item 3"
-                        }
-                    },
-                    "id": "a98a19c6-2ead-4e69-9ea2-3158c7e82976"
-                },
-                {
-                    "type": "item",
-                    "value": {
-                        "link": {
-                            "text": "Test Item 4"
-                        }
-                    },
-                    "id": "db7183a2-d9dd-4fbd-9e42-fd2b9ebf0458"
-                }
-            ]
-        },
-        "id": "3e9144fd-5fa5-47f8-917e-8fe87c15da01"
-    }
-]
-
-
-class HeadingComponent(blocks.StructBlock):
-    heading = blocks.CharBlock(max_length=25)
-    subheading = blocks.CharBlock(max_length=40)
-
-class LinkBlock(blocks.StructBlock):
-    text = blocks.CharBlock(max_length=25)
-
-class MenuItemBlock(blocks.StructBlock):
-    link = LinkBlock()
-
-class FlatMenuComponent(blocks.StructBlock):
-    title = blocks.CharBlock(max_length=25)
-    subtitle = blocks.RichTextBlock()
-    items = blocks.ListBlock(
-        MenuItemBlock()
-    )
+from wagtail_fedit import forms as block_forms
+from wagtail_fedit import utils
+from .base import TEST_BLOCK_DATA
+from ..models import (
+    HeadingComponent,
+    FlatMenuComponent
+)
 
 import uuid
 

@@ -10,6 +10,7 @@ from django.views.generic import View
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     JsonResponse,
     HttpResponse,
 )
@@ -17,7 +18,6 @@ from django.apps import apps
 
 from wagtail.log_actions import log
 from wagtail.models import (
-    DraftStateMixin,
     RevisionMixin, 
 )
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
@@ -55,13 +55,15 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
 
         self.model = apps.get_model(app_label, model_name)
         if not self.has_perms(request, self.model):
-            return HttpResponseBadRequest("You do not have permission to view this page")
+            return HttpResponseForbidden("Permission denied")
 
-        if issubclass(self.model, RevisionMixin):
-            model_instance = self.model.objects.get(pk=model_id)
+        # Only fetch latest reivision if it exists
+        # If not; it will be automatically created by the form.
+        model_instance = self.model._default_manager.get(pk=model_id)
+        if isinstance(model_instance, RevisionMixin) and model_instance.latest_revision_id:
             self.instance = model_instance.latest_revision.as_object()
         else:
-            self.instance = self.model._default_manager.get(pk=model_id)
+            self.instance = model_instance
 
         self.field_name = field_name
         self.model_name = model_name
