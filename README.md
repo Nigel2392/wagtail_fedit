@@ -63,6 +63,8 @@ Getting Started
    {# myapp/render_my_field.html #}
    {% load fedit %}
    {% for block in self.content %}
+       {# Sub-Blocks wrapped by fedit_block do not require the field_name or model argument. #}
+       {# This is taken from the parent (also wrapped by `fedit_block`); the model and field name are shared through context. #}
        {% fedit_block block=block block_id=block.id field_name="content" model=self %}
    {% endfor %}
 
@@ -80,7 +82,7 @@ Getting Started
    ```
 
    Your content will then automatically be rendered with that method when need be by using `{% fedit_field "content" self %} `
-4. **But wait?! I go to my template and I do not see a way to edit!**That is true! We try to protect any styling on your actual page; we do not want to interfere.Instead; we serve the editing interface on a different URL, accessible by clicking `Frontend Editing` in the Wagtail userbar.Keep an eye on that userbar! It is also used for publishing if your model inherits from `DraftStateMixin`.
+4. **But wait?! I go to my template and I do not see a way to edit!**That is true! We try to protect any styling on your actual page; we do not want to interfere.Instead; we serve the editing interface on a different URL, accessible by clicking `Frontend Editing` in the Wagtail userbar. Keep an eye on that userbar! It is also used for publishing if your model inherits from `DraftStateMixin`.
 
 ## Permissions
 
@@ -165,6 +167,15 @@ Our new loop would then be:
 {% endfor %}
 ```
 
-## Settings
+**Note:** If the parent block is wrapped with `fedit_block` or `fedit_field` the field_name and model argument can be omitted.  
+The parent- blocktag will share these variables through context.
+This makes it possibly to easily use editable sub-blocks across multiple different model types.
+If your model **ISN'T** capable of editing; or these variables aren't shared - your block will be rendered as normal.
 
-## Models/Methods
+## Implemented
+
+* Revision Support
+* Locked Support
+* Draft Support
+* Preview Support
+* Full block capabilities on Frontend Editing
