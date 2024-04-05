@@ -35,10 +35,10 @@ from ..utils import (
     USERBAR_MODEL_VAR,
     FeditPermissionCheck,
     with_userbar_model,
-    user_can_publish,
-    user_can_unpublish,
-    user_can_submit_for_moderation,
-    lock_info,
+    # user_can_publish,
+    # user_can_unpublish,
+    # user_can_submit_for_moderation,
+    # lock_info,
 )
 
 from .mixins import (
@@ -61,6 +61,8 @@ def get_publish_action(object):
 
 class BaseFeditView(ObjectViewMixin, FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
+        if self.error_response:
+            return self.error_response
 
         if not self.has_perms(request, self.object):
             return HttpResponseForbidden("You do not have permission to view this page")

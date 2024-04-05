@@ -361,7 +361,7 @@ def render_editable_field(request, content, field_name, model, context, **kwargs
 
     kwargs["wagtail_fedit_field_name"] = field_name
     kwargs["wagtail_fedit_instance"] = model
-
+    kwargs["inline"] = str(kwargs.get("inline", False)).lower() == "true"
     return render_to_string(
         "wagtail_fedit/content/editable_field.html",
         {
@@ -371,7 +371,6 @@ def render_editable_field(request, content, field_name, model, context, **kwargs
             "content": content,
             "parent_context": context,
             "toolbar_items": items,
-            "inline": str(kwargs.get("inline", False)).lower() == "true",
             **kwargs,
         },
         request=request,

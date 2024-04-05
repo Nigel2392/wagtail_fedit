@@ -25,6 +25,7 @@ class ObjectViewMixin:
         except (self.model.DoesNotExist):
             self.error_response = HttpResponseBadRequest("Model not found")
 
+
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
         if self.error_response:
             return self.error_response
