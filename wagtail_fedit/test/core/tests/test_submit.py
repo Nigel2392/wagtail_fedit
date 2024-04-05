@@ -79,7 +79,10 @@ class TestSubmitViews(BaseFEditTest):
         content_type = ContentType.objects.get_for_model(self.full_model.__class__)
         WorkflowContentType.objects.create(content_type=content_type, workflow=workflow)
 
-        self.assertIsNotNone(self.full_model.get_workflow())
+        wf = self.full_model.get_workflow()
+        self.assertIsNotNone(wf)
+        self.assertEqual(wf, workflow)
+        self.assertFalse(wf.active)
 
         self.makeRequest("submit", self.full_model, SubmitView)
 
