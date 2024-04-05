@@ -86,6 +86,8 @@ Getting Started
 
 We have the following basic permission requirements:
 
+**Note: This is not required for pages. The `Page` model already provides this interface.**
+
 * You must have `wagtailadmin.access_admin` to edit a block/field.
 * You must have the appropriate `app_label.change_*` permission for the model.
 
