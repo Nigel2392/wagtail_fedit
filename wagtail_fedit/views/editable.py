@@ -20,13 +20,13 @@ from wagtail.actions.publish_revision import PublishRevisionAction
 from wagtail.actions.unpublish_page import UnpublishPageAction
 from wagtail.actions.unpublish import UnpublishAction
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
-from wagtail.permission_policies import ModelPermissionPolicy
 from wagtail.models import (
     RevisionMixin,
     PreviewableMixin,
     DraftStateMixin,
     WorkflowMixin,
     WorkflowState,
+    LockableMixin,
     Page,
 )
 from .. import forms as block_forms
@@ -38,6 +38,7 @@ from ..utils import (
     user_can_publish,
     user_can_unpublish,
     user_can_submit_for_moderation,
+    lock_info,
 )
 
 from ..toolbar import (
@@ -127,6 +128,10 @@ class BaseFeditView(FeditPermissionCheck, TemplateView):
         except ValueError as e:
             return HttpResponseForbidden(str(e))
 
+        self.lock, self.locked_for_user = lock_info(
+            self.object, request.user,
+        )
+
         return super().dispatch(request, object_id, app_label, model_name)
     
     def checks(self, request: HttpRequest, object: Any) -> None:
@@ -147,7 +152,10 @@ class FEditableView(BaseFeditView):
             raise ValueError("Model {} does not inherit from PreviewableMixin, cannot edit.".format(self.model))
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        # # Check if lock applies to this user
+        # if not self.locked_for_user:
         self.request = with_userbar_model(self.request, self.object)
+
         object: PreviewableMixin = self.object
         return object.make_preview_request(original_request=self.request, extra_request_attrs={
             FEDIT_PREVIEW_VAR: True,
@@ -212,6 +220,10 @@ class FeditablePublishView(WagtailAdminTemplateMixin, BaseFeditView):
         else:
             self.workflow_state = None
 
+        # Check if lock applies to this user
+        if self.locked_for_user:
+            messages.error(request, _("This object is locked. It cannot be published."))
+            return self.redirect_to_failsafe_url(request)
 
         if request.POST.get("action-publish") == "1"\
                 and policy.can_publish()\

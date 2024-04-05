@@ -1,4 +1,5 @@
 from typing import Any
+from collections import namedtuple
 from django.db import models
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
@@ -10,6 +11,7 @@ from wagtail import hooks
 from wagtail.models import (
     DraftStateMixin,
     WorkflowMixin,
+    LockableMixin,
 )
 from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.blocks.stream_block import StreamValue
@@ -305,3 +307,20 @@ def user_can_submit_for_moderation(instance, user, check_for_changes: bool = Tru
         return False
     
     return instance.permissions_for_user(user).can_submit_for_moderation()
+
+
+_lock_info = namedtuple("lock_info", ["lock", "locked_for_user"])
+
+def lock_info(object, user) -> _lock_info:
+    if isinstance(object, LockableMixin):
+        lock = object.get_lock()
+        locked_for_user = lock is not None and lock.for_user(
+            user
+        )
+    else:
+        lock = None
+        locked_for_user = False
+
+    return _lock_info(lock, locked_for_user)
+
+

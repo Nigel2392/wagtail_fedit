@@ -40,6 +40,7 @@ from ..utils import (
     saving_relation,
     is_draft_capable,
     get_model_string,
+    lock_info,
 )
 
 
@@ -95,6 +96,10 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                 self.model,
                 [field_name],
             )
+
+        self.lock, self.locked_for_user = lock_info(
+            self.instance, request.user,
+        )
 
         return super().dispatch(request, field_name, model_name, app_label, model_id)
 
@@ -194,100 +199,102 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
         # Can omit data from context - we are not rendering the content.
         form = self.form_class(request=request, instance=self.instance)
         return self.render_to_response(
-            self.get_context_data(form=form),
+            self.get_context_data(form=form, locked=self.locked_for_user),
             success=True,
         )
 
 
     def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         form = self.form_class(request.POST, request=request, instance=self.instance)
-        if form.is_valid():
-            self.instance = form.save()
-            
-            # add data to context
-            context = self.get_context_data(form=form, **self.data)
-
-            # Check if we are saving a relation
-            if saving_relation(self.instance, self.original_instance):
-                self.meta_field.save_form_data(self.original_instance, self.instance)
-                field_forms.save_possible_revision(self.original_instance, request)
-
-            extra_log_kwargs = {}
-            if isinstance(self.original_instance, RevisionMixin):
-                extra_log_kwargs["revision"] = self.original_instance.latest_revision
-
-            data = {
-                "verbose_field_name": self.meta_field.verbose_name,
-                "field_name": self.field_name,
-                "model_id": self.model_id,
-                "model_name": self.model_name,
-                "app_label": self.app_label,
-                "model_verbose": str(self.model._meta.verbose_name),
-                "model_string": str(get_model_string(self.original_instance)),
-                "old": str(self.initial_field_value),
-                "new": str(getattr(
-                    self.original_instance,
-                    self.field_name
-                )),
-            }
-
-            uid = uuid.uuid4()
-            if self.original_instance.pk != self.instance.pk:
-                data.update({
-                    "edited_model_string": str(get_model_string(self.instance)),
-                    "edited_model_verbose": str(self.instance._meta.verbose_name),
-                    "edited_model_id": self.instance.pk,
-                    "edited_model_name": self.instance._meta.model_name,
-                    "edited_app_label": self.instance._meta.app_label,
-                })
-
-                log(
-                    instance=self.instance,
-                    action="wagtail_fedit.related_changed",
-                    user=request.user,
-                    uuid=uid,
-                    data=data,
-                    content_changed=True,
+        if not form.is_valid() or self.locked_for_user:
+            return JsonResponse({
+                "success": False,
+                "errors": form.errors,
+                "locked": self.locked_for_user,
+                "html": render_to_string(
+                    "wagtail_fedit/editor/field_iframe.html",
+                    context=self.get_context_data(form=form, locked=self.locked_for_user),
+                    request=request,
                 )
-            
+            })
+
+        
+        self.instance = form.save()
+        
+        # add data to context
+        context = self.get_context_data(form=form, **self.data)
+
+        # Check if we are saving a relation
+        if saving_relation(self.instance, self.original_instance):
+            self.meta_field.save_form_data(self.original_instance, self.instance)
+            field_forms.save_possible_revision(self.original_instance, request)
+
+        extra_log_kwargs = {}
+        if isinstance(self.original_instance, RevisionMixin):
+            extra_log_kwargs["revision"] = self.original_instance.latest_revision
+
+        data = {
+            "verbose_field_name": self.meta_field.verbose_name,
+            "field_name": self.field_name,
+            "model_id": self.model_id,
+            "model_name": self.model_name,
+            "app_label": self.app_label,
+            "model_verbose": str(self.model._meta.verbose_name),
+            "model_string": str(get_model_string(self.original_instance)),
+            "old": str(self.initial_field_value),
+            "new": str(getattr(
+                self.original_instance,
+                self.field_name
+            )),
+        }
+
+        uid = uuid.uuid4()
+        if self.original_instance.pk != self.instance.pk:
+            data.update({
+                "edited_model_string": str(get_model_string(self.instance)),
+                "edited_model_verbose": str(self.instance._meta.verbose_name),
+                "edited_model_id": self.instance.pk,
+                "edited_model_name": self.instance._meta.model_name,
+                "edited_app_label": self.instance._meta.app_label,
+            })
+
             log(
-                instance=self.original_instance,
-                action="wagtail_fedit.edit_field",
+                instance=self.instance,
+                action="wagtail_fedit.related_changed",
                 user=request.user,
-                title=self.get_header_title(),
                 uuid=uid,
                 data=data,
                 content_changed=True,
-                **extra_log_kwargs,
             )
+        
+        log(
+            instance=self.original_instance,
+            action="wagtail_fedit.edit_field",
+            user=request.user,
+            title=self.get_header_title(),
+            uuid=uid,
+            data=data,
+            content_changed=True,
+            **extra_log_kwargs,
+        )
 
-            content = get_field_content(
-                request,
-                self.original_instance,
-                self.meta_field,
-                context
-            )
+        content = get_field_content(
+            request,
+            self.original_instance,
+            self.meta_field,
+            context
+        )
 
-            # Render the frame HTML
-            html = render_editable_field(
-                self.request, content,
-                self.field_name, self.original_instance,
-                context=context,
-                **self.data,
-            )
-
-            return JsonResponse({
-                "success": True,
-                "html": html,
-            })
+        # Render the frame HTML
+        html = render_editable_field(
+            self.request, content,
+            self.field_name, self.original_instance,
+            context=context,
+            **self.data,
+        )
 
         return JsonResponse({
-            "success": False,
-            "errors": form.errors,
-            "html": render_to_string(
-                "wagtail_fedit/editor/field_iframe.html",
-                context=self.get_context_data(form=form),
-                request=request,
-            )
+            "success": True,
+            "html": html,
         })
 

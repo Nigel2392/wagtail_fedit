@@ -68,9 +68,12 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         self.block, self.contentpath = result
         self.form_class = block_forms.get_block_form_class(self.block.block)
 
-
         if not self.form_class:
             return HttpResponseBadRequest("Invalid block type")
+
+        self.lock, self.locked_for_user = utils.lock_info(
+            self.model_instance, request.user,
+        )
 
         return super().dispatch(request, block_id, field_name, model_id, model_name, app_label)
 
@@ -156,7 +159,7 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         form = self.form_class(block=self.block, parent_instance=self.instance, request=request)
         # Safe to omit data from context - we are not rendering the content.
         return self.render_to_response(
-            self.get_context_data(form=form),
+            self.get_context_data(form=form, locked=self.locked_for_user),
             success=True,
         )
 
@@ -167,16 +170,17 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
         setattr(request, utils.FEDIT_PREVIEW_VAR, True)
 
         valid = form.is_valid()
-        if valid:
+        if valid and not self.locked_for_user:
             self.block = form.save()
         else:
             # We are not rendering the content, so we can omit data from context.
             return JsonResponse({
                 "success": False,
                 "errors": form.errors,
+                "locked": self.locked_for_user,
                 "html": render_to_string(
                     "wagtail_fedit/editor/block_iframe.html",
-                    context=self.get_context_data(form=form),
+                    context=self.get_context_data(form=form, locked=self.locked_for_user),
                     request=request,
                 )
             }, status=400)
