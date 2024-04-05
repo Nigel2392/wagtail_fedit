@@ -216,7 +216,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
                     context=self.get_context_data(form=form, locked=self.locked_for_user),
                     request=request,
                 )
-            })
+            }, status=423 if self.locked_for_user else 400)
 
         
         self.instance = form.save()

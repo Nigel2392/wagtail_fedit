@@ -138,25 +138,27 @@ class BaseFEditTest(TestCase):
             content=TEST_BLOCK_DATA,
         )
 
-        self.models: list[models.Model] = [
-            self.full_model,
-            self.draft_model,
-            self.revision_model,
-            self.preview_model,
-            self.basic_model,
-        ]
-
-        # Additional models for other functionality - not tested in a loop.
+        # Additional models for other functionality
         self.admin_user = User.objects.create_superuser(
             username="admin",
             email="admin@localhost",
             password="admin"
+        )
+        self.other_admin_user = User.objects.create_superuser(
+            username="other_admin",
+            email="other_admin@localhost",
+            password="other_admin"
         )
         self.regular_user = User.objects.create_user(
             username="regular",
             email="regular@localhost",
             password="regular"
         )
+        self.regular_user.user_permissions.add(Permission.objects.get(
+            codename="access_admin",
+            content_type__app_label="wagtailadmin"
+        ))
+
         self.lock_model = EditableLockModel.objects.create(
             title="Lock Model",
             body="Lock Model Body",
@@ -164,11 +166,15 @@ class BaseFEditTest(TestCase):
             locked=True,
             locked_by=self.admin_user,
         )
-
-        self.regular_user.user_permissions.add(Permission.objects.get(
-            codename="access_admin",
-            content_type__app_label="wagtailadmin"
-        ))
+        
+        self.models: list[models.Model] = [
+            self.full_model,
+            self.draft_model,
+            self.revision_model,
+            self.preview_model,
+            self.basic_model,
+            self.lock_model,
+        ]
 
     def get_editable_url(self, object_id, app_label, model_name):
         url_name = "editable"

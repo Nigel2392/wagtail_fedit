@@ -183,7 +183,7 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
                     context=self.get_context_data(form=form, locked=self.locked_for_user),
                     request=request,
                 )
-            }, status=400)
+            }, status=423 if self.locked_for_user else 400)
         
         extra_log_kwargs = {}
         if isinstance(self.instance, RevisionMixin):

@@ -8,6 +8,8 @@ from .base import (
     BaseFEditTest,
 )
 
+import json
+
 class TestBlockEdit(BaseFEditTest):
     def test_block_edited(self):
         self.client.force_login(self.admin_user)
@@ -55,13 +57,7 @@ class TestBlockEdit(BaseFEditTest):
     def test_unauthorized_unchanged(self):
         self.client.force_login(self.regular_user)
         
-        for i, (model, has_revision_support) in enumerate([
-            (self.full_model, True),
-            (self.draft_model, True),
-            (self.revision_model, True),
-            (self.preview_model, False),
-            (self.basic_model, False),
-        ]):
+        for i, model in enumerate(self.models):
             
             initial_content = model.content
             response = self.client.post(
@@ -80,7 +76,7 @@ class TestBlockEdit(BaseFEditTest):
 
             model.refresh_from_db()
 
-            if has_revision_support:
+            if isinstance(model, RevisionMixin):
                 self.assertEqual(model.revisions.count(), 0)
                 chk = model
 
@@ -92,9 +88,9 @@ class TestBlockEdit(BaseFEditTest):
             self.assertEqual(chk.content.get_prep_value(), initial_content.get_prep_value())
 
     def test_lock_unchanged(self):
-        self.client.force_login(self.admin_user)
+        self.client.force_login(self.other_admin_user)
         initial_content = self.lock_model.content
-        bound, _ = find_block(block_id=self.BLOCK_ID, field=self.lock_model.content)
+        initial_bound, _ = find_block(block_id=self.BLOCK_ID, field=self.lock_model.content)
 
         response = self.client.post(
             self.get_block_url(
@@ -105,11 +101,20 @@ class TestBlockEdit(BaseFEditTest):
                 self.lock_model.pk,
             ),
             {
-                "value-link-text": f"{bound.value['link']['text']} test case"
+                "value-link-text": f"{initial_bound.value['link']['text']} test case"
             }
         )
 
-        self.assertEqual(response.status_code, 403)
         self.lock_model.refresh_from_db()
 
+        self.assertEqual(response.status_code, 423) # 423 Locked
+        self.assertEqual(self.lock_model.revisions.count(), 0)
+        
+        try:
+            response_content = (json.loads(response.content) or {})
+        except json.JSONDecodeError:
+            self.fail("Response content is not valid JSON")
+            
+        self.assertTrue(response_content.get("locked", False))
+        self.assertEqual(self.lock_model.locked_by, self.admin_user)
         self.assertEqual(self.lock_model.content.get_prep_value(), initial_content.get_prep_value())
