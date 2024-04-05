@@ -9,10 +9,13 @@ from wagtail.models import (
     LockableMixin,
     RevisionMixin,
     PreviewableMixin,
+    WorkflowMixin,
     DraftStateMixin,
 )
 from wagtail_fedit.models import (
     FEditableMixin,
+    FeditPermissionTester,
+    ModelPermissionPolicy,
 )
 
 class HeadingComponent(blocks.StructBlock):
@@ -89,10 +92,21 @@ class EditablePreviewModel(BaseEditableMixin, PreviewableMixin, models.Model):
     ], use_json_field=True)
 
 @register_snippet
-class EditableLockModel(BaseEditableMixin, LockableMixin, RevisionMixin, DraftStateMixin, models.Model):
+class EditableLockModel(BaseEditableMixin, WorkflowMixin, DraftStateMixin, RevisionMixin, LockableMixin, models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
     content = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
+
+    
+    def get_permissions_policy(self):
+        return ModelPermissionPolicy(self.__class__)
+    
+    def permissions_for_user(self, user):
+        return FeditPermissionTester(
+            self,
+            user=user,
+            policy=self.get_permissions_policy()
+        )

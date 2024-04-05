@@ -19,7 +19,7 @@ from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.actions.publish_page_revision import PublishPageRevisionAction
 from wagtail.actions.publish_revision import PublishRevisionAction
 from wagtail.actions.unpublish_page import UnpublishPageAction
-from wagtail.actions.unpublish import UnpublishAction
+from wagtail.actions.unpublish import UnpublishAction, UnpublishPermissionError
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
 from wagtail.models import (
     RevisionMixin,
@@ -245,6 +245,9 @@ class PublishView(BaseActionView):
         if not policy.can_publish():
             raise ValueError("User does not have permission to publish")
         
+        if self.locked_for_user:
+            raise ValueError("Object is locked")
+        
         if not self.object.has_unpublished_changes:
             raise ValueError("Object has no unpublished changes")
 
@@ -285,6 +288,9 @@ class UnpublishView(BaseActionView):
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not policy.can_unpublish():
             raise ValueError("User does not have permission to unpublish")
+        
+        if self.locked_for_user:
+            raise ValueError("Object is locked")
         
         if not self.object.live:
             raise ValueError("Object is not live")

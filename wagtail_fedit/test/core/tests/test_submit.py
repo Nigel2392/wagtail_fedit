@@ -18,7 +18,7 @@ from wagtail_fedit.views import (
 
 class TestSubmitViews(BaseFEditTest):
 
-    def makeRequest(self, url_name: str, model, view_class):
+    def makeRequest(self, url_name: str, model, view_class, check_status = 0):
         url = self.get_url_for(url_name,
             app_label=model._meta.app_label,
             model_name=model._meta.model_name,
@@ -29,7 +29,8 @@ class TestSubmitViews(BaseFEditTest):
         expected_post_value = view.get_action_value()
 
         response = self.client.post(url, {"action": expected_post_value})
-        self.assertEqual(response.status_code, 302, msg=f"Request failed for {url_name}")
+        if check_status:
+            self.assertEqual(response.status_code, check_status, msg=f"Request failed for {url_name}")
         return response
 
     def test_publish(self):
@@ -39,7 +40,7 @@ class TestSubmitViews(BaseFEditTest):
 
         self.assertFalse(self.full_model.live)
 
-        self.makeRequest("publish", self.full_model, PublishView)
+        self.makeRequest("publish", self.full_model, PublishView, 302)
 
         self.full_model.refresh_from_db()
 
@@ -60,7 +61,7 @@ class TestSubmitViews(BaseFEditTest):
 
         self.assertTrue(self.full_model.live)
 
-        self.makeRequest("unpublish", self.full_model, UnpublishView)
+        self.makeRequest("unpublish", self.full_model, UnpublishView, 302)
 
         self.full_model.refresh_from_db()
 
@@ -84,9 +85,74 @@ class TestSubmitViews(BaseFEditTest):
         self.assertEqual(wf, workflow)
         self.assertFalse(not not self.full_model.workflow_states)
 
-        self.makeRequest("submit", self.full_model, SubmitView)
+        self.makeRequest("submit", self.full_model, SubmitView, 302)
 
         self.full_model.refresh_from_db()
         workflow: Workflow = self.full_model.get_workflow()
         self.assertTrue(not not self.full_model.workflow_states)
         
+    def test_lock_nopublish(self):
+        self.client.force_login(self.other_admin_user)
+        
+        self.lock_model.locked = False
+        self.lock_model.live = False
+        self.lock_model.save(update_fields=["locked", "live"])
+        self.assertFalse(self.lock_model.live)
+
+        if self.lock_model.live:
+            self.lock_model.unpublish(
+                user=self.admin_user,
+            )
+
+        self.lock_model.has_unpublished_changes = True
+        self.lock_model.locked_by = self.admin_user
+        self.lock_model.locked = True
+        self.lock_model.save()
+
+        self.makeRequest("publish", self.lock_model, PublishView, 200)
+
+        self.lock_model.refresh_from_db()
+
+        self.assertFalse(self.lock_model.live)
+        self.assertTrue(self.lock_model.has_unpublished_changes)
+
+    def test_lock_nounpublish(self):
+        self.client.force_login(self.admin_user)
+
+        if not self.lock_model.latest_revision:
+            self.lock_model.save_revision(
+                user=self.admin_user,
+                clean=False,
+            )
+
+        self.lock_model.publish(
+            user=self.admin_user,
+            revision=self.lock_model.latest_revision,
+        )
+        
+        self.lock_model.has_unpublished_changes = True
+        self.lock_model.locked_by = self.admin_user
+        self.lock_model.locked = True
+        self.lock_model.save()
+
+        self.makeRequest("unpublish", self.lock_model, UnpublishView, False)
+
+        self.lock_model.refresh_from_db()
+
+        self.assertTrue(self.lock_model.live)
+        self.assertTrue(self.lock_model.has_unpublished_changes)
+
+    def test_lock_nosubmit(self):
+        self.client.force_login(self.admin_user)
+        
+        self.lock_model.has_unpublished_changes = True
+        self.lock_model.locked_by = self.admin_user
+        self.lock_model.locked = True
+        self.lock_model.save()
+
+        self.makeRequest("submit", self.full_model, SubmitView, False)
+
+        self.lock_model.refresh_from_db()
+
+        self.assertTrue(self.lock_model.has_unpublished_changes)
+        self.assertFalse(not not self.lock_model.workflow_states)
