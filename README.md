@@ -3,6 +3,28 @@ wagtail_fedit
 
 Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.
 
+# Table of Contents
+
+1. [Getting Started](#getting-started)
+2. [Getting Editing!](#getting-editing)
+3. [Permissions](#permissions)
+4. [Revisions](#revisions)
+5. [Workflows](#workflows)
+6. [Logs](#logs)
+7. [Caveats](#caveats)
+8. [Hooks](#hooks)
+    1. [wagtail_fedit.construct_block_toolbar](#wagtail_feditconstruct_block_toolbar)
+    2. [wagtail_fedit.construct_field_toolbar](#wagtail_feditconstruct_field_toolbar)
+    3. [wagtail_fedit.register_type_renderer](#wagtail_feditregister_type_renderer)
+    4. [wagtail_fedit.register_field_renderer](#wagtail_feditregister_field_renderer)
+    5. [wagtail_fedit.exclude_related_forms](#wagtail_feditexclude_related_forms)
+    6. [wagtail_fedit.action_menu_item_is_shown](#wagtail_feditaction_menu_item_is_shown)
+9. [How your field/block is rendered](#how-your-fieldblock-is-rendered)
+    1. [Rendered block output HTML](#rendered-block-output-html)
+    2. [Rendered field output HTML](#rendered-field-output-html)
+10. [Implemented](#implemented)
+
+
 Getting Started
 ---------------
 
