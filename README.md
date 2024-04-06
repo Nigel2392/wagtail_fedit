@@ -5,25 +5,24 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 
 # Table of Contents
 
--  [Getting Started](#getting-started)
--  [Getting Editing!](#getting-editing)
--  [Permissions](#permissions)
--  [Revisions](#revisions)
--  [Workflows](#workflows)
--  [Logs](#logs)
--  [Caveats](#caveats)
--  [Hooks](#hooks)
-    - [wagtail_fedit.construct_block_toolbar](#wagtail_feditconstruct_block_toolbar)
-    - [wagtail_fedit.construct_field_toolbar](#wagtail_feditconstruct_field_toolbar)
-    - [wagtail_fedit.register_type_renderer](#wagtail_feditregister_type_renderer)
-    - [wagtail_fedit.register_field_renderer](#wagtail_feditregister_field_renderer)
-    - [wagtail_fedit.exclude_related_forms](#wagtail_feditexclude_related_forms)
-    - [wagtail_fedit.action_menu_item_is_shown](#wagtail_feditaction_menu_item_is_shown)
--  [How your field/block is rendered](#how-your-fieldblock-is-rendered)
-    - [Rendered block output HTML](#rendered-block-output-html)
-    - [Rendered field output HTML](#rendered-field-output-html)
--  [Implemented](#implemented)
-
+- [Getting Started](#getting-started)
+- [Getting Editing!](#getting-editing)
+- [Permissions](#permissions)
+- [Revisions](#revisions)
+- [Workflows](#workflows)
+- [Logs](#logs)
+- [Caveats](#caveats)
+- [Hooks](#hooks)
+  - [wagtail_fedit.construct_block_toolbar](#wagtail_feditconstruct_block_toolbar)
+  - [wagtail_fedit.construct_field_toolbar](#wagtail_feditconstruct_field_toolbar)
+  - [wagtail_fedit.register_type_renderer](#wagtail_feditregister_type_renderer)
+  - [wagtail_fedit.register_field_renderer](#wagtail_feditregister_field_renderer)
+  - [wagtail_fedit.exclude_related_forms](#wagtail_feditexclude_related_forms)
+  - [wagtail_fedit.action_menu_item_is_shown](#wagtail_feditaction_menu_item_is_shown)
+- [How your field/block is rendered](#how-your-fieldblock-is-rendered)
+  - [Rendered block output HTML](#rendered-block-output-html)
+  - [Rendered field output HTML](#rendered-field-output-html)
+- [Implemented](#implemented)
 
 Getting Started
 ---------------
@@ -296,7 +295,7 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
 
 ## How your field/block is rendered
 
-(**Maintainer's note:** In my experience this doesn't mess the CSS up too much if you don't get hyperspecific with your selectors and structure your templates well.)
+(**Maintainer's note:** In my experience this doesn't mess the CSS up too much, or even at all for most content - **if** you don't get hyperspecific with your CSS selectors and structure your templates well.)
 
 Your block and field are wrapped in a `div`, any CSS for your templates should keep this in mind.
 
