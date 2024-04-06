@@ -13,8 +13,6 @@ import json
 class TestBlockEdit(BaseFEditTest):
     def test_block_edited(self):
 
-        self.fail("Test action workflow fails.")
-
         self.client.force_login(self.admin_user)
         
         for i, model in enumerate(self.models):
