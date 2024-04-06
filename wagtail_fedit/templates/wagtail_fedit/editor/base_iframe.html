@@ -55,7 +55,7 @@
             {% translate "Locked" as locked_heading %}
             {% if locked and not locked_for_user %}
                 {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
-                    {% help_block status=info %}
+                    {% help_block status="info" %}
                         <p>{% translate "This object is locked" %}</p>
                         <p>{% translate "You are still able to edit this object." %}</p>
                     {% endhelp_block %}
@@ -64,7 +64,7 @@
 
             {% if locked_for_user %}
                 {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
-                    {% help_block status=info %}
+                    {% help_block status="info" %}
                         <p>{% translate "This object is locked and cannot be edited." %}</p>
                     {% endhelp_block %}
                 {% endpanel %}
