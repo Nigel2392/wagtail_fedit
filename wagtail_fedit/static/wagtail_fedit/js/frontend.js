@@ -185,7 +185,6 @@ class WagtailFeditEditor {
                             cancelButton.addEventListener("click", this.closeModal.bind(this));
                             return;
                         }
-                        this.wrapperElement.style.display = "none";
                         this.setWrapperHtml(response.html);
                         this.initNewEditors();
                         this.closeModal();
@@ -235,13 +234,34 @@ class WagtailFeditEditor {
     }
 
     setWrapperHtml(html) {
-        const newBlock = document.createElement("div");
-        newBlock.innerHTML = html;
-        const blockWrapper = newBlock.firstElementChild;
-        this.wrapperElement.parentNode.insertBefore(blockWrapper, this.wrapperElement);
-        this.wrapperElement.parentNode.removeChild(this.wrapperElement);
-        this.wrapperElement = blockWrapper;
-        this.init();
+        const anim = this.wrapperElement.animate([
+            {opacity: 1},
+            {opacity: 0},
+        ], {
+            duration: 350,
+            easing: "ease-in-out",
+        });
+        anim.onfinish = () => {
+            const newBlock = document.createElement("div");
+            newBlock.innerHTML = html;
+            const blockWrapper = newBlock.firstElementChild;
+            this.wrapperElement.parentNode.insertBefore(blockWrapper, this.wrapperElement);
+            this.wrapperElement.parentNode.removeChild(this.wrapperElement);
+            blockWrapper.style.opacity = 0;
+            this.wrapperElement = blockWrapper;
+            this.init();
+
+            const anim = blockWrapper.animate([
+                {opacity: 0},
+                {opacity: 1},
+            ], {
+                duration: 350,
+                easing: "ease-in-out",
+            });
+            anim.onfinish = () => {
+                blockWrapper.style.opacity = 1;
+            };
+        }
     }
 
     closeModal() {
