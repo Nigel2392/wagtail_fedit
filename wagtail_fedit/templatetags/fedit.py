@@ -127,15 +127,8 @@ class BlockEditNode(Node):
 
         # Check if the user has permission to edit the block.
         request = context.get("request")
-        if request:
-            if (
-                not request.user.is_authenticated\
-                or not request.user.has_perm("wagtailadmin.access_admin")\
-                or not request.user.has_perm(f"{model._meta.app_label}.change_{model._meta.model_name}")    
-                or not getattr(request, FEDIT_PREVIEW_VAR, False)
-            ):
-                
-                return rendered
+        if not _can_edit(request, model):
+            return rendered
 
         # If the model is a page, we can redirect the user to the page editor.
         # This will act as a shortcut; jumping to the block inside of the admin.
@@ -327,14 +320,8 @@ class FieldEditNode(Node):
             context,
         )
 
-        if request:
-            if (
-                not request.user.is_authenticated\
-                or not request.user.has_perm("wagtailadmin.access_admin")\
-                or not request.user.has_perm(f"{obj._meta.app_label}.change_{obj._meta.model_name}")\
-                or not getattr(request, FEDIT_PREVIEW_VAR, False)
-            ):
-                return content
+        if not _can_edit(request, obj):
+            return content
             
         return render_editable_field(
             request=request, 
@@ -455,6 +442,16 @@ def get_kwargs(parser: Parser, kwarg_list: list[str], tokens: list[str]) -> dict
     return kwargs
 
 
+def _can_edit(request, obj: models.Model):
+    if not request or not obj:
+        return False
+    
+    return not (
+        not request.user.is_authenticated\
+        or not request.user.has_perm("wagtailadmin.access_admin")\
+        or not request.user.has_perm(f"{obj._meta.app_label}.change_{obj._meta.model_name}")\
+        or not getattr(request, FEDIT_PREVIEW_VAR, False)
+    )
 
 
 def _get_from_context_or_set(context, key, value, *args, **kwargs):
