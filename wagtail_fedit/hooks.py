@@ -6,6 +6,7 @@ def prefix(name):
 
 
 """
+### wagtail_fedit.construct_block_toolbar
 Construct the toolbar for the given block.
 This is used to display the edit icon in the block.
 
@@ -20,6 +21,7 @@ CONSTRUCT_BLOCK_TOOLBAR  = prefix("construct_block_toolbar")
 
 
 """
+### wagtail_fedit.construct_field_toolbar
 Construct the toolbar for the given field.
 This is used to display the edit icon in the field.
 
@@ -34,6 +36,7 @@ CONSTRUCT_FIELD_TOOLBAR  = prefix("construct_field_toolbar")
 
 
 """
+### wagtail_fedit.register_type_renderer
 Register a custom renderer for a type.
 
 Example of how this type of renderer can be used:
@@ -54,6 +57,7 @@ REGISTER_TYPE_RENDERER   = prefix("register_type_renderer")
 
 
 """
+### wagtail_fedit.register_field_renderer
 Register a custom renderer for a field.
 
 Example of how this type of renderer is used in wagtail_hooks/renderers.py:
@@ -72,6 +76,7 @@ REGISTER_FIELD_RENDERER  = prefix("register_field_renderer")
 
 
 """
+### wagtail_fedit.exclude_related_forms
 Exclude the given model type from the related forms.
 This is used internally to exclude the Page, Image, and Document models from the related forms.
 This way; the user will have the actual widget for the field instead of the related form.
@@ -97,6 +102,7 @@ EXCLUDE_FROM_RELATED_FORMS = prefix("exclude_related_forms")
 
 
 """
+### wagtail_fedit.action_menu_item_is_shown
 Decide if the action menu item should be shown for the given instance.
 
 Return None if you cannot decide, False if you want to hide the item, and True if you want to show the item.
