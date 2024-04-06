@@ -210,9 +210,9 @@ def register_renderers(renderer_map):
 
     # This is a custom renderer for the Page model.
     # It will render the Page model as a simple h2 tag.
-    renderer_map[Page] = lambda request, context, instance: format_html(
+    renderer_map[Page] = lambda request, context, instance, value: format_html(
         '<h2>{0}</h2>',
-        instance.title
+        value.title
     )
 ```
 
