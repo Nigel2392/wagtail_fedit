@@ -134,13 +134,10 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
             UserBarActionUnpublishComponent(self.model),
         ]
 
-        for i, button in enumerate(buttons):
-            buttons[i] = button.render(request)
-
-        buttons = list(filter(None, buttons))
-
         return super().get_context_data(request) | {
-            "buttons": buttons,
+            "buttons": list(
+                filter(None, map(lambda x: x.render(request), buttons))
+            ),
         }
 
 def retrieve_page_model(items):
