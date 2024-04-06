@@ -4,15 +4,6 @@ from . import views
 app_name = "wagtail_fedit"
 
 urlpatterns = [
-    # Preview
-    path("editable/<str:object_id>/<str:app_label>/<str:model_name>/", views.FEditableView.as_view(), name="editable"),
-
-    # Submit Views
-    path("publish/<str:object_id>/<str:app_label>/<str:model_name>/", views.PublishView.as_view(), name="publish"),
-    path("submit/<str:object_id>/<str:app_label>/<str:model_name>/", views.SubmitView.as_view(), name="submit"),
-    path("unpublish/<str:object_id>/<str:app_label>/<str:model_name>/", views.UnpublishView.as_view(), name="unpublish"),
-    # path("cancel/<str:object_id>/<str:app_label>/<str:model_name>/", views.CancelView.as_view(), name="cancel"),
-
     # Frontend Editing
     path(
         "field/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", 
@@ -23,3 +14,17 @@ urlpatterns = [
         views.EditBlockView.as_view(), name="edit_block"
     ),
 ]
+
+model_based_views = (
+    ("editable", views.FEditableView),
+    ("publish", views.PublishView),
+    ("submit", views.SubmitView),
+    ("unpublish", views.UnpublishView),
+)
+
+for name, view in model_based_views:
+    view.url_name = f"wagtail_fedit:{name}"
+    view.url_pattern = f"{name}/<str:object_id>/<str:app_label>/<str:model_name>/"
+    urlpatterns.append(
+        path(view.url_pattern, view.as_view(), name=name)
+    )
