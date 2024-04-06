@@ -13,10 +13,10 @@ from ..toolbar import (
     FeditToolbarComponent,
 )
 from ..utils import (
-    is_draft_capable,
+    FEDIT_PREVIEW_VAR,
     FeditPermissionCheck,
     access_userbar_model,
-    FEDIT_PREVIEW_VAR,
+    is_draft_capable,
     user_can_publish,
     user_can_unpublish,
     user_can_submit_for_moderation,
@@ -141,14 +141,6 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
 
         return super().get_context_data(request) | {
             "buttons": buttons,
-            "can_publish": self.can_publish,
-            "can_unpublish": self.can_unpublish,
-            "hidden": self.can_publish or self.can_submit_for_moderation\
-                and self.model.has_unpublished_changes,
-            "publish_url": reverse(
-                "wagtail_fedit:publish",
-                args=[self.model.pk, self.model._meta.app_label, self.model._meta.model_name],
-            ),
         }
 
 def retrieve_page_model(items):
