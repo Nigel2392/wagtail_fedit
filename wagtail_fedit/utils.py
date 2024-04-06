@@ -324,3 +324,7 @@ def lock_info(object, user) -> _lock_info:
     return _lock_info(lock, locked_for_user)
 
 
+def get_hooks(hook_name):
+    for hook in hooks.get_hooks(f"wagtail_fedit.{hook_name}"):
+        yield hook
+        
