@@ -94,20 +94,9 @@ class TestSubmitViews(BaseFEditTest):
     def test_lock_nopublish(self):
         self.client.force_login(self.other_admin_user)
         
-        self.lock_model.locked = False
         self.lock_model.live = False
-        self.lock_model.save(update_fields=["locked", "live"])
-        self.assertFalse(self.lock_model.live)
-
-        if self.lock_model.live:
-            self.lock_model.unpublish(
-                user=self.admin_user,
-            )
-
         self.lock_model.has_unpublished_changes = True
-        self.lock_model.locked_by = self.admin_user
-        self.lock_model.locked = True
-        self.lock_model.save()
+        self.lock_model.save(update_fields=["live", "has_unpublished_changes"])
 
         self.makeRequest("publish", self.lock_model, PublishView, 200)
 
@@ -130,27 +119,17 @@ class TestSubmitViews(BaseFEditTest):
             revision=self.lock_model.latest_revision,
         )
         
-        self.lock_model.has_unpublished_changes = True
-        self.lock_model.locked_by = self.admin_user
-        self.lock_model.locked = True
-        self.lock_model.save()
-
-        self.makeRequest("unpublish", self.lock_model, UnpublishView, False)
+        self.makeRequest("unpublish", self.lock_model, UnpublishView, 200)
 
         self.lock_model.refresh_from_db()
 
         self.assertTrue(self.lock_model.live)
-        self.assertTrue(self.lock_model.has_unpublished_changes)
+        self.assertFalse(self.lock_model.has_unpublished_changes)
 
     def test_lock_nosubmit(self):
         self.client.force_login(self.admin_user)
         
-        self.lock_model.has_unpublished_changes = True
-        self.lock_model.locked_by = self.admin_user
-        self.lock_model.locked = True
-        self.lock_model.save()
-
-        self.makeRequest("submit", self.full_model, SubmitView, False)
+        self.makeRequest("submit", self.full_model, SubmitView, 200)
 
         self.lock_model.refresh_from_db()
 

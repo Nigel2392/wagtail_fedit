@@ -168,6 +168,7 @@ class BaseFEditTest(TestCase):
             content=TEST_BLOCK_DATA,
             locked=True,
             locked_by=self.admin_user,
+            has_unpublished_changes=True,
         )
         
         self.models: list[models.Model] = [
