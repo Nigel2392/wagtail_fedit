@@ -29,8 +29,8 @@ register = library.Library()
 url_value_signer = signing.TimestampSigner()
 
 
-WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context for field %(field)s."
-WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for block %(block)s."
+WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context for %(object)s."
+WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for %(object)s."
 
 
 class BlockEditNode(Node):
@@ -91,11 +91,11 @@ class BlockEditNode(Node):
         # This allows us to use the block as a block tag or as a simple tag.
         if block:
             try:
-                context = context.flatten()
+                block_context = context.flatten()
             except AttributeError:
                 pass
-            context.update(extra)
-            rendered = block.render_as_block(context)
+            block_context.update(extra)
+            rendered = block.render_as_block(block_context)
             self.has_block = True
         elif self.nl:
             rendered = self.nl.render(context)
@@ -104,11 +104,17 @@ class BlockEditNode(Node):
             raise ValueError("Block or nodelist is required")
         
         if not field_name:
-            warnings.warn(WARNING_FIELD_NAME_NOT_AVAILABLE % {"field": field_name})
+            warnings.warn(
+                WARNING_FIELD_NAME_NOT_AVAILABLE
+                % {"object": context.template_name}
+            )
             return rendered
         
         if not model:
-            warnings.warn(WARNING_MODEL_INSTANCE_NOT_AVAILABLE % {"block": block.label})
+            warnings.warn(
+                WARNING_MODEL_INSTANCE_NOT_AVAILABLE
+                % {"object": block.block.__class__.__name__}
+            )
             return rendered
         
         # Get block id from block if bound or context.
