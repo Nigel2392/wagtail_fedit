@@ -99,7 +99,7 @@ EXCLUDE_FROM_RELATED_FORMS = prefix("exclude_related_forms")
 """
 Decide if the action menu item should be shown for the given instance.
 
-Return None if you cannot decide.
+Return None if you cannot decide, False if you want to hide the item, and True if you want to show the item.
 
 Example of how this hook is called:
 
