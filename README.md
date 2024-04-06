@@ -37,11 +37,13 @@ Getting Started
    </head>
    <body>
        {# Adress the model.field or model.my.related.field you wish to edit. #}
-       <h1>{% fedit_field self.title %}</h1>
+       {# Editable fields get a special `inline` argument. #}
+       {# if True the button is not placed with an absolute CSS position. #}
+       <h1>{% fedit_field self.title inline=True or False %}</h1>
 
        {# Pass in the field_name and the model instance on which that field resides if you are using `wagtail_fedit <= 1.3.8` #}
        <main class="my-streamfield-content">
-           {% fedit_field "content" self%}
+           {% fedit_field "content" self %}
        </main>
 
        {% wagtailuserbar %}
@@ -270,6 +272,35 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
         return result # <- bool
 ```
 
+## How your field/block is rendered
+
+(**Maintainer's note:** In my experience this doesn't mess the CSS up too much if you don't get hyperspecific with your selectors and structure your templates well.)
+
+Your block and field are wrapped in a `div`, any CSS for your templates should keep this in mind.
+
+### Rendered block output HTML
+
+```html
+<div class="wagtail-fedit-block-wrapper" id="wagtail-fedit-{{ block_id }}" data-block-id="{{block_id}}" data-edit-url="{{ edit_url }}"> 
+    <div class="wagtail-fedit-buttons">
+        {% for item in toolbar_items %}
+            {{ item }} {# Edit button; more buttons MIGHT possibly be added in the future. #}
+        {% endfor %}
+    </div>{{ content|safe }}{# Your block's rendered content. The same as {% include_block block %} #}
+</div>
+```
+
+### Rendered field output HTML
+
+```html
+<div class="wagtail-fedit-field-wrapper {% if inline %}wagtail-fedit-inline{% endif %}" id="wagtail-fedit-{{ field_name }}-{{model.pk}}" data-edit-url="{{ edit_url }}"> 
+    <div class="wagtail-fedit-buttons">
+        {% for item in toolbar_items %}
+            {{ item }} {# Edit button; more buttons MIGHT possibly be added in the future. #}
+        {% endfor %}
+    </div>{{ content|safe }}{# Your field's rendered content. Rendering may vary on your setup. #}
+</div>
+```
 
 ## Implemented
 
