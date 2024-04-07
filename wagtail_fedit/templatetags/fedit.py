@@ -93,7 +93,7 @@ class BlockEditNode(Node):
             try:
                 block_context = context.flatten()
             except AttributeError:
-                pass
+                block_context = context
             block_context.update(extra)
             rendered = block.render_as_block(block_context)
             self.has_block = True
