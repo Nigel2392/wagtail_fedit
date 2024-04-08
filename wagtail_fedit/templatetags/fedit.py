@@ -124,6 +124,9 @@ class BlockEditNode(Node):
             block_id = block.id
         elif not block_id:
             raise ValueError("Block ID is required")
+        
+        if not rendered:
+            rendered = mark_safe("")
 
         # Check if the user has permission to edit the block.
         request = context.get("request")
@@ -319,6 +322,9 @@ class FieldEditNode(Node):
             obj._meta.get_field(self.field),
             context,
         )
+
+        if not content:
+            content = mark_safe("")
 
         if not _can_edit(request, obj):
             return content
