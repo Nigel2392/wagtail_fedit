@@ -325,6 +325,9 @@ class FieldEditNode(Node):
 
         if not content:
             content = mark_safe("")
+            # Force inline editing if no content is available.
+            # This will make sure the height of the field to edit is not 0.
+            inline = True
 
         if not _can_edit(request, obj):
             return content
