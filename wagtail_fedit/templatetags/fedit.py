@@ -73,7 +73,7 @@ class BlockEditNode(Node):
             field_name = context["wagtail_fedit_field_name"]
 
         block, block_id, field_name, model =\
-            _resolve_expressions(block, block_id, field_name, model)
+            _resolve_expressions(context, block, block_id, field_name, model)
         
         if not block_id and "block_id" not in context and not block:
             raise ValueError("Block ID is required")
@@ -291,7 +291,8 @@ class FieldEditNode(Node):
         model = self.model
         inline = self.inline
 
-        model, inline = _resolve_expressions(model, inline)
+        model, inline =\
+            _resolve_expressions(context, model, inline)
 
         obj = model
         for i in range(len(getters) - 1):

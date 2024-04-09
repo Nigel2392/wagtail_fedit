@@ -2,8 +2,12 @@ from django.db import models
 from django.http import HttpResponse
 from django.utils.text import slugify
 from wagtail.snippets.models import register_snippet
+from django.template import Template, Context
 from wagtail import blocks
-from wagtail.fields import StreamField
+from wagtail.fields import (
+    StreamField,
+    StreamValue,
+)
 from wagtail.models import (
     Page,
     LockableMixin,
@@ -22,11 +26,37 @@ class HeadingComponent(blocks.StructBlock):
     heading = blocks.CharBlock(max_length=25)
     subheading = blocks.CharBlock(max_length=40)
 
+    def render(self, value, context=None):
+        template = Template("""
+            <h1>{{ heading }}</h1>
+            <h2>{{ subheading }}</h2>
+        """)
+
+        context = self.get_context(value, parent_context=context)
+        return template.render(Context(context))
+
 class LinkBlock(blocks.StructBlock):
     text = blocks.CharBlock(max_length=25)
 
+    def render(self, value, context=None):
+        template = Template("""
+            <a href="#">{{ text }}</a>
+        """)
+
+        context = self.get_context(value, parent_context=context)
+        return template.render(Context(context))
+
 class MenuItemBlock(blocks.StructBlock):
     link = LinkBlock()
+
+    def render(self, value, context=None):
+        template = Template("""
+            {% load wagtailcore_tags %}
+            <li>{% include_block self.link %}</li>
+        """)
+
+        context = self.get_context(value, parent_context=context)
+        return template.render(Context(context))
 
 class FlatMenuComponent(blocks.StructBlock):
     title = blocks.CharBlock(max_length=25)
@@ -34,6 +64,21 @@ class FlatMenuComponent(blocks.StructBlock):
     items = blocks.ListBlock(
         MenuItemBlock()
     )
+
+    def render(self, value, context=None):
+        template = Template("""
+            {% load wagtailcore_tags %}
+            <h1>{{ title }}</h1>
+            <p>{{ subtitle }}</p>
+            <ul>
+                {% for item in items %}
+                    {% include_block item %}
+                {% endfor %}
+            </ul>
+        """)
+
+        context = self.get_context(value, parent_context=context)
+        return template.render(Context(context))
 
 
 class BaseEditableMixin:
@@ -47,7 +92,7 @@ class BaseEditableMixin:
 class BasicModel(models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    content = StreamField([
+    content: StreamValue = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
@@ -56,7 +101,7 @@ class BasicModel(models.Model):
 class EditableFullModel(BaseEditableMixin, FEditableMixin):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    content = StreamField([
+    content: StreamValue = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
@@ -66,7 +111,7 @@ class EditableFullModel(BaseEditableMixin, FEditableMixin):
 class EditableDraftModel(BaseEditableMixin, DraftStateMixin, RevisionMixin, models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    content = StreamField([
+    content: StreamValue = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
@@ -76,7 +121,7 @@ class EditableDraftModel(BaseEditableMixin, DraftStateMixin, RevisionMixin, mode
 class EditableRevisionModel(BaseEditableMixin, RevisionMixin, models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    content = StreamField([
+    content: StreamValue = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
@@ -86,7 +131,7 @@ class EditableRevisionModel(BaseEditableMixin, RevisionMixin, models.Model):
 class EditablePreviewModel(BaseEditableMixin, PreviewableMixin, models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    content = StreamField([
+    content: StreamValue = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
@@ -95,7 +140,7 @@ class EditablePreviewModel(BaseEditableMixin, PreviewableMixin, models.Model):
 class EditableLockModel(BaseEditableMixin, WorkflowMixin, DraftStateMixin, RevisionMixin, LockableMixin, models.Model):
     title = models.CharField(max_length=255)
     body = models.TextField()
-    content = StreamField([
+    content: StreamValue = StreamField([
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
