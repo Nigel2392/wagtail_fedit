@@ -1,9 +1,11 @@
 from typing import Any
 from collections import namedtuple
+from urllib.parse import urlencode
 from django.db import models
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.template.base import FilterExpression
 from django.conf import settings
 from django.urls import reverse
 
@@ -12,6 +14,7 @@ from wagtail.models import (
     DraftStateMixin,
     WorkflowMixin,
     LockableMixin,
+    PreviewableMixin
 )
 from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.blocks.stream_block import StreamValue
@@ -85,6 +88,11 @@ class FeditIFrameMixin:
 
 
 def use_related_form(field: models.Field) -> bool:
+    """
+    Check if a field should be included in the related forms.
+    Internally used to make sure we use widgets instead
+    of rendering a form for a Page, Image or Document model.
+    """
     for hook in hooks.get_hooks(EXCLUDE_FROM_RELATED_FORMS):
         if hook(field):
             return False
@@ -92,17 +100,27 @@ def use_related_form(field: models.Field) -> bool:
 
 
 def access_userbar_model(request: HttpRequest) -> models.Model:
-
+    """
+    Retrieve the model set for the userbar in the request.
+    """
     if not hasattr(request, USERBAR_MODEL_VAR):
         return None
     
     return getattr(request, USERBAR_MODEL_VAR)
 
 def with_userbar_model(request: HttpRequest, model: models.Model) -> HttpRequest:
+    """
+    Set the model to be available in the userbar.
+    The request is shared easily between these contexts - might as well use it.
+    """
     setattr(request, USERBAR_MODEL_VAR, model)
     return request
 
 def get_block_name(block):
+    """
+    Return the block's type name for a block in a StreamField or ListBlock.
+    eg. "heading", "paragraph", "image", "item", "column", etc.
+    """
     if isinstance(block, StreamValue.StreamChild):
         return block.block_type
     elif isinstance(block, ListValue.ListChild):
@@ -115,6 +133,9 @@ def get_block_name(block):
         raise ValueError("Unknown block type: %s" % type(block))
     
 def get_block_path(block):
+    """
+    Get the current path part of a block in a StreamField or ListBlock.
+    """
     if isinstance(block, StreamValue.StreamChild):
         return block.id
     elif isinstance(block, ListValue.ListChild):
@@ -127,6 +148,9 @@ def get_block_path(block):
         raise ValueError("Unknown block type: %s" % type(block))
 
 def find_block(block_id, field, contentpath=None):
+    """
+    Find a block in a StreamField or ListBlock by its ID.
+    """
     if contentpath is None:
         contentpath = []
 
@@ -181,6 +205,12 @@ def _look_for_renderers():
 
 
 def get_field_content(request, instance, meta_field: models.Field, context, content=None):
+    """
+    Return the content for a field on a model.
+    Also checks the model for a rendering method.
+    The method should be named `render_fedit_{field_name}`.
+    We wil also check for any hooks which may convert the content.
+    """
     _look_for_renderers()
 
     if isinstance(meta_field, str):
@@ -214,11 +244,18 @@ def get_field_content(request, instance, meta_field: models.Field, context, cont
     return content
 
 def is_draft_capable(model):
+    """
+    Check if a model is capable of drafts.
+    """
     return isinstance(model, DraftStateMixin)\
         or type(model) == type\
         and issubclass(model, DraftStateMixin)
 
 def saving_relation(m1, m2):
+    """
+    Check if two model instances are different.
+    This is used to determine if a relation is being saved.
+    """
     return not (
         m1._meta.app_label == m2._meta.app_label
         and m1._meta.model_name == m2._meta.model_name\
@@ -226,7 +263,46 @@ def saving_relation(m1, m2):
     )
 
 
-def get_model_string(instance: models.Model, publish_url: bool = False, request: HttpRequest = None, target = "_blank") -> str:
+def edit_url(instance: models.Model, request: HttpRequest, hash = None, **params) -> str:
+    """
+        Return the edit URL for a given object and user (or request instead of user.)
+        If none exists and the model is an instance of PreviewableMixin;
+        return the wagtail_fedit:editable url; else an empty string.
+    """
+
+    user = request.user
+    finder = AdminURLFinder(user)
+    admin_url = finder.get_edit_url(instance)
+
+    if not admin_url:
+
+        # Check if the instance is a PreviewableMixin
+        # and the user has permission to edit it.
+        if isinstance(instance, PreviewableMixin)\
+                and _can_edit(request, instance):
+            
+            admin_url = reverse(
+                "wagtail_fedit:editable",
+                args=[
+                    instance.pk,
+                    instance._meta.app_label,
+                    instance._meta.model_name
+                ],
+            )
+        else:
+            return ""
+
+    data = urlencode(params)
+    if params:
+        admin_url = f"{admin_url}?{data}"
+
+    if hash:
+        admin_url = f"{admin_url}#{hash}"
+    
+    return admin_url
+
+
+def get_model_string(instance: models.Model, publish_url: bool = False, request: HttpRequest = None, target = "_blank", **params) -> str:
     """
     Get a string representation of a model instance. If the instance has a
     `get_admin_display_title` method, it will be used to get the string
@@ -256,9 +332,12 @@ def get_model_string(instance: models.Model, publish_url: bool = False, request:
                 ],
             )
 
+            data = urlencode(params)
+            if params:
+                admin_url = f"{admin_url}?{data}"
+
         else:
-            finder = AdminURLFinder(request)
-            admin_url = finder.get_edit_url(instance)
+            admin_url = edit_url(instance, request, **params)
 
         if admin_url:
             model_string = mark_safe(
@@ -267,7 +346,26 @@ def get_model_string(instance: models.Model, publish_url: bool = False, request:
 
     return model_string
 
+def _can_edit(request, obj: models.Model):
+    """
+    Check if the user has appropriate permissions to edit an object.
+    Also requires the current request be on the `wagtail_fedit:editable` url.
+    """
+    if not request or not obj:
+        return False
+    
+    return not (
+        not request.user.is_authenticated\
+        or not request.user.has_perm("wagtailadmin.access_admin")\
+        or not request.user.has_perm(f"{obj._meta.app_label}.change_{obj._meta.model_name}")\
+        or not getattr(request, FEDIT_PREVIEW_VAR, False)
+    )
+
 def user_can_publish(instance, user, check_for_changes: bool = True):
+    """
+    Check if a user can publish an object.
+    Mostly comes from PagePermissionTester.can_publish
+    """
     if not isinstance(instance, DraftStateMixin):
         return False
     
@@ -284,6 +382,10 @@ def user_can_publish(instance, user, check_for_changes: bool = True):
     return instance.permissions_for_user(user).can_publish()
 
 def user_can_unpublish(instance, user):
+    """
+    Check if a user can unpublish an object.
+    Mostly comes from PagePermissionTester.can_unpublish
+    """
     if not isinstance(instance, DraftStateMixin):
         return False
     
@@ -293,6 +395,10 @@ def user_can_unpublish(instance, user):
     return instance.permissions_for_user(user).can_unpublish()
 
 def user_can_submit_for_moderation(instance, user, check_for_changes: bool = True):
+    """
+    Check if a user can submit an object for moderation.
+    Mostly comes from PagePermissionTester.can_submit_for_moderation
+    """
     if not getattr(settings, "WAGTAIL_WORKFLOW_ENABLED", True):
         return False
 
@@ -312,6 +418,9 @@ def user_can_submit_for_moderation(instance, user, check_for_changes: bool = Tru
 _lock_info = namedtuple("lock_info", ["lock", "locked_for_user"])
 
 def lock_info(object, user) -> _lock_info:
+    """
+        Returns the Lock instance (if any) and whether it is locked for the given user.
+    """
     if isinstance(object, LockableMixin):
         lock = object.get_lock()
         locked_for_user = lock is not None and lock.for_user(
@@ -325,6 +434,20 @@ def lock_info(object, user) -> _lock_info:
 
 
 def get_hooks(hook_name):
+    """
+        Return the hooks for a given hook name in the wagtail_fedit namespace.
+    """
     for hook in hooks.get_hooks(f"wagtail_fedit.{hook_name}"):
         yield hook
-        
+
+    
+def _resolve_expressions(context, *expressions):
+    """
+        Resolve a list of possible templatetag filterexpressions.
+    """
+    def _map(expression):
+        if isinstance(expression, FilterExpression):
+            return expression.resolve(context)
+        return expression
+    
+    return tuple(map(_map, expressions))

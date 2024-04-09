@@ -124,17 +124,11 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
             "form_class": self.form_class,
         }
 
-        if isinstance(self.instance, Page):
-            admin_edit_url = reverse(
-                "wagtailadmin_pages:edit",
-                args=[self.instance.pk],
-            )
-            admin_edit_url = f"{admin_edit_url}#block-{self.block_id}-section"
-        else:
-            admin_edit_url = None
-
-
-        must["admin_edit_url"] = admin_edit_url
+        must["admin_edit_url"] = utils.edit_url(
+            self.instance,
+            self.request,
+            hash=f"block-{self.block_id}-section",
+        )
 
         context.update(must)
         for key, value in can.items():

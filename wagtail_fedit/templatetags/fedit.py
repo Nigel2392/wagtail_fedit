@@ -8,7 +8,6 @@ from django.core import signing
 from django.db import models
 
 from wagtail.blocks import BoundBlock
-from wagtail.models import Page
 from wagtail import hooks
 from urllib.parse import urlencode
 
@@ -18,7 +17,12 @@ from ..toolbar import (
     FeditBlockEditButton,
     FeditFieldEditButton,
 )
-from ..utils import FEDIT_PREVIEW_VAR, get_field_content
+from ..utils import (
+    _can_edit,
+    edit_url,
+    get_field_content,
+    _resolve_expressions,
+)
 from ..hooks import (
     CONSTRUCT_BLOCK_TOOLBAR,
     CONSTRUCT_FIELD_TOOLBAR,
@@ -68,14 +72,8 @@ class BlockEditNode(Node):
         if not field_name and "wagtail_fedit_field_name" in context:
             field_name = context["wagtail_fedit_field_name"]
 
-        if isinstance(block, FilterExpression):
-            block = block.resolve(context)
-        if isinstance(block_id, FilterExpression):
-            block_id = block_id.resolve(context)
-        if isinstance(field_name, FilterExpression):
-            field_name = field_name.resolve(context)
-        if isinstance(model, FilterExpression):
-            model = model.resolve(context)
+        block, block_id, field_name, model =\
+            _resolve_expressions(block, block_id, field_name, model)
         
         if not block_id and "block_id" not in context and not block:
             raise ValueError("Block ID is required")
@@ -133,19 +131,11 @@ class BlockEditNode(Node):
         if not _can_edit(request, model):
             return rendered
 
-        # If the model is a page, we can redirect the user to the page editor.
-        # This will act as a shortcut; jumping to the block inside of the admin.
-        if isinstance(model, Page):
-            admin_edit_url = _get_from_context_or_set(
-                context, "page_base_edit_url",
-                lambda: reverse(
-                    "wagtailadmin_pages:edit",
-                    args=[model.id],
-                ),
-            )
-            admin_edit_url = f"{admin_edit_url}#block-{block_id}-section"
-        else:
-            admin_edit_url = None
+        admin_edit_url = edit_url(
+            model,
+            request,
+            hash=f"block-{block_id}-section",
+        )
 
         extra["has_block"] = self.has_block
 
@@ -301,11 +291,7 @@ class FieldEditNode(Node):
         model = self.model
         inline = self.inline
 
-        if isinstance(model, FilterExpression):
-            model = model.resolve(context)
-
-        if isinstance(inline, FilterExpression):
-            inline = inline.resolve(context)
+        model, inline = _resolve_expressions(model, inline)
 
         obj = model
         for i in range(len(getters) - 1):
@@ -450,26 +436,3 @@ def get_kwargs(parser: Parser, kwarg_list: list[str], tokens: list[str]) -> dict
 
     return kwargs
 
-
-def _can_edit(request, obj: models.Model):
-    if not request or not obj:
-        return False
-    
-    return not (
-        not request.user.is_authenticated\
-        or not request.user.has_perm("wagtailadmin.access_admin")\
-        or not request.user.has_perm(f"{obj._meta.app_label}.change_{obj._meta.model_name}")\
-        or not getattr(request, FEDIT_PREVIEW_VAR, False)
-    )
-
-
-def _get_from_context_or_set(context, key, value, *args, **kwargs):
-    if key in context:
-        return context[key]
-    
-    if callable(value):
-        value = value(*args, **kwargs)
-
-    context[key] = value
-    return value
-    
