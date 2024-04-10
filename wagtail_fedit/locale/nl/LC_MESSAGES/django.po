@@ -1,0 +1,342 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-04-10 22:45+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\edit_block.html:3
+msgid "Edit block"
+msgstr "Bewerk blok"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\edit_field.html:3
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:46
+msgid "Edit Field"
+msgstr "Bewerk veld"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_confirm.html:32
+msgid "Are you sure you want to continue?"
+msgstr "Weet u zeker dat u wilt doorgaan?"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_confirm.html:45
+#: .\tester\wagtail_fedit\views\editable.py:423
+msgid "Cancel"
+msgstr "Annuleren"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:9
+msgid "Changes since last publish"
+msgstr "Wijzigingen sinds laatste publicatie"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:15
+msgid "Action"
+msgstr "Actie"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:18
+msgid "User"
+msgstr "Gebruiker"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:21
+msgid "Date / Time"
+msgstr "Datum / Tijd"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:34
+msgid "Comment"
+msgstr "Commentaar"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:37
+msgid "Current draft"
+msgstr "Huidige concept"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:51
+#, python-format
+msgid ""
+"This object has more changes. <a href=\"%(view_more_url)s\">View all changes."
+"</a>"
+msgstr ""
+"Dit object heeft meer wijzigingen. <a href=\"%(view_more_url)s\">Bekijk alle "
+"wijzigingen.</a>"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:55
+msgid "Locked"
+msgstr "Vergrendeld"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:59
+msgid "This object is locked"
+msgstr "Dit object is vergrendeld"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:60
+msgid "You are still able to edit this object."
+msgstr "U kunt dit object nog steeds bewerken."
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:68
+msgid "This object is locked and cannot be edited."
+msgstr "Dit object is vergrendeld en kan niet worden bewerkt."
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:100
+msgid "Edit in Wagtail Admin"
+msgstr "Bewerk in Wagtail Admin"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:104
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:105
+msgid "Save"
+msgstr "Opslaan"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:111
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:112
+msgid "Close"
+msgstr "Sluiten"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\item_fedit.html:11
+msgid "Frontend Editing"
+msgstr "Bewerken op frontend"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\item_fedit_view_live.html:12
+msgid "View Live Page"
+msgstr "Bekijk live pagina"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\buttons\publish.html:11
+#: .\tester\wagtail_fedit\views\editable.py:235
+msgid "Publish"
+msgstr "Publiceren"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\buttons\submit.html:11
+msgid "Submit for Moderation"
+msgstr "Indienen voor moderatie"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\buttons\unpublish.html:11
+#: .\tester\wagtail_fedit\views\editable.py:342
+msgid "Unpublish"
+msgstr "Depubliceren"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\item_fedit_publishing.html:13
+msgid "Revision Management"
+msgstr "Revisiebeheer"
+
+#: .\tester\wagtail_fedit\utils.py:54 .\tester\wagtail_fedit\views\fields.py:51
+msgid "Validation Errors"
+msgstr "Validatiefouten"
+
+#: .\tester\wagtail_fedit\utils.py:56
+msgid "Publishing Required"
+msgstr "Publicatie vereist"
+
+#: .\tester\wagtail_fedit\utils.py:57
+#: .\tester\wagtail_fedit\views\fields.py:183
+msgid "The object you are editing supports drafts."
+msgstr "Het object dat u bewerkt, ondersteunt concepten."
+
+#: .\tester\wagtail_fedit\utils.py:58
+#, python-format
+msgid "You must publish %(model)s to make any changes visible."
+msgstr "U moet %(model)s publiceren om wijzigingen zichtbaar te maken."
+
+#: .\tester\wagtail_fedit\utils.py:60
+msgid "No Publishing Required"
+msgstr "Geen publicatie vereist"
+
+#: .\tester\wagtail_fedit\utils.py:61
+msgid "The object you are editing does not support drafts."
+msgstr "Het object dat u bewerkt, ondersteunt geen concepten."
+
+#: .\tester\wagtail_fedit\utils.py:62
+msgid ""
+"You are not required to publish this object to make this change visible."
+msgstr ""
+"U hoeft dit object niet te publiceren om deze wijziging zichtbaar te maken."
+
+#: .\tester\wagtail_fedit\views\blocks.py:31
+msgid "Block Validation Errors"
+msgstr "Blokvalidatiefouten"
+
+#: .\tester\wagtail_fedit\views\blocks.py:91
+#, python-format
+msgid "Edit block %(block_label)s for %(model_name)s %(model_string)s"
+msgstr "Bewerk blok %(block_label)s voor %(model_name)s %(model_string)s"
+
+#: .\tester\wagtail_fedit\views\editable.py:218
+msgid "This object is locked. It cannot be acted upon."
+msgstr "Dit object is vergrendeld. Er kan niet op worden gereageerd."
+
+#: .\tester\wagtail_fedit\views\editable.py:222
+msgid "No action specified"
+msgstr "Geen actie opgegeven"
+
+#: .\tester\wagtail_fedit\views\editable.py:226
+msgid "Invalid action specified: {}"
+msgstr "Ongeldige actie opgegeven: {}"
+
+#: .\tester\wagtail_fedit\views\editable.py:238
+msgid "Publishing {} \"{}\""
+msgstr "Publiceren van {} \"{}\""
+
+#: .\tester\wagtail_fedit\views\editable.py:241
+msgid "About publishing"
+msgstr "Over publiceren"
+
+#: .\tester\wagtail_fedit\views\editable.py:245
+msgid "Publishing this object will make it visible to users on the site."
+msgstr "Publicatie van dit object maakt het zichtbaar voor gebruikers op de site."
+
+#: .\tester\wagtail_fedit\views\editable.py:246
+#: .\tester\wagtail_fedit\views\editable.py:427
+msgid ""
+"That means that any changes you make will be immediately visible to everyone."
+msgstr ""
+"Dit betekent dat alle wijzigingen die u aanbrengt, onmiddellijk zichtbaar zijn"
+"voor iedereen."
+
+#: .\tester\wagtail_fedit\views\editable.py:250
+msgid "You can always choose to unpublish it."
+msgstr "U kunt er altijd voor kiezen om het te depubliceren."
+
+#: .\tester\wagtail_fedit\views\editable.py:343
+msgid "About unpublishing"
+msgstr "Over depubliceren"
+
+#: .\tester\wagtail_fedit\views\editable.py:345
+msgid "Unpublishing this object will make it invisible to users on the site."
+msgstr "Depublicatie van dit object maakt het onzichtbaar voor gebruikers op de site."
+
+#: .\tester\wagtail_fedit\views\editable.py:346
+#: .\tester\wagtail_fedit\views\editable.py:384
+msgid "That means that it will no longer be visible to anyone."
+msgstr "Dat betekent dat het niet langer zichtbaar is voor iedereen."
+
+#: .\tester\wagtail_fedit\views\editable.py:347
+#: .\tester\wagtail_fedit\views\editable.py:385
+msgid "You can always choose to publish it again."
+msgstr "U kunt er altijd voor kiezen om het opnieuw te publiceren."
+
+#: .\tester\wagtail_fedit\views\editable.py:351
+msgid "Unpublishing {} \"{}\""
+msgstr "Depubliceren van {} \"{}\""
+
+#: .\tester\wagtail_fedit\views\editable.py:365
+msgid "This object is not live"
+msgstr "Dit object is niet live"
+
+#: .\tester\wagtail_fedit\views\editable.py:380
+msgid "Submit for moderation"
+msgstr "Indienen voor moderatie"
+
+#: .\tester\wagtail_fedit\views\editable.py:381
+msgid "About submitting for moderation"
+msgstr "Over indienen voor moderatie"
+
+#: .\tester\wagtail_fedit\views\editable.py:383
+msgid ""
+"Submitting this object for moderation will make it invisible to users on the "
+"site."
+msgstr ""
+"Het indienen van dit object voor moderatie maakt het onzichtbaar voor "
+"gebruikers op de site."
+
+#: .\tester\wagtail_fedit\views\editable.py:389
+msgid "Submitting {} \"{}\" for moderation"
+msgstr "Indienen van {} \"{}\" voor moderatie"
+
+#: .\tester\wagtail_fedit\views\editable.py:424
+msgid "About cancelling"
+msgstr ""
+
+#: .\tester\wagtail_fedit\views\editable.py:426
+msgid "Cancelling this object will make it visible to users on the site."
+msgstr ""
+
+#: .\tester\wagtail_fedit\views\editable.py:431
+msgid "Cancelling workflow for {} \"{}\""
+msgstr ""
+
+#: .\tester\wagtail_fedit\views\fields.py:122
+#, python-format
+msgid "Edit model %(instance_string)s for %(model_name)s %(model_string)s"
+msgstr "Bewerk model %(instance_string)s voor %(model_name)s %(model_string)s"
+
+#: .\tester\wagtail_fedit\views\fields.py:128
+#, python-format
+msgid "Edit field %(field_name)s for %(model_name)s %(model_string)s"
+msgstr "Bewerk veld %(field_name)s voor %(model_name)s %(model_string)s"
+
+#: .\tester\wagtail_fedit\views\fields.py:158
+#, python-format
+msgid ""
+"You must publish %(model)s and the related object of type "
+"%(related_verbose_name)s (%(related_model)s) to make any changes visible."
+msgstr ""
+"U moet %(model)s en het gerelateerde object van het type "
+"%(related_verbose_name)s (%(related_model)s) publiceren om wijzigingen "
+"zichtbaar te maken."
+
+#: .\tester\wagtail_fedit\views\fields.py:182
+msgid "Publishing related object required."
+msgstr "Publicatie van gerelateerd object vereist."
+
+#: .\tester\wagtail_fedit\views\fields.py:184
+#, python-format
+msgid ""
+"You must publish the related object of type %(type)s (%(model)s) to make any "
+"changes visible."
+msgstr ""
+"U moet het gerelateerde object van het type %(type)s (%(model)s) publiceren "
+"om wijzigingen zichtbaar te maken."
+
+#: .\tester\wagtail_fedit\wagtail_hooks\action_menu.py:14
+msgid "Frontend Edit"
+msgstr "Bewerk op frontend"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:7
+msgid "Edit Related"
+msgstr "Bewerk gerelateerd"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:7
+msgid "Related Object Edited"
+msgstr "Gerelateerd object bewerkt"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:11
+msgid "Field Changed (Frontend)"
+msgstr "Veld gewijzigd (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:12
+msgid "A field was changed from the frontend"
+msgstr "Een veld is gewijzigd vanaf de frontend"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:22
+#, python-format
+msgid ""
+"Changed related '%(related)s' instance '%(instance)s' on field "
+"'%(field)s' (Frontend)"
+msgstr ""
+"Gerelateerde '%(related)s' instantie '%(instance)s' gewijzigd op veld "
+"'%(field)s' (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:39
+#, python-format
+msgid "Changed '%(field)s' from '%(old)s' to '%(new)s' (Frontend)"
+msgstr "Gewijzigd '%(field)s' van '%(old)s' naar '%(new)s' (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:51
+msgid "Block Changed (Frontend)"
+msgstr "Blok gewijzigd (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:52
+msgid "A block was changed from the frontend"
+msgstr "Een blok is gewijzigd vanaf de frontend"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:65
+#, python-format
+msgid ""
+"Changed block \"%(block)s\" on field \"%(field)s\" (%(block_id)s, Frontend)"
+msgstr ""
+"Blok \"%(block)s\" gewijzigd op veld \"%(field)s\" (%(block_id)s, Frontend)"

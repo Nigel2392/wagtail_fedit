@@ -53,7 +53,7 @@ from .mixins import (
 )
 
 
-MAX_LOG_ENTRIES_DISPLAYED = 8
+MAX_LOG_ENTRIES_DISPLAYED = 5
 
 
 def get_unpublish_action(object):
@@ -252,12 +252,19 @@ class PublishView(BaseActionView):
         return s
     
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
         log_entry_count = 0
         log_entry_model = registry.get_log_model_for_model(self.object.__class__)
         if issubclass(log_entry_model, PageLogEntry):
             log_entries = log_entry_model.objects\
                 .filter(page=self.object)\
                 .order_by("-timestamp")
+            
+            context["view_more_url"] = reverse(
+                "wagtailadmin_pages:history",
+                args=[self.object.pk],
+            )
                 
         elif issubclass(log_entry_model, ModelLogEntry):
             log_entries = log_entry_model.objects\
@@ -275,16 +282,29 @@ class PublishView(BaseActionView):
                                .order_by("-timestamp")[:1]
                 )
             )
+            log_entries = log_entries.select_related("user")
+
+            if isinstance(self.object, Page):
+                log_entries = log_entries.select_related("page")
+            else:
+                log_entries = log_entries.select_related("content_type")
+
+            if not self.request.user.is_superuser or\
+               not self.request.user.is_staff:
+                log_entries = log_entries.filter(user=self.request.user)
+
             log_entry_count = log_entries.count()
             log_entries = log_entries[:MAX_LOG_ENTRIES_DISPLAYED]
 
-        return super().get_context_data(**kwargs) | {
+        context.update({
             "log_entries": log_entries,
             "has_more_entries": log_entry_count > MAX_LOG_ENTRIES_DISPLAYED,
             "log_entry_count": log_entry_count,
             "last_published_at": self.object.last_published_at,
             "is_page": isinstance(self.object, Page),
-        }
+        })
+
+        return context
 
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not policy.can_publish():
