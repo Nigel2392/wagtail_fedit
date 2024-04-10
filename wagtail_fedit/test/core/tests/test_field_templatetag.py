@@ -12,13 +12,20 @@ from .base import (
 )
 
 
-@hooks.register(fedit_hooks.REGISTER_FIELD_RENDERER)
-def register_type_renderer(mapping):
-    mapping[models.TextField] =\
-        lambda request, context, instance, value: f"<p class=\"text-field\">{value}</p>"
-
-
 class TestFieldTemplateTag(BaseFEditTest):
+
+    def setUp(self):
+        super().setUp()
+
+        # # This might make tests fail runnning in parallel.
+        # @hooks.register(fedit_hooks.REGISTER_FIELD_RENDERER)
+        # def register_type_renderer(mapping):
+        #     mapping[models.TextField] =\
+        #         lambda request, context, instance, value: f"<p class=\"text-field\">{value}</p>"
+
+        # This is ok.
+        utils._field_renderer_map[models.TextField] =\
+            lambda request, context, instance, value: f"<p class=\"text-field\">{value}</p>"
 
     def test_render_regular_no_custom_type_renderer(self):
 

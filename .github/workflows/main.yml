@@ -17,3 +17,6 @@ jobs:
       - name: Run tests
         run: |
           python wagtail_fedit/test/manage.py test
+      - name: Run tests in parallel
+        run: |
+          python wagtail_fedit/test/manage.py test --parallel auto --shuffle
