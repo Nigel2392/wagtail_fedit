@@ -5,6 +5,7 @@ from django.test import RequestFactory
 from django.contrib.auth.models import (
     User,
     Permission,
+    AnonymousUser,
 )
 from ..models import (
     BasicModel,
@@ -157,6 +158,7 @@ class BaseFEditTest(TestCase):
             email="regular@localhost",
             password="regular"
         )
+        self.anonymous_user = AnonymousUser()
         self.regular_user.user_permissions.add(Permission.objects.get(
             codename="access_admin",
             content_type__app_label="wagtailadmin"

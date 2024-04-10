@@ -35,11 +35,15 @@ USERBAR_MODEL_VAR = "_wagtail_fedit_userbar_model"
 class FeditPermissionCheck:
     @staticmethod
     def has_perms(request: HttpRequest, model: Any) -> bool:
+
+        user = request
+        if isinstance(request, HttpRequest):
+            user = request.user
         
         if (
-            not request.user.is_authenticated\
-            or not request.user.has_perm("wagtailadmin.access_admin")\
-            or not request.user.has_perm(f"{model._meta.app_label}.change_{model._meta.model_name}")    
+            not user.is_authenticated\
+            or not user.has_perm("wagtailadmin.access_admin")\
+            or not user.has_perm(f"{model._meta.app_label}.change_{model._meta.model_name}")    
         ):
             return False
         
@@ -251,7 +255,7 @@ def is_draft_capable(model):
         or type(model) == type\
         and issubclass(model, DraftStateMixin)
 
-def saving_relation(m1, m2):
+def model_diff(m1, m2):
     """
     Check if two model instances are different.
     This is used to determine if a relation is being saved.
@@ -349,16 +353,15 @@ def get_model_string(instance: models.Model, publish_url: bool = False, request:
 def _can_edit(request, obj: models.Model):
     """
     Check if the user has appropriate permissions to edit an object.
-    Also requires the current request be on the `wagtail_fedit:editable` url.
+    Also requires the current request be on the `wagtail_fedit:editable` url
+    (Or the preview variable to be True)
     """
     if not request or not obj:
         return False
     
-    return not (
-        not request.user.is_authenticated\
-        or not request.user.has_perm("wagtailadmin.access_admin")\
-        or not request.user.has_perm(f"{obj._meta.app_label}.change_{obj._meta.model_name}")\
-        or not getattr(request, FEDIT_PREVIEW_VAR, False)
+    return (
+        FeditPermissionCheck.has_perms(request, obj)\
+        and getattr(request, FEDIT_PREVIEW_VAR, False)
     )
 
 def user_can_publish(instance, user, check_for_changes: bool = True):

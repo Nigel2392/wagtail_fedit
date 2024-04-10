@@ -37,7 +37,7 @@ from ..utils import (
     FeditIFrameMixin,
     use_related_form,
     get_field_content,
-    saving_relation,
+    model_diff,
     is_draft_capable,
     get_model_string,
     lock_info,
@@ -150,7 +150,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
     def get_help_text(self):
         if is_draft_capable(self.original_instance)\
                 and is_draft_capable(self.instance)\
-                and saving_relation(self.instance, self.original_instance):
+                and model_diff(self.instance, self.original_instance):
             return {
                 "status": "warning",
                 "heading": FeditIFrameMixin.HEADING_SUPPORTS_DRAFTS,
@@ -164,7 +164,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
 
         elif is_draft_capable(self.original_instance)\
                 and not is_draft_capable(self.instance)\
-                and saving_relation(self.instance, self.original_instance):
+                and model_diff(self.instance, self.original_instance):
             return {
                 "status": "warning",
                 "heading": FeditIFrameMixin.HEADING_SUPPORTS_DRAFTS,
@@ -176,7 +176,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
         
         elif not is_draft_capable(self.original_instance)\
                 and is_draft_capable(self.instance)\
-                and saving_relation(self.instance, self.original_instance):
+                and model_diff(self.instance, self.original_instance):
             return {
                 "status": "warning",
                 "heading": _("Publishing related object required."),
@@ -241,7 +241,7 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
         context = self.get_context_data(form=form, **self.data)
 
         # Check if we are saving a relation
-        if saving_relation(self.instance, self.original_instance):
+        if model_diff(self.instance, self.original_instance):
             self.meta_field.save_form_data(self.original_instance, self.instance)
             field_forms.save_possible_revision(self.original_instance, request)
 
