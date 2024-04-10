@@ -1,4 +1,5 @@
 from typing import Any, Type
+from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.utils.decorators import method_decorator
@@ -15,6 +16,9 @@ from django.http import (
     HttpResponse,
 )
 from wagtail.admin import messages
+from wagtail.log_actions import (
+    registry,
+)
 from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.actions.publish_page_revision import PublishPageRevisionAction
 from wagtail.actions.publish_revision import PublishRevisionAction
@@ -27,6 +31,8 @@ from wagtail.models import (
     DraftStateMixin,
     WorkflowMixin,
     WorkflowState,
+    PageLogEntry,
+    ModelLogEntry,
     Page,
 )
 from .. import forms as block_forms
@@ -45,6 +51,9 @@ from .mixins import (
     ObjectViewMixin,
     LockViewMixin,
 )
+
+
+MAX_LOG_ENTRIES_DISPLAYED = 8
 
 
 def get_unpublish_action(object):
@@ -221,6 +230,7 @@ class BaseActionView(LockViewMixin, BaseFeditView):
 
 
 class PublishView(BaseActionView):
+    template_name = "wagtail_fedit/editor/action_publish_confirm.html"
     required_superclasses = [DraftStateMixin, RevisionMixin]
     action_text = _("Publish")
 
@@ -240,6 +250,41 @@ class PublishView(BaseActionView):
             s.append(_("You can always choose to unpublish it."))
 
         return s
+    
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        log_entry_count = 0
+        log_entry_model = registry.get_log_model_for_model(self.object.__class__)
+        if issubclass(log_entry_model, PageLogEntry):
+            log_entries = log_entry_model.objects\
+                .filter(page=self.object)\
+                .order_by("-timestamp")
+                
+        elif issubclass(log_entry_model, ModelLogEntry):
+            log_entries = log_entry_model.objects\
+                .filter(object_id=self.object.pk)\
+                .order_by("-timestamp")
+                
+        else:
+            log_entries = None
+
+        if log_entries:
+            log_entries = log_entries.filter(
+                timestamp__gt=models.Subquery(
+                    log_entries.filter(action="wagtail.publish")\
+                               .values("timestamp")\
+                               .order_by("-timestamp")[:1]
+                )
+            )
+            log_entry_count = log_entries.count()
+            log_entries = log_entries[:MAX_LOG_ENTRIES_DISPLAYED]
+
+        return super().get_context_data(**kwargs) | {
+            "log_entries": log_entries,
+            "has_more_entries": log_entry_count > MAX_LOG_ENTRIES_DISPLAYED,
+            "log_entry_count": log_entry_count,
+            "last_published_at": self.object.last_published_at,
+            "is_page": isinstance(self.object, Page),
+        }
 
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not policy.can_publish():

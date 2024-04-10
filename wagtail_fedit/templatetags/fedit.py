@@ -75,8 +75,8 @@ class BlockEditNode(Node):
         block, block_id, field_name, model =\
             _resolve_expressions(context, block, block_id, field_name, model)
         
-        if not block_id and "block_id" not in context and not block:
-            raise ValueError("Block ID is required")
+        # if not block_id and "block_id" not in context and not block:
+        #     raise ValueError("Block ID is required")
         
         # `wagtail_fedit_instance` is provided after the form is saved.
         # This allows us to easily use the same instance across multiple views.
@@ -120,15 +120,15 @@ class BlockEditNode(Node):
             block_id = context["block_id"]
         elif not block_id and block and hasattr(block, "id"):
             block_id = block.id
-        elif not block_id:
-            raise ValueError("Block ID is required")
+        # elif not block_id: # Commented out; just return rendered if block_id is not available.
+        #     raise ValueError("Block ID is required")
         
         if not rendered:
             rendered = mark_safe("")
 
         # Check if the user has permission to edit the block.
         request = context.get("request")
-        if not _can_edit(request, model):
+        if not _can_edit(request, model) or not block_id:
             return rendered
 
         if self.has_block:

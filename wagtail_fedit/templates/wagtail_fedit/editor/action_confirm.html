@@ -12,32 +12,42 @@
     {% include "wagtailadmin/shared/header.html" with title=action_title icon=view.get_header_icon %}
 
     <div class="nice-padding">
-        <div class="wagtail-fedit-form-wrapper{% if form.block.block.meta.fedit_full %} fedit-full{% endif %}">
+        <div class="wagtail-fedit-form-wrapper">
             <form id="wagtail-fedit-form" method="post">
                 {% csrf_token %}
+                
+                {% block form_content %}
+                    {% block help_panel %}
+                        {% panel id="wagtail-fedit-help-text" icon="help" heading=action_help_text_title %}
+                            {% help_block status="warning" %}
+                                {% for text in action_help_text %}
+                                    <p>{{ text }}</p>
+                                {% endfor %}
+                            {% endhelp_block %}
+                        {% endpanel %}
+                    {% endblock %}
 
-                {% panel id="wagtail-fedit-help-text" icon="help" heading=action_help_text_title %}
-                    {% help_block status="warning" %}
-                        {% for text in action_help_text %}
-                            <p>{{ text }}</p>
-                        {% endfor %}
-                    {% endhelp_block %}
-                {% endpanel %}
+                    {% block confirm_text %}
+                        <div class="wagtail-fedit-form-help">
+                            <h2>{% translate "Are you sure you want to continue?" %}</h2>
+                        </div>
+                    {% endblock %}
 
-                <div class="wagtail-fedit-form-help">
-                    <h2>{% translate "Are you sure you want to continue?" %}</h2>
-                </div>
-
-                <input type="hidden" name="action" value="{{ action }}" />
-
-                <div class="wagtail-fedit-form-buttons">
-                    <button type="submit" class="button button-primary button-large">
-                        {{ action_text }}
-                    </button>
-                    <a href="{{ cancel_url }}" class="button no button-large">
-                        {% translate "Cancel" %}
-                    </a>
-                </div>
+                    <input type="hidden" name="action" value="{{ action }}" />
+                    
+                    {% block buttons_wrapper %}
+                        <div class="wagtail-fedit-form-buttons">
+                            {% block buttons %}
+                                <button type="submit" class="button button-primary button-large">
+                                    {{ action_text }}
+                                </button>
+                                <a href="{{ cancel_url }}" class="button no button-large">
+                                    {% translate "Cancel" %}
+                                </a>
+                            {% endblock %}
+                        </div>
+                    {% endblock %}
+                {% endblock %}
 
             </form>
         </div>
