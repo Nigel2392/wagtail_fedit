@@ -96,3 +96,30 @@ class TestUtils(BaseFEditTest):
         self.assertFalse(
             utils.model_diff(self.full_model, other_full_model)
         )
+
+    def test_can_edit(self):
+        requests = (
+            (self.admin_user, True),
+            (self.regular_user, False),
+            (self.anonymous_user, False),
+        )
+
+        for user, outcome in requests:
+            request = self.request_factory.get("/")
+            request.user = user
+
+            self.assertFalse(
+                utils._can_edit(request, self.basic_model)
+            )
+
+            setattr(
+                request,
+                utils.FEDIT_PREVIEW_VAR,
+                True,
+            )
+
+            self.assertEqual(
+                utils._can_edit(request, self.basic_model),
+                outcome,
+            )
+
