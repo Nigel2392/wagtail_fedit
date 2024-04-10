@@ -257,7 +257,8 @@ def is_draft_capable(model):
 
 def model_diff(m1, m2):
     """
-    Check if two model instances are different.
+    Check if two model instances are different based on their type and primary key.
+    Does not check for differences in the model's fields.
     This is used to determine if a relation is being saved.
     """
     return not (
