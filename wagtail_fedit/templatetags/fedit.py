@@ -318,14 +318,20 @@ class FieldEditNode(Node):
 
         if not _can_edit(request, obj):
             return content
-            
+
+        for k, v in self.kwargs.items():
+            if isinstance(v, FilterExpression):
+                self.kwargs[k] = v.resolve(context)
+                  
+        if inline:
+            self.kwargs["inline"] = True
+  
         return render_editable_field(
             request=request, 
             content=content,
             field_name=self.field, 
             model=obj,
             context=context,
-            inline=inline,
             **self.kwargs,
         )
     

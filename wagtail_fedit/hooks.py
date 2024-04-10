@@ -5,6 +5,7 @@ def prefix(name):
     return f"wagtail_fedit.{name}"
 
 
+CONSTRUCT_BLOCK_TOOLBAR  = prefix("construct_block_toolbar")
 """
 ### wagtail_fedit.construct_block_toolbar
 Construct the toolbar for the given block.
@@ -17,9 +18,9 @@ for hook in hooks.get_hooks(CONSTRUCT_BLOCK_TOOLBAR):
     hook(request=request, items=items, model=model, block_id=block_id, field_name=field_name)
 ```
 """
-CONSTRUCT_BLOCK_TOOLBAR  = prefix("construct_block_toolbar")
 
 
+CONSTRUCT_FIELD_TOOLBAR  = prefix("construct_field_toolbar")
 """
 ### wagtail_fedit.construct_field_toolbar
 Construct the toolbar for the given field.
@@ -32,9 +33,9 @@ for hook in hooks.get_hooks(CONSTRUCT_FIELD_TOOLBAR):
     hook(request=request, items=items, model=model, field_name=field_name)
 ```
 """
-CONSTRUCT_FIELD_TOOLBAR  = prefix("construct_field_toolbar")
 
 
+REGISTER_TYPE_RENDERER   = prefix("register_type_renderer")
 """
 ### wagtail_fedit.register_type_renderer
 Register a custom renderer for a type.
@@ -53,9 +54,9 @@ def register_renderers(renderer_map):
     )
 ```
 """
-REGISTER_TYPE_RENDERER   = prefix("register_type_renderer")
 
 
+REGISTER_FIELD_RENDERER  = prefix("register_field_renderer")
 """
 ### wagtail_fedit.register_field_renderer
 Register a custom renderer for a field.
@@ -72,9 +73,9 @@ def register_renderers(renderer_map):
         lambda request, context, instance, value: richtext(value)
 ```
 """
-REGISTER_FIELD_RENDERER  = prefix("register_field_renderer")
 
 
+EXCLUDE_FROM_RELATED_FORMS = prefix("exclude_related_forms")
 """
 ### wagtail_fedit.exclude_related_forms
 Exclude the given model type from the related forms.
@@ -98,9 +99,9 @@ def exclude_related_forms(field):
     return False
 ```
 """
-EXCLUDE_FROM_RELATED_FORMS = prefix("exclude_related_forms")
 
 
+ACTION_MENU_ITEM_IS_SHOWN = prefix("action_menu_item_is_shown")
 """
 ### wagtail_fedit.action_menu_item_is_shown
 Decide if the action menu item should be shown for the given instance.
@@ -116,4 +117,3 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
         return result # <- bool
 ```
 """
-ACTION_MENU_ITEM_IS_SHOWN = prefix("action_menu_item_is_shown")
