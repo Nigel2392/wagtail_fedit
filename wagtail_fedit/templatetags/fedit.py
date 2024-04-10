@@ -131,44 +131,19 @@ class BlockEditNode(Node):
         if not _can_edit(request, model):
             return rendered
 
-        admin_edit_url = edit_url(
-            model,
-            request,
-            hash=f"block-{block_id}-section",
+        if self.has_block:
+            extra["has_block"] = self.has_block
+
+        return render_editable_block(
+            request=request,
+            content=rendered,
+            block_id=block_id,
+            field_name=field_name,
+            model=model,
+            context=context,
+            **extra,
         )
 
-        extra["has_block"] = self.has_block
-
-        items = [
-            FeditBlockEditButton(),
-        ]
-
-        for hook in hooks.get_hooks(CONSTRUCT_BLOCK_TOOLBAR):
-            hook(request=request, items=items, model=model, block_id=block_id, field_name=field_name)
-
-        items = [item.render(request) for item in items]
-        items = list(filter(None, items))
-        
-        return render_to_string(
-            "wagtail_fedit/content/editable_block.html",
-            {
-                "edit_url": self.get_edit_url(
-                    block_id, field_name,
-                    instance=model,
-                    **extra,
-                ),
-                "admin_edit_url": admin_edit_url,
-                "block_id": block_id,
-                "model": model,
-                "content": rendered,
-                "field_name": field_name,
-                "parent_context": context,
-                "wagtail_fedit_field_name": field_name,
-                "wagtail_fedit_instance": model,
-                "toolbar_items": items,
-            }
-        )
-    
     @staticmethod
     def pack(**kwargs) -> dict:
 
@@ -418,6 +393,44 @@ def render_editable_field(request, content, field_name, model, context, **kwargs
         },
         request=request,
     )
+
+def render_editable_block(request, content, block_id, field_name, model, context, **kwargs):
+        admin_edit_url = edit_url(
+            model,
+            request,
+            hash=f"block-{block_id}-section",
+        )
+
+        items = [
+            FeditBlockEditButton(),
+        ]
+
+        for hook in hooks.get_hooks(CONSTRUCT_BLOCK_TOOLBAR):
+            hook(request=request, items=items, model=model, block_id=block_id, field_name=field_name)
+
+        items = [item.render(request) for item in items]
+        items = list(filter(None, items))
+        
+        return render_to_string(
+            "wagtail_fedit/content/editable_block.html",
+            {
+                "edit_url": BlockEditNode.get_edit_url(
+                    block_id, field_name,
+                    instance=model,
+                    **kwargs,
+                ),
+                "admin_edit_url": admin_edit_url,
+                "block_id": block_id,
+                "model": model,
+                "content": content,
+                "field_name": field_name,
+                "parent_context": context,
+                "wagtail_fedit_field_name": field_name,
+                "wagtail_fedit_instance": model,
+                "toolbar_items": items,
+            }
+        )
+
 
 def get_kwargs(parser: Parser, kwarg_list: list[str], tokens: list[str]) -> dict:
     had_kwargs = False
