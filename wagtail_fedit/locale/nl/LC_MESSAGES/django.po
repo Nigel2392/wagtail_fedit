@@ -135,7 +135,7 @@ msgstr "Publicatie vereist"
 #: .\tester\wagtail_fedit\utils.py:57
 #: .\tester\wagtail_fedit\views\fields.py:183
 msgid "The object you are editing supports drafts."
-msgstr "Het object dat u bewerkt, ondersteunt concepten."
+msgstr "Het object dat u bewerkt ondersteunt concepten."
 
 #: .\tester\wagtail_fedit\utils.py:58
 #, python-format
@@ -148,7 +148,7 @@ msgstr "Geen publicatie vereist"
 
 #: .\tester\wagtail_fedit\utils.py:61
 msgid "The object you are editing does not support drafts."
-msgstr "Het object dat u bewerkt, ondersteunt geen concepten."
+msgstr "Het object dat u bewerkt ondersteunt geen concepten."
 
 #: .\tester\wagtail_fedit\utils.py:62
 msgid ""

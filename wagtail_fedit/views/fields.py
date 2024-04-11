@@ -1,6 +1,7 @@
 from typing import Any
 from django.db import models
 from django.shortcuts import render
+from django.utils import translation
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.utils.decorators import method_decorator
@@ -249,50 +250,51 @@ class EditFieldView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplate
         if isinstance(self.original_instance, RevisionMixin):
             extra_log_kwargs["revision"] = self.original_instance.latest_revision
 
-        data = {
-            "verbose_field_name": self.meta_field.verbose_name,
-            "field_name": self.field_name,
-            "model_id": self.model_id,
-            "model_name": self.model_name,
-            "app_label": self.app_label,
-            "model_verbose": str(self.model._meta.verbose_name),
-            "model_string": str(get_model_string(self.original_instance)),
-            "old": str(self.initial_field_value),
-            "new": str(getattr(
-                self.original_instance,
-                self.field_name
-            )),
-        }
+        with translation.override(None):
+            data = {
+                "verbose_field_name": str(self.meta_field.verbose_name),
+                "field_name": self.field_name,
+                "model_id": self.model_id,
+                "model_name": self.model_name,
+                "app_label": self.app_label,
+                "model_verbose": str(self.model._meta.verbose_name),
+                "model_string": str(get_model_string(self.original_instance)),
+                "old": str(self.initial_field_value),
+                "new": str(getattr(
+                    self.original_instance,
+                    self.field_name
+                )),
+            }
 
-        uid = uuid.uuid4()
-        if self.original_instance.pk != self.instance.pk:
-            data.update({
-                "edited_model_string": str(get_model_string(self.instance)),
-                "edited_model_verbose": str(self.instance._meta.verbose_name),
-                "edited_model_id": self.instance.pk,
-                "edited_model_name": self.instance._meta.model_name,
-                "edited_app_label": self.instance._meta.app_label,
-            })
+            uid = uuid.uuid4()
+            if self.original_instance.pk != self.instance.pk:
+                data.update({
+                    "edited_model_string": str(get_model_string(self.instance)),
+                    "edited_model_verbose": str(self.instance._meta.verbose_name),
+                    "edited_model_id": self.instance.pk,
+                    "edited_model_name": self.instance._meta.model_name,
+                    "edited_app_label": self.instance._meta.app_label,
+                })
+
+                log(
+                    instance=self.instance,
+                    action="wagtail_fedit.related_changed",
+                    user=request.user,
+                    uuid=uid,
+                    data=data,
+                    content_changed=True,
+                )
 
             log(
-                instance=self.instance,
-                action="wagtail_fedit.related_changed",
+                instance=self.original_instance,
+                action="wagtail_fedit.edit_field",
                 user=request.user,
+                title=self.get_header_title(),
                 uuid=uid,
                 data=data,
                 content_changed=True,
+                **extra_log_kwargs,
             )
-        
-        log(
-            instance=self.original_instance,
-            action="wagtail_fedit.edit_field",
-            user=request.user,
-            title=self.get_header_title(),
-            uuid=uid,
-            data=data,
-            content_changed=True,
-            **extra_log_kwargs,
-        )
 
         content = get_field_content(
             request,

@@ -1,4 +1,7 @@
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import (
+    gettext_lazy as _,
+    gettext,
+)
 from wagtail.log_actions import LogFormatter
 from wagtail import hooks
 
@@ -20,8 +23,8 @@ def register_core_log_actions(actions):
             if "edited_model_string" in data\
                 and "edited_model_verbose" in data:
                 return _("Changed related '%(related)s' instance '%(instance)s' on field '%(field)s' (Frontend)") % {
-                    "field": data["verbose_field_name"],
-                    "related": data["edited_model_verbose"],
+                    "field": gettext(data["verbose_field_name"]),
+                    "related": gettext(data["edited_model_verbose"]),
                     "instance": data["edited_model_string"],
                 }
 
@@ -37,7 +40,7 @@ def register_core_log_actions(actions):
                     new = new[:50] + "..."
 
                 return _("Changed '%(field)s' from '%(old)s' to '%(new)s' (Frontend)") % {
-                    "field": data["verbose_field_name"],
+                    "field": gettext(data["verbose_field_name"]),
                     "old": old,
                     "new": new,
                 }
@@ -63,7 +66,7 @@ def register_core_log_actions(actions):
                 return self.label
 
             return _("Changed block \"%(block)s\" on field \"%(field)s\" (%(block_id)s, Frontend)") % {
-                "field": data["verbose_field_name"],
-                "block": data["block_label"],
+                "block": gettext(data["block_label"]),
+                "field": gettext(data["verbose_field_name"]),
                 "block_id": data["block_id"],
             }

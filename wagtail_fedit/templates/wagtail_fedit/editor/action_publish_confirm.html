@@ -35,7 +35,7 @@
                                             <span class="report__results--comment">{% trans "Comment" %}: <em>{{ entry.comment }}</em></span>
                                         {% endif %}
                                         {% if entry.revision and entry.content_changed and is_page %}
-                                            {% if entry.revision == page_latest_revision %}{% trans 'Current draft' as status_label %}{% status status_label classname="w-status--primary" %}{% endif %}
+                                            {% if entry.revision == view.object.latest_revision %}{% trans 'Current draft' as status_label %}{% status status_label classname="w-status--primary" %}{% endif %}
                                             {% include "wagtailadmin/pages/revisions/_actions.html" with revision=entry.revision page=view.object %}
                                         {% endif %}
                                     </td>

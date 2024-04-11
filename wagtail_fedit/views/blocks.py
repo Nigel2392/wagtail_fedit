@@ -1,11 +1,11 @@
 from typing import Any
-from django.shortcuts import render
-from django.template.loader import render_to_string
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.decorators import method_decorator
+from django.template.loader import render_to_string
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import View
-from django.urls import reverse
+from django.shortcuts import render
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
@@ -195,23 +195,24 @@ class EditBlockView(utils.FeditIFrameMixin, utils.FeditPermissionCheck, WagtailA
 
         meta_field = self.model._meta.get_field(self.field_name)
         
-        log(
-            instance=self.instance,
-            action="wagtail_fedit.edit_block",
-            user=request.user,
-            title=self.get_header_title(),
-            data={
-                "block_id": self.block_id,
-                "field_name": self.field_name,
-                "model_id": self.model_id,
-                "model_name": self.model_name,
-                "app_label": self.app_label,
-                "verbose_field_name": str(meta_field.verbose_name),
-                "block_label": str(self.block.block.label),
-            },
-            content_changed=True,
-            **extra_log_kwargs,
-        )
+        with translation.override(None):
+            log(
+                instance=self.instance,
+                action="wagtail_fedit.edit_block",
+                user=request.user,
+                title=self.get_header_title(),
+                data={
+                    "block_id": self.block_id,
+                    "field_name": self.field_name,
+                    "model_id": self.model_id,
+                    "model_name": self.model_name,
+                    "app_label": self.app_label,
+                    "verbose_field_name": str(meta_field.verbose_name),
+                    "block_label": str(self.block.block.label),
+                },
+                content_changed=True,
+                **extra_log_kwargs,
+            )
 
         # Add the data to the context and render the block.
 
