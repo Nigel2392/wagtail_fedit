@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-10 22:45+0200\n"
+"POT-Creation-Date: 2024-04-11 11:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,12 +17,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 #: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\edit_block.html:3
 msgid "Edit block"
 msgstr "Bewerk blok"
 
 #: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\edit_field.html:3
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:46
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:49
 msgid "Edit Field"
 msgstr "Bewerk veld"
 
@@ -31,7 +32,6 @@ msgid "Are you sure you want to continue?"
 msgstr "Weet u zeker dat u wilt doorgaan?"
 
 #: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_confirm.html:45
-#: .\tester\wagtail_fedit\views\editable.py:423
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -51,15 +51,15 @@ msgstr "Gebruiker"
 msgid "Date / Time"
 msgstr "Datum / Tijd"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:34
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:35
 msgid "Comment"
 msgstr "Commentaar"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:37
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:38
 msgid "Current draft"
 msgstr "Huidige concept"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:51
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_publish_confirm.html:55
 #, python-format
 msgid ""
 "This object has more changes. <a href=\"%(view_more_url)s\">View all changes."
@@ -106,21 +106,7 @@ msgstr "Bewerken op frontend"
 msgid "View Live Page"
 msgstr "Bekijk live pagina"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\buttons\publish.html:11
-#: .\tester\wagtail_fedit\views\editable.py:235
-msgid "Publish"
-msgstr "Publiceren"
-
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\buttons\submit.html:11
-msgid "Submit for Moderation"
-msgstr "Indienen voor moderatie"
-
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\buttons\unpublish.html:11
-#: .\tester\wagtail_fedit\views\editable.py:342
-msgid "Unpublish"
-msgstr "Depubliceren"
-
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\item_fedit_publishing.html:13
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\userbar\publish\item_fedit_publishing.html:17
 msgid "Revision Management"
 msgstr "Revisiebeheer"
 
@@ -177,65 +163,78 @@ msgstr "Geen actie opgegeven"
 msgid "Invalid action specified: {}"
 msgstr "Ongeldige actie opgegeven: {}"
 
-#: .\tester\wagtail_fedit\views\editable.py:238
+#: .\tester\wagtail_fedit\views\editable.py:235
+#: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:48
+msgid "Publish"
+msgstr "Publiceren"
+
+#: .\tester\wagtail_fedit\views\editable.py:239
 msgid "Publishing {} \"{}\""
 msgstr "Publiceren van {} \"{}\""
 
-#: .\tester\wagtail_fedit\views\editable.py:241
+#: .\tester\wagtail_fedit\views\editable.py:242
 msgid "About publishing"
 msgstr "Over publiceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:245
-msgid "Publishing this object will make it visible to users on the site."
-msgstr "Publicatie van dit object maakt het zichtbaar voor gebruikers op de site."
-
 #: .\tester\wagtail_fedit\views\editable.py:246
-#: .\tester\wagtail_fedit\views\editable.py:427
+msgid "Publishing this object will make it visible to users on the site."
+msgstr ""
+"Publicatie van dit object maakt het zichtbaar voor gebruikers op de site."
+
+#: .\tester\wagtail_fedit\views\editable.py:247
 msgid ""
 "That means that any changes you make will be immediately visible to everyone."
 msgstr ""
-"Dit betekent dat alle wijzigingen die u aanbrengt, onmiddellijk zichtbaar zijn"
-"voor iedereen."
+"Dit betekent dat alle wijzigingen die u aanbrengt, onmiddellijk zichtbaar "
+"zijnvoor iedereen."
 
-#: .\tester\wagtail_fedit\views\editable.py:250
+#: .\tester\wagtail_fedit\views\editable.py:251
 msgid "You can always choose to unpublish it."
 msgstr "U kunt er altijd voor kiezen om het te depubliceren."
 
-#: .\tester\wagtail_fedit\views\editable.py:343
+#: .\tester\wagtail_fedit\views\editable.py:347
+#: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:59
+msgid "Unpublish"
+msgstr "Depubliceren"
+
+#: .\tester\wagtail_fedit\views\editable.py:348
 msgid "About unpublishing"
 msgstr "Over depubliceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:345
+#: .\tester\wagtail_fedit\views\editable.py:350
 msgid "Unpublishing this object will make it invisible to users on the site."
-msgstr "Depublicatie van dit object maakt het onzichtbaar voor gebruikers op de site."
+msgstr ""
+"Depublicatie van dit object maakt het onzichtbaar voor gebruikers op de site."
 
-#: .\tester\wagtail_fedit\views\editable.py:346
-#: .\tester\wagtail_fedit\views\editable.py:384
+#: .\tester\wagtail_fedit\views\editable.py:351
+#: .\tester\wagtail_fedit\views\editable.py:390
+#: .\tester\wagtail_fedit\views\editable.py:433
 msgid "That means that it will no longer be visible to anyone."
 msgstr "Dat betekent dat het niet langer zichtbaar is voor iedereen."
 
-#: .\tester\wagtail_fedit\views\editable.py:347
-#: .\tester\wagtail_fedit\views\editable.py:385
+#: .\tester\wagtail_fedit\views\editable.py:352
+#: .\tester\wagtail_fedit\views\editable.py:391
 msgid "You can always choose to publish it again."
 msgstr "U kunt er altijd voor kiezen om het opnieuw te publiceren."
 
-#: .\tester\wagtail_fedit\views\editable.py:351
+#: .\tester\wagtail_fedit\views\editable.py:356
 msgid "Unpublishing {} \"{}\""
 msgstr "Depubliceren van {} \"{}\""
 
-#: .\tester\wagtail_fedit\views\editable.py:365
+#: .\tester\wagtail_fedit\views\editable.py:370
 msgid "This object is not live"
 msgstr "Dit object is niet live"
 
-#: .\tester\wagtail_fedit\views\editable.py:380
+#: .\tester\wagtail_fedit\views\editable.py:386
+#: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:70
 msgid "Submit for moderation"
 msgstr "Indienen voor moderatie"
 
-#: .\tester\wagtail_fedit\views\editable.py:381
+#: .\tester\wagtail_fedit\views\editable.py:387
 msgid "About submitting for moderation"
 msgstr "Over indienen voor moderatie"
 
-#: .\tester\wagtail_fedit\views\editable.py:383
+#: .\tester\wagtail_fedit\views\editable.py:389
 msgid ""
 "Submitting this object for moderation will make it invisible to users on the "
 "site."
@@ -243,19 +242,32 @@ msgstr ""
 "Het indienen van dit object voor moderatie maakt het onzichtbaar voor "
 "gebruikers op de site."
 
-#: .\tester\wagtail_fedit\views\editable.py:389
+#: .\tester\wagtail_fedit\views\editable.py:395
 msgid "Submitting {} \"{}\" for moderation"
 msgstr "Indienen van {} \"{}\" voor moderatie"
 
-#: .\tester\wagtail_fedit\views\editable.py:424
-msgid "About cancelling"
-msgstr ""
+#: .\tester\wagtail_fedit\views\editable.py:429
+#: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:81
+msgid "Cancel Workflow"
+msgstr "Workflow annuleren"
 
-#: .\tester\wagtail_fedit\views\editable.py:426
-msgid "Cancelling this object will make it visible to users on the site."
-msgstr ""
+#: .\tester\wagtail_fedit\views\editable.py:430
+msgid "About cancelling workflows"
+msgstr "Over het annuleren van workflows"
 
-#: .\tester\wagtail_fedit\views\editable.py:431
+#: .\tester\wagtail_fedit\views\editable.py:432
+msgid ""
+"Cancelling the workflow for this object will remove it from the moderation "
+"process."
+msgstr ""
+"Het annuleren van de workflow voor dit object verwijdert het uit het "
+"moderatieproces."
+
+#: .\tester\wagtail_fedit\views\editable.py:434
+msgid "You can always choose to submit it for moderation again."
+msgstr "Je kunt er altijd voor kiezen om het opnieuw in te dienen voor moderatie."
+
+#: .\tester\wagtail_fedit\views\editable.py:438
 msgid "Cancelling workflow for {} \"{}\""
 msgstr ""
 
@@ -296,23 +308,23 @@ msgstr ""
 msgid "Frontend Edit"
 msgstr "Bewerk op frontend"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:7
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:10
 msgid "Edit Related"
 msgstr "Bewerk gerelateerd"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:7
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:10
 msgid "Related Object Edited"
 msgstr "Gerelateerd object bewerkt"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:11
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:14
 msgid "Field Changed (Frontend)"
 msgstr "Veld gewijzigd (Frontend)"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:12
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:15
 msgid "A field was changed from the frontend"
 msgstr "Een veld is gewijzigd vanaf de frontend"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:22
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:25
 #, python-format
 msgid ""
 "Changed related '%(related)s' instance '%(instance)s' on field "
@@ -321,22 +333,25 @@ msgstr ""
 "Gerelateerde '%(related)s' instantie '%(instance)s' gewijzigd op veld "
 "'%(field)s' (Frontend)"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:39
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:42
 #, python-format
 msgid "Changed '%(field)s' from '%(old)s' to '%(new)s' (Frontend)"
 msgstr "Gewijzigd '%(field)s' van '%(old)s' naar '%(new)s' (Frontend)"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:51
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:54
 msgid "Block Changed (Frontend)"
 msgstr "Blok gewijzigd (Frontend)"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:52
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:55
 msgid "A block was changed from the frontend"
 msgstr "Een blok is gewijzigd vanaf de frontend"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:65
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:68
 #, python-format
 msgid ""
 "Changed block \"%(block)s\" on field \"%(field)s\" (%(block_id)s, Frontend)"
 msgstr ""
 "Blok \"%(block)s\" gewijzigd op veld \"%(field)s\" (%(block_id)s, Frontend)"
+
+#~ msgid "Submit for Moderation"
+#~ msgstr "Indienen voor moderatie"

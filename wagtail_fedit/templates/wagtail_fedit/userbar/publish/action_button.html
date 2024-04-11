@@ -1,0 +1,7 @@
+{% load wagtailadmin_tags i18n %}
+<a href="{{action_url}}" class="wagtail-fedit-userbar-button button bicolor button--icon">
+    <span class="icon-wrapper">
+        {% icon name=action_icon classname="w-action-icon" %}
+    </span>
+    {{ action_text }}
+</a>

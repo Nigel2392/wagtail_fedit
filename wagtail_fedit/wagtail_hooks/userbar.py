@@ -2,6 +2,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.templatetags.static import static
+from django.utils.translation import gettext_lazy as _
 from wagtail.admin.userbar import (
     BaseItem,
     AddPageItem,
@@ -23,12 +24,18 @@ from ..utils import (
 )
 
 class FeditableModelComponent(FeditToolbarComponent):
+    template_name = "wagtail_fedit/userbar/publish/action_button.html"
+    action_icon = None
+    action_text = None
+
     def __init__(self, instance):
         self.instance = instance
 
     def get_context_data(self, request):
         return super().get_context_data(request) | {
             "hidden": not self.instance.has_unpublished_changes,
+            "action_icon": self.action_icon,
+            "action_text": self.action_text,
             "action_url": reverse(
                 self.action_url,
                 args=[self.instance.pk, self.instance._meta.app_label, self.instance._meta.model_name],
@@ -36,19 +43,20 @@ class FeditableModelComponent(FeditToolbarComponent):
         }
 
 class UserBarActionPublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/userbar/publish/buttons/publish.html"
     action_url = "wagtail_fedit:publish"
-    check_for_changes = False
+    action_icon = "fedit-eye-open"
+    action_text = _("Publish")
     
     def is_shown(self, request):
         if not super().is_shown(request):
             return False
         
-        return user_can_publish(self.instance, request.user, check_for_changes=self.check_for_changes)
+        return user_can_publish(self.instance, request.user, check_for_changes=False)
 
 class UserBarActionUnpublishComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/userbar/publish/buttons/unpublish.html"
     action_url = "wagtail_fedit:unpublish"
+    action_icon = "fedit-eye-closed"
+    action_text = _("Unpublish")
         
     def is_shown(self, request):
         if not super().is_shown(request):
@@ -57,16 +65,27 @@ class UserBarActionUnpublishComponent(FeditableModelComponent):
         return user_can_unpublish(self.instance, request.user)
 
 class UserBarActionSubmitComponent(FeditableModelComponent):
-    template_name = "wagtail_fedit/userbar/publish/buttons/submit.html"
     action_url = "wagtail_fedit:submit"
-    check_for_changes = False
+    action_icon = "fedit-check-list"
+    action_text = _("Submit for moderation")
 
     def is_shown(self, request):
         if not super().is_shown(request):
             return False
         
-        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=self.check_for_changes)
+        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=False)
 
+class UserBarActionCancelComponent(FeditableModelComponent):
+    action_url = "wagtail_fedit:cancel"
+    action_icon = "fedit-stop-sign"
+    action_text = _("Cancel Workflow")
+
+    def is_shown(self, request):
+        if not super().is_shown(request):
+            return False
+        
+        return is_draft_capable(self.instance) and\
+               self.instance.has_unpublished_changes
 
 class BaseWagtailFeditItem(BaseItem, FeditPermissionCheck):
     def __init__(self, model):
@@ -132,6 +151,7 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
             UserBarActionPublishComponent(self.model),
             UserBarActionSubmitComponent(self.model),
             UserBarActionUnpublishComponent(self.model),
+            UserBarActionCancelComponent(self.model),
         ]
 
         return super().get_context_data(request) | {

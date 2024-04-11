@@ -20,6 +20,7 @@ model_based_views = (
     ("publish", views.PublishView),
     ("submit", views.SubmitView),
     ("unpublish", views.UnpublishView),
+    ("cancel", views.CancelView),
 )
 
 for name, view in model_based_views:

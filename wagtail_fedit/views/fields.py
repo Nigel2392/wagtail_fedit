@@ -30,7 +30,6 @@ from ..templatetags.fedit import (
     render_editable_field,
 )
 from ..forms import (
-    blocks as block_forms,
     fields as field_forms,
 )
 from ..utils import (

@@ -1,14 +1,10 @@
-from typing import Any, Type
+from typing import Any
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.utils.decorators import method_decorator
-from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.apps import apps
-from django.core.exceptions import PermissionDenied
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
@@ -23,8 +19,7 @@ from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.actions.publish_page_revision import PublishPageRevisionAction
 from wagtail.actions.publish_revision import PublishRevisionAction
 from wagtail.actions.unpublish_page import UnpublishPageAction
-from wagtail.actions.unpublish import UnpublishAction, UnpublishPermissionError
-from wagtail.admin.views.generic import WagtailAdminTemplateMixin
+from wagtail.actions.unpublish import UnpublishAction
 from wagtail.models import (
     RevisionMixin,
     PreviewableMixin,
@@ -123,6 +118,7 @@ class FEditableView(BaseFeditView):
 class BaseActionView(LockViewMixin, BaseFeditView):
     template_name         = "wagtail_fedit/editor/action_confirm.html"
     required_superclasses = [DraftStateMixin]
+    action_icon            = None
     action_text            = None
     title_format           = None
     action_help_text_title = None
@@ -143,6 +139,9 @@ class BaseActionView(LockViewMixin, BaseFeditView):
     def get_action_help_text(self) -> str:
         return self.action_help_text
     
+    def get_action_icon(self) -> str:
+        return self.action_icon
+    
     def setup(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
         super().setup(request, object_id, app_label, model_name)
         self.policy = self.object.permissions_for_user(request.user)
@@ -161,6 +160,7 @@ class BaseActionView(LockViewMixin, BaseFeditView):
             "action_title": self.get_action_title(),
             "action_help_text_title": self.get_action_help_text_title(),
             "action_help_text": self.get_action_help_text(),
+            "action_icon": self.get_action_icon(),
             "cancel_url": reverse(
                 "wagtail_fedit:editable",
                 args=[self.object.pk, self.model._meta.app_label, self.model._meta.model_name],
@@ -233,6 +233,7 @@ class PublishView(BaseActionView):
     template_name = "wagtail_fedit/editor/action_publish_confirm.html"
     required_superclasses = [DraftStateMixin, RevisionMixin]
     action_text = _("Publish")
+    action_icon = "fedit-eye-open"
 
     def get_action_title(self):
         return _("Publishing {} \"{}\"").format(self.object._meta.verbose_name, self.object)
@@ -342,6 +343,7 @@ class PublishView(BaseActionView):
 
 class UnpublishView(BaseActionView):
     required_superclasses = [DraftStateMixin]
+    action_icon = "fedit-eye-closed"
     action_text = _("Unpublish")
     action_help_text_title = _("About unpublishing")
     action_help_text = [
@@ -380,6 +382,7 @@ class UnpublishView(BaseActionView):
 
 class SubmitView(BaseActionView):
     required_superclasses = [DraftStateMixin, WorkflowMixin, RevisionMixin]
+    action_icon = "fedit-check-list"
     action_text = _("Submit for moderation")
     action_help_text_title = _("About submitting for moderation")
     action_help_text = [
@@ -421,13 +424,14 @@ class SubmitView(BaseActionView):
 
 
 class CancelView(BaseActionView):
-    template_name = "wagtail_fedit/editor/cancel_confirm.html"
     required_superclasses = [DraftStateMixin, WorkflowMixin]
-    action_text = _("Cancel")
-    action_help_text_title = _("About cancelling")
+    action_icon = "fedit-stop-sign"
+    action_text = _("Cancel Workflow")
+    action_help_text_title = _("About cancelling workflows")
     action_help_text = [
-        _("Cancelling this object will make it visible to users on the site."),
-        _("That means that any changes you make will be immediately visible to everyone."),
+        _("Cancelling the workflow for this object will remove it from the moderation process."),
+        _("That means that it will no longer be visible to anyone."),
+        _("You can always choose to submit it for moderation again."),
     ]
 
     def get_action_title(self):
