@@ -3,7 +3,9 @@ from django.contrib.contenttypes.models import (
 )
 from wagtail.models import (
     Workflow,
+    WorkflowTask,
     WorkflowContentType,
+    GroupApprovalTask,
 )
 from .base import (
     BaseFEditTest,
@@ -12,7 +14,7 @@ from wagtail_fedit.views import (
     PublishView,
     SubmitView,
     UnpublishView,
-    # CancelView,
+    CancelView,
 )
 
 
@@ -76,21 +78,43 @@ class TestSubmitViews(BaseFEditTest):
         workflow = self.full_model.get_workflow()
         self.assertIsNone(workflow)
 
-        workflow = Workflow.objects.create(name="test_workflow")
+        workflow = Workflow.objects.get_or_create(name="test_workflow")[0]
+        workflow_task = GroupApprovalTask.objects.create(name="test_task_1")
         content_type = ContentType.objects.get_for_model(self.full_model.__class__)
         WorkflowContentType.objects.create(content_type=content_type, workflow=workflow)
+        WorkflowTask.objects.create(
+            workflow=workflow, task=workflow_task, sort_order=1
+        )
 
         wf = self.full_model.get_workflow()
         self.assertIsNotNone(wf)
         self.assertEqual(wf, workflow)
-        self.assertFalse(not not self.full_model.workflow_states)
+        self.assertFalse(not not self.full_model.workflow_states.all())
 
         self.makeRequest("submit", self.full_model, SubmitView, 302)
 
-        self.full_model.refresh_from_db()
+        self.full_model = self.full_model.__class__.objects.get(pk=self.full_model.pk)
         workflow: Workflow = self.full_model.get_workflow()
-        self.assertTrue(not not self.full_model.workflow_states)
-        
+        current_state = self.full_model.workflow_states.first()
+
+        self.assertEqual(
+            current_state.status,
+            current_state.STATUS_IN_PROGRESS,
+        )
+
+    def test_cancel(self):
+        self.test_submit()
+
+        self.makeRequest("cancel", self.full_model, CancelView, 302)
+
+        self.full_model.refresh_from_db()
+
+        current_state = self.full_model.workflow_states.first()
+        self.assertEqual(
+            current_state.status,
+            current_state.STATUS_CANCELLED,
+        )
+
     def test_lock_nopublish(self):
         self.client.force_login(self.other_admin_user)
         
@@ -129,9 +153,30 @@ class TestSubmitViews(BaseFEditTest):
     def test_lock_nosubmit(self):
         self.client.force_login(self.admin_user)
         
-        self.makeRequest("submit", self.full_model, SubmitView, 200)
+        self.makeRequest("submit", self.lock_model, SubmitView, 200)
 
         self.lock_model.refresh_from_db()
 
         self.assertTrue(self.lock_model.has_unpublished_changes)
         self.assertFalse(not not self.lock_model.workflow_states)
+
+    def test_lock_nocancel(self):
+        self.lock_model.locked = False
+        self.lock_model.locked_by = None
+        self.lock_model.save(update_fields=["locked", "locked_by"])
+
+        self.test_submit()
+
+        self.lock_model.locked = True
+        self.lock_model.locked_by = self.other_admin_user
+        self.lock_model.save(update_fields=["locked", "locked_by"])
+        
+        self.makeRequest("cancel", self.lock_model, CancelView, 200)
+
+        self.lock_model.refresh_from_db()
+        current_state = self.full_model.workflow_states.first()
+
+        self.assertEqual(
+            current_state.status,
+            current_state.STATUS_IN_PROGRESS,
+        )
