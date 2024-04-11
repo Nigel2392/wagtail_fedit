@@ -1,9 +1,12 @@
 from django.urls import reverse
+from django.conf import settings
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
-from wagtail.models import WorkflowMixin
+from wagtail.models import (
+    WorkflowMixin,
+)
 from wagtail.admin.userbar import (
     BaseItem,
     AddPageItem,
@@ -52,7 +55,8 @@ class UserBarActionPublishComponent(FeditableModelComponent):
         if not super().is_shown(request):
             return False
         
-        return user_can_publish(self.instance, request.user, check_for_changes=False)
+        return user_can_publish(self.instance, request.user, check_for_changes=False)\
+               and self.instance.has_unpublished_changes
 
 class UserBarActionUnpublishComponent(FeditableModelComponent):
     action_url = "wagtail_fedit:unpublish"
@@ -74,7 +78,8 @@ class UserBarActionSubmitComponent(FeditableModelComponent):
         if not super().is_shown(request):
             return False
         
-        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=False)
+        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=False)\
+               and self.instance.has_unpublished_changes
 
 class UserBarActionCancelComponent(FeditableModelComponent):
     action_url = "wagtail_fedit:cancel"
@@ -91,11 +96,21 @@ class UserBarActionCancelComponent(FeditableModelComponent):
         if not isinstance(self.instance, WorkflowMixin):
             return False
         
-        workflow_state = self.instance.current_workflow_state
-        return workflow_state and (
-            workflow_state.status == workflow_state.STATUS_IN_PROGRESS or\
-            workflow_state.status == workflow_state.STATUS_NEEDS_CHANGES
-        )
+        if not getattr(settings, "WAGTAIL_WORKFLOW_ENABLED", True):
+            return False
+        
+        wf_state = self.instance.current_workflow_state or\
+            self.instance.workflow_states.order_by("created_at").last()
+
+        return wf_state and\
+            wf_state.status in\
+                (wf_state.STATUS_IN_PROGRESS, wf_state.STATUS_NEEDS_CHANGES)
+
+        # workflow_state = self.instance.current_workflow_state
+        # return workflow_state and (
+        #     workflow_state.status == workflow_state.STATUS_IN_PROGRESS or\
+        #     workflow_state.status == workflow_state.STATUS_NEEDS_CHANGES
+        # )
 
 class BaseWagtailFeditItem(BaseItem, FeditPermissionCheck):
     def __init__(self, model):
