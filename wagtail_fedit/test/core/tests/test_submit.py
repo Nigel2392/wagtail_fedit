@@ -95,7 +95,7 @@ class TestSubmitViews(BaseFEditTest):
 
         self.full_model = self.full_model.__class__.objects.get(pk=self.full_model.pk)
         workflow: Workflow = self.full_model.get_workflow()
-        current_state = self.full_model.workflow_states.first()
+        current_state = self.full_model.current_workflow_state
 
         self.assertEqual(
             current_state.status,
@@ -174,7 +174,7 @@ class TestSubmitViews(BaseFEditTest):
         self.makeRequest("cancel", self.lock_model, CancelView, 200)
 
         self.lock_model.refresh_from_db()
-        current_state = self.full_model.workflow_states.first()
+        current_state = self.full_model.current_workflow_state
 
         self.assertEqual(
             current_state.status,

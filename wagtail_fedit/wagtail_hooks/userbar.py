@@ -3,6 +3,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
+from wagtail.models import WorkflowMixin
 from wagtail.admin.userbar import (
     BaseItem,
     AddPageItem,
@@ -84,8 +85,17 @@ class UserBarActionCancelComponent(FeditableModelComponent):
         if not super().is_shown(request):
             return False
         
-        return is_draft_capable(self.instance) and\
-               self.instance.has_unpublished_changes
+        if not is_draft_capable(self.instance):
+            return False
+        
+        if not isinstance(self.instance, WorkflowMixin):
+            return False
+        
+        workflow_state = self.instance.current_workflow_state
+        return workflow_state and (
+            workflow_state.status == workflow_state.STATUS_IN_PROGRESS or\
+            workflow_state.status == workflow_state.STATUS_NEEDS_CHANGES
+        )
 
 class BaseWagtailFeditItem(BaseItem, FeditPermissionCheck):
     def __init__(self, model):
