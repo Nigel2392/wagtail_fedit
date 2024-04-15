@@ -73,6 +73,9 @@ class BaseAdapter(FeditIFrameMixin):
             return False
         return True
     
+    def get_element_id(self) -> str:
+        raise NotImplementedError
+    
     def get_form(self) -> "forms.Form":
         raise NotImplementedError
 

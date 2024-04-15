@@ -1,4 +1,4 @@
-<div class="wagtail-fedit-adapter-wrapper{%if shared_context.inline%} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}"{% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}">
+<div id="{{ adapter.get_element_id }}" class="wagtail-fedit-adapter-wrapper{%if shared_context.inline%} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}"{% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}">
     <div class="wagtail-fedit-buttons">
         {% for button in buttons %}
             {{ button }}

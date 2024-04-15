@@ -109,7 +109,11 @@ class FieldAdapter(BaseAdapter):
             }
 
         return super().get_help_text()
-        
+          
+    def get_element_id(self) -> str:
+        m = self.model
+        return f"field-{self.field_name}-{m._meta.app_label}-{m._meta.model_name}-{self.object.pk}"
+  
     def get_form(self):
         if self.request.method == "POST":
             form = self.form_class(self.request.POST, request=self.request, instance=self.object)

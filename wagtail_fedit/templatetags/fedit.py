@@ -158,7 +158,6 @@ def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict) -> s
 
     context["wagtail_fedit_field"] = adapter.field_name
     context["wagtail_fedit_instance"] = adapter.object
-    
     context["request"] = request
 
     content = adapter.render_content(context)
@@ -185,7 +184,6 @@ def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict) -> s
     return render_to_string(
         "wagtail_fedit/content/editable_adapter.html",
         {
-            "request": request,
             "identifier": adapter.identifier,
             "content": content,
             "adapter": adapter,

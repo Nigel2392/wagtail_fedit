@@ -63,6 +63,9 @@ class BlockAdapter(BaseAdapter):
             "model_name": self.model._meta.verbose_name,
             "model_string": model_string,
         }
+    
+    def get_element_id(self) -> str:
+        return f"block-{self.kwargs['block_id']}-section"
 
     def get_form(self):
 
