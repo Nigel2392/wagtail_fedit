@@ -1,4 +1,3 @@
-import uuid
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
@@ -11,20 +10,12 @@ from wagtail.blocks import (
     BoundBlock,
 )
 from wagtail.models import (
-    StreamField,
+    RevisionMixin,
 )
 
 from .base import (
     BaseAdapter,
     AdapterError,
-)
-from ..utils import (
-    use_related_form,
-    model_diff,
-    get_model_string,
-    get_field_content,
-    is_draft_capable,
-    FeditIFrameMixin,
 )
 from ..forms import (
     blocks as block_forms,
@@ -74,6 +65,7 @@ class BlockAdapter(BaseAdapter):
         }
 
     def get_form(self):
+
         self.form_class = block_forms.get_block_form_class(self.block.block)
 
         if self.request.method == "POST":
@@ -85,8 +77,35 @@ class BlockAdapter(BaseAdapter):
     def form_valid(self, form: block_forms.BlockEditForm):
         self.block = form.save()
 
+        extra_log_kwargs = {}
+        if isinstance(self.object, RevisionMixin):
+            extra_log_kwargs["revision"] = self.object.latest_revision
+
+        with translation.override(None):
+            log(
+                instance=self.object,
+                action="wagtail_fedit.edit_block",
+                user=self.request.user,
+                title=self.get_header_title(),
+                data={
+                    "block_id": self.kwargs["block_id"],
+                    "field_name": self.field_name,
+                    "model_id": self.object.pk,
+                    "model_name": self.object._meta.model_name,
+                    "app_label": self.object._meta.app_label,
+                    "verbose_field_name": str(self.meta_field.verbose_name),
+                    "block_label": str(self.block.block.label),
+                },
+                content_changed=True,
+                **extra_log_kwargs,
+            )
+
     def render_content(self, parent_context: dict = None) -> str:
+        parent_context = parent_context or {}
         if hasattr(parent_context, "flatten"):
             parent_context = parent_context.flatten()
+
+        parent_context.update(self.kwargs)
+
         return self.block.render(parent_context)
         

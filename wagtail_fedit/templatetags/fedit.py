@@ -98,8 +98,8 @@ class AdapterNode(Node):
         )
 
         if not adapter.check_permissions()\
-        or not _can_edit(request, obj):
-            return adapter.render_content()
+          or not _can_edit(request, obj):
+            return adapter.render_content(context)
 
         return wrap_adapter(request, adapter, context)
 

@@ -121,11 +121,8 @@ class WagtailFeditEditor {
     constructor(options) {
         const {
             element = null,
-            wrapperQuerySelector = ".wagtail-fedit-block-wrapper",
-            type = "block",
         } = options;
 
-        this.type = type;
         this.initialTitle = document.title;
         
         if (!element) {
@@ -259,6 +256,7 @@ class WagtailFeditEditor {
             const newBlock = document.createElement("div");
             newBlock.innerHTML = html;
             const blockWrapper = newBlock.firstElementChild;
+            blockWrapper.classList.add("wagtail-fedit-initialized");
             this.wrapperElement.parentNode.insertBefore(blockWrapper, this.wrapperElement);
             this.wrapperElement.parentNode.removeChild(this.wrapperElement);
             blockWrapper.style.opacity = 0;
@@ -301,9 +299,12 @@ class WagtailFeditEditor {
     }
 
     init() {
+        console.log("before", this.sharedContext);
         this.sharedContext = this.wrapperElement.dataset.sharedContext;
         this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
         this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
+
+        console.log("after", this.sharedContext);
 
         const api = new WagtailFeditorAPI(this);
         const content = this.wrapperElementContent;
@@ -324,7 +325,7 @@ class WagtailFeditEditor {
         for (const editor of wagtailFeditBlockEditors) {
             if (!editor.classList.contains("wagtail-fedit-initialized")) {
                 editor.classList.add("wagtail-fedit-initialized");
-                new WagtailFeditEditor({element: editor, type: this.type});
+                new WagtailFeditEditor({element: editor});
             }
         }
     }
