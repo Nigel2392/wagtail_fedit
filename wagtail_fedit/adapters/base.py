@@ -83,6 +83,15 @@ class BaseAdapter(FeditIFrameMixin):
         pass
 
     @classmethod
+    def render_from_kwargs(cls, context, **kwargs):
+        """
+        Render the content for the field from the kwargs if possible.
+        This should NOT include the wagtail-fedit wrapper.
+        This is rendered if anything goes wrong;
+        like the model/field variables not being available.
+        """
+        raise AdapterError("Cannot render {} from kwargs".format(cls.__name__))
+
     def render_content(self, parent_context: dict = None) -> str:
         """
         Render the content for the field.

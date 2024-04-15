@@ -100,6 +100,17 @@ class BlockAdapter(BaseAdapter):
                 **extra_log_kwargs,
             )
 
+    @classmethod
+    def render_from_kwargs(context, **kwargs):
+        if "block" not in kwargs:
+            raise AdapterError("Block is required")
+        
+        block = kwargs.pop("block")
+        if not hasattr(block, "render"):
+            raise AdapterError("Invalid block type, missing render method")
+        
+        return block.render(context)
+
     def render_content(self, parent_context: dict = None) -> str:
         parent_context = parent_context or {}
         if hasattr(parent_context, "flatten"):

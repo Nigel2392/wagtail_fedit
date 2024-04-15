@@ -1,5 +1,6 @@
 from .base import (
     BaseAdapter,
+    AdapterError,
 )
 from .registry import (
     AdapterRegistry,

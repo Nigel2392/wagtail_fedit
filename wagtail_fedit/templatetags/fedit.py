@@ -1,32 +1,27 @@
 from typing import Type
-from django.template import library, Node, NodeList, TemplateSyntaxError
+from django.template import library, Node, TemplateSyntaxError
 from django.template.loader import render_to_string
 from django.template.base import Parser, Token
 from django.template.base import FilterExpression
-from django.utils.safestring import mark_safe
 from django.http import HttpRequest
 from django.urls import reverse
 from django.core import signing
-from django.db import models
 
-from wagtail.blocks import BoundBlock
 from wagtail import hooks
-from urllib.parse import urlencode
 
 import warnings
 
 from ..toolbar import (
-    FeditBlockEditButton,
     FeditAdapterEditButton,
 )
 from ..adapters import (
     adapter_registry,
     RegistryLookUpError,
     BaseAdapter,
+    AdapterError,
 )
 from ..utils import (
     _can_edit,
-    edit_url,
 )
 from ..hooks import (
     CONSTRUCT_ADAPTER_TOOLBAR,
@@ -78,10 +73,19 @@ class AdapterNode(Node):
         else:
 
             if not model:
-                raise TemplateSyntaxError(
-                    "`instance.field` is required; use `from_context` if "
-                    "this is wrapped by a fedit templatetag or adress a model field."
+                warnings.warn(
+                    WARNING_MODEL_INSTANCE_NOT_AVAILABLE % {
+                        "object": self.adapter.__name__,
+                    },
+                    RuntimeWarning,
                 )
+
+                try:
+                    return self.adapter.render_from_kwargs(
+                        context, **kwargs,
+                    )
+                except AdapterError as e:
+                    raise TemplateSyntaxError(str(e))
 
             field_name = getters[len(getters)-1]
             obj = model
