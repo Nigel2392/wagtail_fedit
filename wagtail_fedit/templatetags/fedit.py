@@ -1,6 +1,6 @@
 from typing import Type
 from django.template import (
-    library, Node, TemplateSyntaxError, RequestContext,
+    library, Node, TemplateSyntaxError,
 )
 from django.template.loader import render_to_string
 from django.template.base import (
