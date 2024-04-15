@@ -62,11 +62,10 @@ Getting Started
        {# Adress the model.field or model.my.related.field you wish to edit. #}
        {# Editable fields get a special `inline` argument. #}
        {# if True the button is not placed with an absolute CSS position. #}
-       <h1>{% fedit_field self.title inline=True or False %}</h1>
+       <h1>{% fedit field self.title inline=True or False %}</h1>
 
-       {# Pass in the field_name and the model instance on which that field resides if you are using `wagtail_fedit <= 1.3.8` #}
        <main class="my-streamfield-content">
-           {% fedit_field "content" self %}
+           {% fedit field self.content %}
        </main>
 
        {% wagtailuserbar %}
@@ -90,7 +89,7 @@ Getting Started
    {% for block in self.content %}
        {# Sub-Blocks wrapped by fedit_block do not require the field_name or model argument. #}
        {# This is taken from the parent (also wrapped by `fedit_block`); the model and field name are shared through context. #}
-       {% fedit_block block=block block_id=block.id field_name="content" model=self %}
+       {% fedit block self.content block=block block_id=block.id %}
    {% endfor %}
 
    ```
@@ -106,7 +105,7 @@ Getting Started
            return render_to_string("myapp/render_my_field.html", self.get_context(request))
    ```
 
-   Your content will then automatically be rendered with that method when need be by using `{% fedit_field "content" self %} `
+   Your content will then automatically be rendered with that method when need be by using `{% fedit field self.content %} `
 4. **But wait?! I go to my template and I do not see a way to edit!**That is true! We try to protect any styling on your actual page; we do not want to interfere.Instead; we serve the editing interface on a different URL, accessible by clicking `Frontend Editing` in the Wagtail userbar. Keep an eye on that userbar! It is also used for publishing if your model inherits from `DraftStateMixin`.
 
 ## Permissions
@@ -188,11 +187,12 @@ Our new loop would then be:
 ```django-html
 {% for item in self.items.bound_blocks %}
     {# Field name and model are the same arguments as in the first example! #}
-    {% fedit_block block=item block_id=item.id field_name="content" model=my_model_instance_var %}
+    {% fedit block my_model_instance_var.content_field block=item block_id=item.id %}
 {% endfor %}
 ```
 
-**Note:** If the parent block is wrapped with `fedit_block` or `fedit_field` the field_name and model argument can be omitted.
+**Note:** If the parent block is wrapped with `fedit block` or `fedit field` passing in the instance variable and field name should be omitted and replaced with `from_context`.
+Example: `{% fedit block from_context block=item block_id=item.id %}`
 The parent- blocktag will share these variables through context.
 This makes it possibly to easily use editable sub-blocks across multiple different model types.
 If your model **ISN'T** capable of editing; or these variables aren't shared - your block will be rendered as normal.
