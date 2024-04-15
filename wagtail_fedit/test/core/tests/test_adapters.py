@@ -193,6 +193,7 @@ class TestBaseAdapter(BaseFEditTest):
             True,
         )
 
+        # In this test we are testing the adapter - not the template.
         tpl = tpl.render(
             Context({
                 "request": request,

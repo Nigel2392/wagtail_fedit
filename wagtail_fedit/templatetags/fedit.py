@@ -202,13 +202,13 @@ def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict, run_
     )
 
 @register.simple_tag(takes_context=True)
-def render_adapter(context: dict, adapter: BaseAdapter) -> str:
-    context = context.flatten()
+def render_adapter(context: Context, adapter: BaseAdapter) -> str:
+    parent_context = {}
     
-    parent_context = context.pop("parent_context", {})
-    if isinstance(parent_context, Context):
-        parent_context = parent_context.flatten()
-        
+    if "parent_context" in context:
+        parent_context = context["parent_context"]
+        del context["parent_context"]
+
     context.update(parent_context)
 
     context["wagtail_fedit_field"]    = adapter.field_name
