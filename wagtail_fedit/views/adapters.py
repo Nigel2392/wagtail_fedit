@@ -184,8 +184,8 @@ class EditAdapterView(BaseAdapterView):
             context[PAGE_TEMPLATE_VAR] = self.instance
 
         context = make_context(
-            self.request,
             context,
+            self.request,
         ).flatten()
 
         # Render the frame HTML
