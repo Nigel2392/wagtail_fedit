@@ -217,18 +217,6 @@ for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
     hook(items=items, adapter=adapter)
 ```
 
-### wagtail_fedit.construct_field_toolbar
-
-Construct the toolbar for the given field.
-This is used to display the edit icon in the field.
-
-How it is called:
-
-```python
-for hook in hooks.get_hooks(CONSTRUCT_FIELD_TOOLBAR):
-    hook(request=request, items=items, model=model, field_name=field_name)
-```
-
 ### wagtail_fedit.register_type_renderer
 
 Register a custom renderer for a type.
