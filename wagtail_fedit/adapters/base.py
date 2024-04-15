@@ -81,7 +81,8 @@ class BaseAdapter(FeditIFrameMixin):
     
     def form_invalid(self, form: "forms.Form"):
         pass
-    
+
+    @classmethod
     def render_content(self, parent_context: dict = None) -> str:
         """
         Render the content for the field.

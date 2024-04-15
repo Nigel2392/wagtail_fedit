@@ -78,7 +78,10 @@ class AdapterNode(Node):
         else:
 
             if not model:
-                raise TemplateSyntaxError("Model is required")
+                raise TemplateSyntaxError(
+                    "`instance.field` is required; use `from_context` if "
+                    "this is wrapped by a fedit templatetag or adress a model field."
+                )
 
             field_name = getters[len(getters)-1]
             obj = model

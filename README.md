@@ -87,8 +87,10 @@ Getting Started
    {# myapp/render_my_field.html #}
    {% load fedit %}
    {% for block in self.content %}
-       {# Sub-Blocks wrapped by fedit_block do not require the field_name or model argument. #}
-       {# This is taken from the parent (also wrapped by `fedit_block`); the model and field name are shared through context. #}
+       {# Sub-Blocks wrapped by {# fedit block #} do not require the field_name or model argument. #}
+       {# This can (and probably should be) replaced with the `from_context` argument. #}
+       {# The variables are then taken from the parent {% fedit %} tag. The model and field name are shared through context. #}
+       {# This keeps everything extensible; but in this case it does not matter since what we are doing is instance- specific. #}
        {% fedit block self.content block=block block_id=block.id %}
    {% endfor %}
 
@@ -101,8 +103,8 @@ Getting Started
    class MyPage(...): # Can be any type of model.
        content = StreamField(...)
 
-       def render_fedit_content(self, request):
-           return render_to_string("myapp/render_my_field.html", self.get_context(request))
+       def render_fedit_content(self, request, context):
+           return render_to_string("myapp/render_my_field.html", self.get_context(request) | context)
    ```
 
    Your content will then automatically be rendered with that method when need be by using
@@ -200,16 +202,19 @@ Our new loop would then be:
 
 ## Hooks
 
-### wagtail_fedit.construct_block_toolbar
+### wagtail_fedit.construct_adapter_toolbar
 
-Construct the toolbar for the given block.
-This is used to display the edit icon in the block.
+Construct the toolbar for the given adapter.
+This is used to display the edit icon for the given adapter.
 
 How it is called:
 
 ```python
-for hook in hooks.get_hooks(CONSTRUCT_BLOCK_TOOLBAR):
-    hook(request=request, items=items, model=model, block_id=block_id, field_name=field_name)
+items = [
+    FeditAdapterEditButton(),
+]
+for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
+    hook(items=items, adapter=adapter)
 ```
 
 ### wagtail_fedit.construct_field_toolbar

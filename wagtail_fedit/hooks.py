@@ -5,35 +5,6 @@ def prefix(name):
     return f"wagtail_fedit.{name}"
 
 
-CONSTRUCT_BLOCK_TOOLBAR  = prefix("construct_block_toolbar")
-"""
-### wagtail_fedit.construct_block_toolbar
-Construct the toolbar for the given block.
-This is used to display the edit icon in the block.
-
-How it is called:
-
-```python
-for hook in hooks.get_hooks(CONSTRUCT_BLOCK_TOOLBAR):
-    hook(request=request, items=items, model=model, block_id=block_id, field_name=field_name)
-```
-"""
-
-
-CONSTRUCT_FIELD_TOOLBAR  = prefix("construct_field_toolbar")
-"""
-### wagtail_fedit.construct_field_toolbar
-Construct the toolbar for the given field.
-This is used to display the edit icon in the field.
-
-How it is called:
-
-```python
-for hook in hooks.get_hooks(CONSTRUCT_FIELD_TOOLBAR):
-    hook(request=request, items=items, model=model, field_name=field_name)
-```
-"""
-
 CONSTRUCT_ADAPTER_TOOLBAR = prefix("construct_adapter_toolbar")
 """
 ### wagtail_fedit.construct_adapter_toolbar
