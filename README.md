@@ -289,33 +289,21 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
         return result # <- bool
 ```
 
-## How your field/block is rendered
+## How your content is rendered
 
 (**Maintainer's note:** In my experience this doesn't mess the CSS up too much, or even at all for most content - **if** you don't get hyperspecific with your CSS selectors and structure your templates well.)
 
 Your block and field are wrapped in a `div`, any CSS for your templates should keep this in mind.
 
-### Rendered block output HTML
+### Rendered editable output HTML
 
 ```html
-<div class="wagtail-fedit-block-wrapper" id="wagtail-fedit-{{ block_id }}" data-block-id="{{block_id}}" data-edit-url="{{ edit_url }}"> 
+<div class="wagtail-fedit-adapter-wrapper{%if shared_context.inline%} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}"{% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}">
     <div class="wagtail-fedit-buttons">
-        {% for item in toolbar_items %}
-            {{ item }} {# Edit button; more buttons MIGHT possibly be added in the future. #}
+        {% for button in buttons %}
+            {{ button }} {# Edit button; more buttons MIGHT possibly be added in the future. #}
         {% endfor %}
-    </div>{{ content|safe }}{# Your block's rendered content. The same as {% include_block block %} #}
-</div>
-```
-
-### Rendered field output HTML
-
-```html
-<div class="wagtail-fedit-field-wrapper {% if inline %}wagtail-fedit-inline{% endif %}" id="wagtail-fedit-{{ field_name }}-{{model.pk}}" data-edit-url="{{ edit_url }}"> 
-    <div class="wagtail-fedit-buttons">
-        {% for item in toolbar_items %}
-            {{ item }} {# Edit button; more buttons MIGHT possibly be added in the future. #}
-        {% endfor %}
-    </div>{{ content|safe }}{# Your field's rendered content. Rendering may vary on your setup. #}
+    </div>{{ content|safe }}
 </div>
 ```
 
