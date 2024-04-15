@@ -1,8 +1,10 @@
-from django.template import library, Node, NodeList
+from typing import Type
+from django.template import library, Node, NodeList, TemplateSyntaxError
 from django.template.loader import render_to_string
 from django.template.base import Parser, Token
 from django.template.base import FilterExpression
 from django.utils.safestring import mark_safe
+from django.http import HttpRequest
 from django.urls import reverse
 from django.core import signing
 from django.db import models
@@ -15,433 +17,188 @@ import warnings
 
 from ..toolbar import (
     FeditBlockEditButton,
-    FeditFieldEditButton,
+    FeditAdapterEditButton,
+)
+from ..adapters import (
+    adapter_registry,
+    RegistryLookUpError,
+    BaseAdapter,
 )
 from ..utils import (
     _can_edit,
     edit_url,
-    get_field_content,
-    _resolve_expressions,
 )
 from ..hooks import (
-    CONSTRUCT_BLOCK_TOOLBAR,
-    CONSTRUCT_FIELD_TOOLBAR,
+    CONSTRUCT_ADAPTER_TOOLBAR,
 )
 
 
 register = library.Library()
-url_value_signer = signing.TimestampSigner()
 
 
 WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context for %(object)s."
 WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for %(object)s."
 
 
-class BlockEditNode(Node):
-    class UnpackError(Exception):
-        pass
 
-    def __init__(self,
-            nodelist: NodeList = None,
-            block: BoundBlock = None,
-            block_id: str = None,
-            field_name: str = None,
-            model: models.Model = None,
-            **extra,
-        ):
+class AdapterNode(Node):
+    signer = signing.TimestampSigner()
 
-        self.nl = nodelist
-        self.block = block
-        self.block_id = block_id
-        self.field_name = field_name
+    def __init__(self, adapter: Type[BaseAdapter], model: FilterExpression, getters: list[str], **kwargs):
+        self.adapter = adapter
         self.model = model
-        self.extra = extra
-
-    def render(self, context):
-        block = self.block
-        block_id = self.block_id
-        field_name = self.field_name
-        model = self.model
-        extra = self.extra
-
-        # Conversions for filterexpressions
-        for k, e in extra.items():
-            if isinstance(e, FilterExpression):
-                extra[k] = e.resolve(context)
-
-        if not field_name and "wagtail_fedit_field_name" in context:
-            field_name = context["wagtail_fedit_field_name"]
-
-        block, block_id, field_name, model =\
-            _resolve_expressions(context, block, block_id, field_name, model)
-        
-        # if not block_id and "block_id" not in context and not block:
-        #     raise ValueError("Block ID is required")
-        
-        # `wagtail_fedit_instance` is provided after the form is saved.
-        # This allows us to easily use the same instance across multiple views.
-        # Model will only be provided initially when the block is rendered.
-        model = model or context.get("wagtail_fedit_instance")
-        context["wagtail_fedit_field_name"] = field_name
-        context["wagtail_fedit_instance"] = model
-        
-        # Render the block or nodelist
-        # This allows us to use the block as a block tag or as a simple tag.
-        if block:
-            try:
-                block_context = context.flatten()
-            except AttributeError:
-                block_context = context
-            block_context.update(extra)
-            rendered = block.render_as_block(block_context)
-            self.has_block = True
-        elif self.nl:
-            rendered = self.nl.render(context)
-            self.has_block = False
-        else:
-            raise ValueError("Block or nodelist is required")
-        
-        if not field_name:
-            warnings.warn(
-                WARNING_FIELD_NAME_NOT_AVAILABLE
-                % {"object": context.template_name}
-            )
-            return rendered
-        
-        if not model:
-            warnings.warn(
-                WARNING_MODEL_INSTANCE_NOT_AVAILABLE
-                % {"object": block.block.__class__.__name__}
-            )
-            return rendered
-        
-        # Get block id from block if bound or context.
-        if not block_id and "block_id" in context:
-            block_id = context["block_id"]
-        elif not block_id and block and hasattr(block, "id"):
-            block_id = block.id
-        # elif not block_id: # Commented out; just return rendered if block_id is not available.
-        #     raise ValueError("Block ID is required")
-        
-        if not rendered:
-            rendered = mark_safe("")
-
-        # Check if the user has permission to edit the block.
-        request = context.get("request")
-        if not _can_edit(request, model) or not block_id:
-            return rendered
-
-        if self.has_block:
-            extra["has_block"] = self.has_block
-
-        return render_editable_block(
-            request=request,
-            content=rendered,
-            block_id=block_id,
-            field_name=field_name,
-            model=model,
-            context=context,
-            **extra,
-        )
-
-    @staticmethod
-    def pack(**kwargs) -> dict:
-
-        packed = {}
-        for k, v in kwargs.items():
-            packed[k] = url_value_signer.sign(str(v))
-
-        return packed
-    
-    @classmethod
-    def unpack(cls, *expected: str, request = None) -> dict:
-        if not request:
-            raise ValueError("Request is required")
-        
-        unpacked = {}
-        for key in expected:
-            try:
-                unpacked[key] = url_value_signer.unsign(
-                    request.GET.get(key)
-                )
-            except signing.SignatureExpired:
-                raise cls.UnpackError(f"Value for {key} has expired")
-            except signing.BadSignature:
-                raise cls.UnpackError(f"Invalid value for {key}")
-            except TypeError:
-                raise cls.UnpackError(f"Missing value for {key}")
-
-        if not all([unpacked.get(key) for key in expected]):
-            raise cls.UnpackError(f"Missing value for {key}")
-        
-        return unpacked
-
-    @staticmethod
-    def get_edit_url(block_id: str, field_name: str, instance: models.Model, **kwargs) -> str:
-        base_url = reverse(
-            "wagtail_fedit:edit_block",
-            args=[block_id, field_name, instance._meta.app_label, instance._meta.model_name, instance.pk]
-        )
-
-        if not kwargs:
-            return base_url
-
-        packed = urlencode(
-            BlockEditNode.pack(**kwargs),
-        )
-        return f"{base_url}?{packed}"
-
-
-
-@register.tag(name="fedit_block")
-def do_render_fedit_block(parser: Parser, token: Token):
-    """
-    This tag is used to render an editable block.
-
-    This block will be wrapped and is able to be edited by the user on the frontend.
-
-    We will require the block_id and field_name of the streamfield this block belongs to.
-
-    You could omit needing to pass a block ID by passing in the StreamChild instance as opposed to the StructValue instance.
-    
-    Usage example 1:
-        ```python
-        {% fedit_block my_structvalue_instance block_id my_streamfield_attribute_name page_instance %}
-        ```
-
-    Optionally you can omit the block and pass in the block_id and field_name as keyword arguments.
-
-    This will allow you to use the block as a block tag.
-
-    Usage example 2:
-        ```python
-        {% fedit_block block_id=my_structvalue_instance field_name=my_streamfield_attribute_name model=page_instance %}
-            <p>Some content before block</p>
-            {% include_block my_block %}
-            <p>Some content after block</p>
-        {% unfedit_block %}
-        ```
-    """
-
-    tokens = token.split_contents()
-    _ = tokens.pop(0)
-    kwargs_names = [
-        "block", "block_id",
-        "field_name", "model",
-    ]
-
-    kwargs = get_kwargs(parser, kwargs_names, tokens)
-    
-    if "block" not in kwargs:
-        nodelist = parser.parse(("unfedit_block",))
-        parser.delete_first_token()
-    else:
-        nodelist = None
-
-    extra = {}
-    for key, value in kwargs.items():
-        if key not in kwargs_names:
-            extra[key] = value
-
-    return BlockEditNode(
-        nodelist=nodelist,
-        block=kwargs.get("block"),
-        block_id=kwargs.get("block_id"),
-        field_name=kwargs.get("field_name"),
-        model=kwargs.get("model"),
-        **extra,
-    )
-
-
-class FieldEditNode(Node):
-    def __init__(self, model: models.Model, getters: list[str], inline: bool = False, **kwargs):
-        self.model = model
-        self.field = getters[len(getters)-1]
         self.getters = getters
-        self.inline = inline
         self.kwargs = kwargs
 
+    def _resolve_expressions(self, context, model, **kwargs):
+        for k, v in kwargs.items():
+            if isinstance(v, FilterExpression):
+                kwargs[k] = v.resolve(context)
+        
+        if isinstance(model, FilterExpression):
+            model = model.resolve(context)
+
+        return model, kwargs
+
     def render(self, context):
-        getters = self.getters
         model = self.model
-        inline = self.inline
+        getters = self.getters
 
-        model, inline =\
-            _resolve_expressions(context, model, inline)
+        model, kwargs = self._resolve_expressions(
+            context, model, **self.kwargs,
+        )
 
-        obj = model
-        for i in range(len(getters) - 1):
-            getter = getters[i]
-            try:
-                obj = getattr(obj, getter)
-            except AttributeError:
-                raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
+        if "wagtail_fedit_field" in context\
+            and "wagtail_fedit_instance" in context\
+            and not model:
+
+            field_name = context["wagtail_fedit_field"]
+            obj = context["wagtail_fedit_instance"]
+
+        else:
+
+            if not model:
+                raise TemplateSyntaxError("Model is required")
+
+            field_name = getters[len(getters)-1]
+            obj = model
+            for i in range(len(getters) - 1):
+                getter = getters[i]
+                try:
+                    obj = getattr(obj, getter)
+                except AttributeError:
+                    raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
 
         request = context.get("request")
-        content = get_field_content(
-            request,
-            obj,
-            obj._meta.get_field(self.field),
-            context,
+        adapter = self.adapter(
+            object=obj,
+            field_name=field_name,
+            request=request,
+            **kwargs,
         )
 
-        if not content:
-            content = mark_safe("")
-            # Force inline editing if no content is available.
-            # This will make sure the height of the field to edit is not 0.
-            inline = True
+        if not adapter.check_permissions()\
+        or not _can_edit(request, obj):
+            return adapter.render_content()
 
-        if not _can_edit(request, obj):
-            return content
-
-        for k, v in self.kwargs.items():
-            if isinstance(v, FilterExpression):
-                self.kwargs[k] = v.resolve(context)
-                  
-        if inline:
-            self.kwargs["inline"] = True
-  
-        return render_editable_field(
-            request=request, 
-            content=content,
-            field_name=self.field, 
-            model=obj,
-            context=context,
-            **self.kwargs,
-        )
-    
+        return wrap_adapter(request, adapter, context)
 
 
-@register.tag(name="fedit_field")
-def do_render_fedit_field(parser: Parser, token: Token):
-    """
-    This tag is used to render an editable field.
+@register.tag(name="fedit")
+def do_render_fedit(parser: Parser, token: Token):
 
-    This field will be wrapped and is able to be edited by the user on the frontend.
-
-    Usage example:
-        ```python
-        {% fedit_field mymodel.myfield inline=(default: False) key1=value1 key2=value2 %}
-        ```
-
-    Optionally your model can define a `render_fedit_{field_name}` method that will be used to render the field.
-    This will allow you to use custom rendering logic if need be.
-    """
     tokens = token.split_contents()
+
     _ = tokens.pop(0)
-    model__field = tokens.pop(0)
-    model_tokens = model__field.split(".")
+    adapter_id = tokens.pop(0)
 
-    if len(model_tokens) < 2:
-        raise ValueError("Model and field name are required")
-    
-    # mymodel.myfield
-    # mymodel.related_field.myfield
-    model = parser.compile_filter(model_tokens.pop(0))
+    try:
+        adapter = adapter_registry[adapter_id]
+    except RegistryLookUpError:
+        raise TemplateSyntaxError(f"No adapter found with identifier '{adapter_id}'")
 
+    model, model_tokens = None, None
     if tokens:
-        kwargs_names = [
-            "inline",
-        ]
+        model__field = tokens.pop(0)
+        model_tokens = model__field.split(".")
 
-        kwargs = get_kwargs(parser, kwargs_names, tokens)
-    else:
-        kwargs = {}
+        if len(model_tokens) < 2:
+            if model_tokens[0] != "from_context":
+                raise TemplateSyntaxError(
+                    "Model and field name are required: 'mymodel.myfield' or 'from_context'",
+                )
 
-    return FieldEditNode(
+        if len(model_tokens) > 1:
+            # mymodel.myfield
+            # mymodel.related_field.myfield
+            model = parser.compile_filter(model_tokens.pop(0))
+
+    kwargs = get_kwargs(parser, tokens, adapter.required_kwargs)
+
+    return AdapterNode(
+        adapter=adapter,
         model=model,
         getters=model_tokens,
         **kwargs,
     )
 
 
-def render_editable_field(request, content, field_name, model, context, **kwargs):
-    edit_url = reverse(
-        "wagtail_fedit:edit_field",
-        args=[field_name, model._meta.app_label, model._meta.model_name, model.pk]
-    )
+def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict) -> str:
+    if not context:
+        context = {}
 
-    if kwargs:
-        packed = urlencode(
-            BlockEditNode.pack(**kwargs),
-        )
-        edit_url = f"{edit_url}?{packed}"
+    context["wagtail_fedit_field"] = adapter.field_name
+    context["wagtail_fedit_instance"] = adapter.object
+
+    content = adapter.render_content(context)
+    shared = adapter.encode_shared_context()
 
     items = [
-        FeditFieldEditButton(),
+        FeditAdapterEditButton(),
     ]
 
-    for hook in hooks.get_hooks(CONSTRUCT_FIELD_TOOLBAR):
-        hook(request=request, items=items, model=model, field_name=field_name)
+    for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
+        hook(items=items, adapter=adapter)
 
     items = [item.render(request) for item in items]
     items = list(filter(None, items))
 
-    kwargs["wagtail_fedit_field_name"] = field_name
-    kwargs["wagtail_fedit_instance"] = model
-    kwargs["inline"] = str(kwargs.get("inline", False)).lower() == "true"
+    reverse_kwargs = {
+        "adapter_id": adapter.identifier,
+        "field_name": adapter.field_name,
+        "app_label": adapter.object._meta.app_label,
+        "model_name": adapter.object._meta.model_name,
+        "model_id": adapter.object.pk,
+    }
+
     return render_to_string(
-        "wagtail_fedit/content/editable_field.html",
+        "wagtail_fedit/content/editable_adapter.html",
         {
-            "edit_url": edit_url,
-            "field_name": field_name,
-            "model": model,
+            "identifier": adapter.identifier,
             "content": content,
-            "parent_context": context,
-            "toolbar_items": items,
-            **kwargs,
+            "adapter": adapter,
+            "buttons": items,
+            "shared": shared,
+            "shared_context": adapter.kwargs,
+            "edit_url": reverse(
+                "wagtail_fedit:edit",
+                kwargs=reverse_kwargs,
+            ),
         },
         request=request,
     )
 
-def render_editable_block(request, content, block_id, field_name, model, context, **kwargs):
-        admin_edit_url = edit_url(
-            model,
-            request,
-            hash=f"block-{block_id}-section",
-        )
 
-        items = [
-            FeditBlockEditButton(),
-        ]
-
-        for hook in hooks.get_hooks(CONSTRUCT_BLOCK_TOOLBAR):
-            hook(request=request, items=items, model=model, block_id=block_id, field_name=field_name)
-
-        items = [item.render(request) for item in items]
-        items = list(filter(None, items))
-        
-        return render_to_string(
-            "wagtail_fedit/content/editable_block.html",
-            {
-                "edit_url": BlockEditNode.get_edit_url(
-                    block_id, field_name,
-                    instance=model,
-                    **kwargs,
-                ),
-                "admin_edit_url": admin_edit_url,
-                "block_id": block_id,
-                "model": model,
-                "content": content,
-                "field_name": field_name,
-                "parent_context": context,
-                "wagtail_fedit_field_name": field_name,
-                "wagtail_fedit_instance": model,
-                "toolbar_items": items,
-            }
-        )
-
-
-def get_kwargs(parser: Parser, kwarg_list: list[str], tokens: list[str]) -> dict:
+def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None) -> dict:
     had_kwargs = False
     kwargs = {}
 
-    # if len(tokens) > len(kwargs_names):
-    #     raise ValueError("Invalid number of arguments provided, expected at most %d" % len(kwargs_names))
+    if not kwarg_list:
+        kwarg_list = []
 
     for i, token in enumerate(tokens):
         split = token.split("=")
-        if len(split) == 1:
+        if len(split) == 1 and len(kwarg_list) > i:
             if had_kwargs:
                 raise ValueError("Unexpected positional argument after keyword argument")
             
@@ -453,6 +210,10 @@ def get_kwargs(parser: Parser, kwarg_list: list[str], tokens: list[str]) -> dict
             
             kwargs[key] = parser.compile_filter(split[1])
             had_kwargs = True
+
+    for kwarg in kwarg_list:
+        if kwarg not in kwargs:
+            raise TemplateSyntaxError(f"Missing required keyword argument {kwarg}")
 
     return kwargs
 

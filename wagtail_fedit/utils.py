@@ -73,13 +73,13 @@ class FeditIFrameMixin:
 
     def get_help_text(self) -> str:
         # No relations. Maybe draft support.
-        if is_draft_capable(getattr(self, "absolute_instance", self.instance)):
+        if is_draft_capable(getattr(self, "absolute_instance", self.object)):
             return {
                 "status": "warning",
                 "heading": self.HEADING_SUPPORTS_DRAFTS,
                 "title": self.TITLE_SUPPORTS_DRAFTS,
                 "text": mark_safe(self.TEXT_PUBLISH_DRAFTS % {
-                    "model": get_model_string(getattr(self, "absolute_instance", self.instance), publish_url=True, request=self.request),
+                    "model": get_model_string(getattr(self, "absolute_instance", self.object), publish_url=True, request=self.request),
                 })
             }
         

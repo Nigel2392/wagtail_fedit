@@ -56,7 +56,7 @@ class BlockEditForm(forms.Form):
 
     def save(self):
         block = self.cleaned_data["value"]
-        self.block.value = block
+        self.block.value.update(block)
         self.parent_instance.full_clean()
 
         if isinstance(self.parent_instance, RevisionMixin) and self.request:

@@ -1,5 +1,7 @@
-from .blocks import EditBlockView
-from .fields import EditFieldView
+from .adapters import (
+    BaseAdapterView,
+    EditAdapterView,
+)
 from .editable import (
     FEditableView,
     PublishView,

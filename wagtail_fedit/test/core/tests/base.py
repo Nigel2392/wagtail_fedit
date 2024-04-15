@@ -16,6 +16,10 @@ from ..models import (
     EditableLockModel,
 )
 
+import urllib.parse
+
+from wagtail_fedit.adapters import BaseAdapter
+
 TEST_BLOCK_DATA = [
     {
         "type": "heading_component",
@@ -204,10 +208,11 @@ class BaseFEditTest(TestCase):
         )
 
     def get_field_url(self, field_name, app_label, model_name, model_id):
-        url_name = "edit_field"
+        url_name = "edit"
         return reverse(
             f"wagtail_fedit:{url_name}",
             kwargs={
+                "adapter_id": "field",
                 "field_name": field_name,
                 "app_label": app_label,
                 "model_name": model_name,
@@ -217,16 +222,22 @@ class BaseFEditTest(TestCase):
 
 
     def get_block_url(self, block_id, field_name, app_label, model_name, model_id):
-        url_name = "edit_block"
-        return reverse(
+        url_name = "edit"
+        url = reverse(
             f"wagtail_fedit:{url_name}",
             kwargs={
-                "block_id": block_id,
+                "adapter_id": "block",
                 "field_name": field_name,
                 "app_label": app_label,
                 "model_name": model_name,
                 "model_id": model_id
             }
         )
+        adapter = BaseAdapter(
+            BasicModel(), "title", None, block_id=block_id,
+        )
+        encoded = adapter.encode_shared_context()
+        encoded = urllib.parse.urlencode({"shared_context": encoded})
+        return f"{url}?{encoded}"
 
 

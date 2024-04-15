@@ -53,3 +53,13 @@ class FeditFieldEditButton(FeditToolbarComponent):
     permissions = [
         "wagtailadmin.access_admin",
     ]
+
+class FeditAdapterEditButton(FeditToolbarComponent):
+    """
+        Required button class for the edit modal to function.
+        This button is handled by the script in `wagtail_fedit/js/frontend.js`
+    """
+    template_name = "wagtail_fedit/content/buttons/edit_adapter.html"
+    permissions = [
+        "wagtailadmin.access_admin",
+    ]

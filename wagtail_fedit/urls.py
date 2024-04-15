@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from . import views
 
 app_name = "wagtail_fedit"
@@ -6,12 +6,8 @@ app_name = "wagtail_fedit"
 urlpatterns = [
     # Frontend Editing
     path(
-        "field/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", 
-        views.EditFieldView.as_view(), name="edit_field"
-    ),
-    path(
-        "block/<str:block_id>/<str:field_name>/<str:app_label>/<str:model_name>/<str:model_id>/", 
-        views.EditBlockView.as_view(), name="edit_block"
+        "edit/<str:adapter_id>/<str:app_label>/<str:model_name>/<str:model_id>/<str:field_name>/", 
+        views.EditAdapterView.as_view(), name="edit"
     ),
 ]
 

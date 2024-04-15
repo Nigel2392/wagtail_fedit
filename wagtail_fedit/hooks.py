@@ -34,6 +34,13 @@ for hook in hooks.get_hooks(CONSTRUCT_FIELD_TOOLBAR):
 ```
 """
 
+CONSTRUCT_ADAPTER_TOOLBAR = prefix("construct_adapter_toolbar")
+"""
+### wagtail_fedit.construct_adapter_toolbar
+Construct the toolbar for the given adapter.
+This is used to display the edit icon for the given adapter.
+"""
+
 
 REGISTER_TYPE_RENDERER   = prefix("register_type_renderer")
 """

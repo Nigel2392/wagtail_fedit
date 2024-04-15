@@ -3,9 +3,10 @@
 class iFrame {
     constructor(options) {
         const {
-            url,
             id,
             className,
+            srcdoc = null,
+            url = null,
             onLoad = () => {},
             onError = () => {},
             onCancel = () => {},
@@ -13,6 +14,8 @@ class iFrame {
 
 
         this.url = url;
+        this.srcdoc = srcdoc;
+        this.iframe = null;
         this.id = id;
         this.className = className;
         this.onLoad = onLoad;
@@ -23,7 +26,7 @@ class iFrame {
 
     get element() {
         if (!this.iframe) {
-            this.iframe = this._renderFrame(this.url, this.onLoad);
+            this.iframe = this._renderFrame(this.url, this.srcdoc, this.onLoad);
         }
         return this.iframe;
     }
@@ -48,9 +51,10 @@ class iFrame {
         return this.document.querySelector(".wagtail-fedit-form-wrapper");
     }
 
-    update(url) {
+    update(url = null, srcdoc = null) {
+        this.srcdoc = srcdoc;
         this.url = url;
-        this._renderFrame(this.url, ({ newFrame }) => {
+        this._renderFrame(this.url, this.srcdoc, ({ newFrame }) => {
             this.iframe.remove();
             this.iframe = newFrame;
             this.onLoad({ newFrame });
@@ -61,13 +65,17 @@ class iFrame {
         if (this.iframe) {
             return this.iframe;
         }
-        this.iframe = this._renderFrame(this.url, this.onLoad);
+        this.iframe = this._renderFrame(this.url, this.srcdoc, this.onLoad);
         return this.iframe;
     }
 
-    _renderFrame(url, onLoad, onError) {
+    _renderFrame(url, srcDoc, onLoad, onError) {
         const iframe = document.createElement('iframe');
-        iframe.src = url;
+        if (srcDoc) {
+            iframe.srcdoc = srcDoc;
+        } else {
+            iframe.src = url;
+        }
         iframe.id = this.id;
         iframe.className = this.className;
         iframe.onload = () => {
@@ -127,7 +135,7 @@ class WagtailFeditEditor {
             /**@type {HTMLElement} */
             this.wrapperElement = element;
         }
-        this.editUrl = null;
+        this.sharedContext = null;
         this.modalHtml = null;
         this.editBtn = null;
         this.init();
@@ -139,30 +147,33 @@ class WagtailFeditEditor {
         }
     }
 
-    get wrapperElementContent() {
-        return this.wrapperElement.querySelector(`.wagtail-fedit-${this.type}-content`);
-    }
-
     focus() {
-        const content = this.wrapperElementContent;
-        if (content) {
-            content.focus();
-            return;
-        }
+        this.wrapperElement.focus();
     }
 
-    makeModal() {
+    getEditUrl() {
+        // build the edit url from relative edit url
+        const url = new URL(window.location.href);
+        url.pathname = this.editUrl;
+        if (this.sharedContext) {
+            url.searchParams.set("shared_context", this.sharedContext);
+        }
+        return url.toString();
+    }
+
+    async makeModal() {
         this.modalWrapper.innerHTML = this.modalHtml;
         this.modal = this.modalWrapper.querySelector(".wagtail-fedit-modal");
+
         this.iframe = new iFrame({
-            url: this.editUrl,
-            id: null,
+            url: this.getEditUrl(),
+            id: "wagtail-fedit-iframe",
             className: null,
             onLoad: () => {
                 const onSubmit = (e) => {
                     e.preventDefault();
                     const formData = new FormData(this.iframe.formElement);
-                    fetch(this.editUrl, {
+                    fetch(this.getEditUrl(), {
                         method: "POST",
                         body: formData,
                     }).then((response) => {
@@ -224,6 +235,7 @@ class WagtailFeditEditor {
                 this.closeModal();
             },
         });
+
         this.modal.appendChild(this.iframe.element);
 
         const closeBtn = document.createElement("button");
@@ -234,6 +246,7 @@ class WagtailFeditEditor {
     }
 
     setWrapperHtml(html) {
+        
         const anim = this.wrapperElement.animate([
             {opacity: 1},
             {opacity: 0},
@@ -241,6 +254,7 @@ class WagtailFeditEditor {
             duration: 350,
             easing: "ease-in-out",
         });
+
         anim.onfinish = () => {
             const newBlock = document.createElement("div");
             newBlock.innerHTML = html;
@@ -282,8 +296,12 @@ class WagtailFeditEditor {
         return wrapper;
     }
 
+    get editUrl() {
+        return this.wrapperElement.dataset.editUrl;
+    }
+
     init() {
-        this.editUrl = this.wrapperElement.dataset.editUrl;
+        this.sharedContext = this.wrapperElement.dataset.sharedContext;
         this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
         this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
 
@@ -294,15 +312,15 @@ class WagtailFeditEditor {
             content.editorAPI = api;
         }
 
-        this.editBtn.addEventListener("click", (e) => {
+        this.editBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this.makeModal();
+            await this.makeModal();
         });
     }
 
     initNewEditors() {
-        const wagtailFeditBlockEditors = this.wrapperElement.querySelectorAll(".wagtail-fedit-block-wrapper");
+        const wagtailFeditBlockEditors = this.wrapperElement.querySelectorAll(".wagtail-fedit-adapter-wrapper");
         for (const editor of wagtailFeditBlockEditors) {
             if (!editor.classList.contains("wagtail-fedit-initialized")) {
                 editor.classList.add("wagtail-fedit-initialized");
@@ -370,25 +388,19 @@ class WagtailFeditPublishMenu {
 }
 
 function initFEditors() {
-    const wagtailFeditBlockEditors = document.querySelectorAll(".wagtail-fedit-block-wrapper");
-    const wagtailFeditFieldEditors = document.querySelectorAll(".wagtail-fedit-field-wrapper");
-    for (const editor of wagtailFeditBlockEditors) {
+    const editors = document.querySelectorAll(".wagtail-fedit-adapter-wrapper");
+    for (const editor of editors) {
         if (!editor.classList.contains("wagtail-fedit-initialized")) {
             editor.classList.add("wagtail-fedit-initialized");
-            new WagtailFeditEditor({element: editor, type: "block"});
-        }
-    }
-    for (const editor of wagtailFeditFieldEditors) {
-        if (!editor.classList.contains("wagtail-fedit-initialized")) {
-            editor.classList.add("wagtail-fedit-initialized");
-            new WagtailFeditEditor({element: editor, type: "field"});
+            new WagtailFeditEditor({element: editor, type: "adapter"});
         }
     }
     const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === 1) {
-                    if (node.classList.contains("wagtail-fedit-block-wrapper") && !node.classList.contains("wagtail-fedit-initialized")) {
+                    if (node.classList.contains("wagtail-fedit-adapter-wrapper") && !node.classList.contains("wagtail-fedit-initialized")) {
+                        node.classList.add("wagtail-fedit-initialized");
                         new WagtailFeditEditor({element: node});
                     }
                 }
