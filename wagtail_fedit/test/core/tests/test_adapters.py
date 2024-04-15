@@ -32,6 +32,9 @@ class TestAdapter(BaseAdapter):
         super().__init__(object, field_name, request, **kwargs)
         adapters[self.kwargs["id"]] = self
 
+    def get_element_id(self) -> str:
+        return f"test-{self.kwargs['id']}"
+
     def render_content(self, parent_context: dict = None) -> str:
         return f"TestAdapter: {self.field_value}"
 
