@@ -3,6 +3,10 @@ from django.template import (
     library, Node, TemplateSyntaxError,
 )
 from django.template.loader import render_to_string
+from django.template.context import (
+    make_context,
+    Context,
+)
 from django.template.base import (
     Parser, Token,
     FilterExpression,
@@ -156,16 +160,9 @@ def do_render_fedit(parser: Parser, token: Token):
     )
 
 
-def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict) -> str:
+def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict, run_context_processors: bool = False) -> str:
     if not context:
         context = {}
-
-    context["wagtail_fedit_field"] = adapter.field_name
-    context["wagtail_fedit_instance"] = adapter.object
-    context["request"] = request
-
-    content = adapter.render_content(context)
-    shared = adapter.encode_shared_context()
 
     items = [
         FeditAdapterEditButton(),
@@ -185,23 +182,41 @@ def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict) -> s
         "model_id": adapter.object.pk,
     }
 
+    shared = adapter.encode_shared_context()
+    
     return render_to_string(
         "wagtail_fedit/content/editable_adapter.html",
         {
             "identifier": adapter.identifier,
-            "content": content,
             "adapter": adapter,
             "buttons": items,
             "shared": shared,
             "shared_context": adapter.kwargs,
+            "parent_context": context,
             "edit_url": reverse(
                 "wagtail_fedit:edit",
                 kwargs=reverse_kwargs,
             ),
         },
-        request=request,
+        request=request if run_context_processors else None,
     )
 
+@register.simple_tag(takes_context=True)
+def render_adapter(context: dict, adapter: BaseAdapter) -> str:
+    context = context.flatten()
+    
+    parent_context = context.pop("parent_context", {})
+    if isinstance(parent_context, Context):
+        parent_context = parent_context.flatten()
+        
+    context.update(parent_context)
+
+    context["wagtail_fedit_field"]    = adapter.field_name
+    context["wagtail_fedit_instance"] = adapter.object
+    context["request"]                = adapter.request
+
+    return adapter.render_content(context)
+    
 
 def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None) -> dict:
     had_kwargs = False

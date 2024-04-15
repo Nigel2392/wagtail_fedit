@@ -4,7 +4,6 @@ from django.utils.translation import gettext as _
 from django.utils.decorators import method_decorator
 from django.template.loader import render_to_string
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-from django.template.context import make_context
 from django.views.generic import View
 from django.http import (
     HttpRequest,
@@ -183,16 +182,12 @@ class EditAdapterView(BaseAdapterView):
             # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
             context[PAGE_TEMPLATE_VAR] = self.instance
 
-        context = make_context(
-            context,
-            self.request,
-        ).flatten()
-
         # Render the frame HTML
         html = wrap_adapter(
             request=self.request,
             adapter=self.adapter,
             context=context,
+            run_context_processors=True,
         )
 
         return JsonResponse({

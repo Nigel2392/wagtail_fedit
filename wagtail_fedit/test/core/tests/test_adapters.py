@@ -46,9 +46,16 @@ class TestBlockAdapter(BlockAdapter, TestAdapter):
 class TestFieldAdapter(FieldAdapter, TestAdapter):
     identifier = "test_field"
 
+class TestContextAdapter(TestAdapter):
+    identifier = "test_context"
+
+    def render_content(self, parent_context: dict = None) -> str:
+        return parent_context["testing"]
+
 adapter_registry.register(TestAdapter)
 adapter_registry.register(TestBlockAdapter)
 adapter_registry.register(TestFieldAdapter)
+adapter_registry.register(TestContextAdapter)
 
 
 class TestBaseAdapter(BaseFEditTest):
@@ -165,6 +172,38 @@ class TestBaseAdapter(BaseFEditTest):
         self.assertHTMLEqual(
             tpl,
             wrap_adapter(request, adapters[4], {})
+        )
+
+    def test_context_processors_run(self):
+        tpl = Template(
+            "{% load fedit %}"
+            "{% fedit test_context object.title test='test' id=5 %}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+                "testing": "testing context processor",
+            }),
+        )
+
+        self.assertHTMLEqual(
+            tpl,
+            wrap_adapter(request, adapters[5], {}, run_context_processors=True)
         )
 
 
