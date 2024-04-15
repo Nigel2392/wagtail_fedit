@@ -101,7 +101,7 @@ class BlockAdapter(BaseAdapter):
             )
 
     @classmethod
-    def render_from_kwargs(context, **kwargs):
+    def render_from_kwargs(cls, context, **kwargs):
         if "block" not in kwargs:
             raise AdapterError("Block is required")
         
