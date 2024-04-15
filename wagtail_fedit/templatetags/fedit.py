@@ -1,8 +1,12 @@
 from typing import Type
-from django.template import library, Node, TemplateSyntaxError
+from django.template import (
+    library, Node, TemplateSyntaxError, RequestContext,
+)
 from django.template.loader import render_to_string
-from django.template.base import Parser, Token
-from django.template.base import FilterExpression
+from django.template.base import (
+    Parser, Token,
+    FilterExpression,
+)
 from django.http import HttpRequest
 from django.urls import reverse
 from django.core import signing
