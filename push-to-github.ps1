@@ -1,8 +1,12 @@
 param (
     [string]$CommitMessage = "Update to package",
-    [bool]$Tag = $false
+    [bool]$Tag = $false,
+    [string]$TagName = "0.0.0"
 )
 
+if ($TagName -ne "0.0.0") {
+    $Tag = $true
+}
 
 $ProjectName = "wagtail_fedit"
 
@@ -99,11 +103,17 @@ function GITHUB_NextVersion {
     # Extract the version, increment it, and prepare the updated version string
     $version = "$(git tag -l --format='VERSION=%(refname:short)' | Sort-Object -Descending | Select-Object -First 1)" -split "=v", 2 | ForEach-Object { $_.Trim() } | Select-Object -Last 1
 
-    if ($version) {
+    if ($version -And $TagName -eq "0.0.0") {
         $newVersion = _NextVersionString -Version $version
         Write-Host "Next version (git): $newVersion"
         return $newVersion
     } else {
+        if ($TagName -ne "0.0.0") {
+            # $TagName = $version
+            # $TagName = _NextVersionString -Version $TagName
+            Write-Host "Next version (tag): $TagName"
+            return $TagName
+        }
         $newVersion = InitRepo -ConfigFile $ConfigFile
         Write-Host "Next version (init): $newVersion"
         return $newVersion

@@ -194,7 +194,6 @@ class WagtailFeditEditor {
                             return;
                         }
                         this.setWrapperHtml(response.html);
-                        this.initNewEditors();
                         this.closeModal();
 
                         const event = new CustomEvent("wagtail-fedit:change", {
@@ -261,6 +260,7 @@ class WagtailFeditEditor {
             this.wrapperElement.parentNode.removeChild(this.wrapperElement);
             blockWrapper.style.opacity = 0;
             this.wrapperElement = blockWrapper;
+            this.initNewEditors();
             this.init();
 
             const anim = blockWrapper.animate([
