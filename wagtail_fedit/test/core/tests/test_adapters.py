@@ -12,6 +12,7 @@ from wagtail_fedit.adapters import (
 )
 from wagtail_fedit.utils import (
     FEDIT_PREVIEW_VAR,
+    find_block,
 )
 from wagtail_fedit.templatetags.fedit import (
     wrap_adapter,
@@ -39,7 +40,15 @@ class TestAdapter(BaseAdapter):
         return f"TestAdapter: {self.field_value}"
 
 
+class TestBlockAdapter(BlockAdapter, TestAdapter):
+    identifier = "test_block"
+
+class TestFieldAdapter(FieldAdapter, TestAdapter):
+    identifier = "test_field"
+
 adapter_registry.register(TestAdapter)
+adapter_registry.register(TestBlockAdapter)
+adapter_registry.register(TestFieldAdapter)
 
 
 class TestBaseAdapter(BaseFEditTest):
@@ -159,3 +168,104 @@ class TestBaseAdapter(BaseFEditTest):
         )
 
 
+class TestBlockAdapter(BaseFEditTest):
+
+    def test_render(self):
+        streamfield = self.basic_model.content
+        block = find_block(self.BLOCK_ID, streamfield)
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+        block_value, _ = block
+        template = Template(
+            "{% load fedit %}"
+            "{% fedit test_block object.content block=block block_id=block_id id=5 %}"
+        )
+
+        context = {
+            "object": self.basic_model,
+            "request": request,
+            "block": block_value,
+            "block_id": self.BLOCK_ID,
+        }
+
+        tpl = template.render(Context(context))
+
+        self.assertHTMLEqual(
+            tpl,
+            wrap_adapter(request, adapters[5], {})
+        )
+
+    def test_render_from_context(self):
+        streamfield = self.basic_model.content
+        block = find_block(self.BLOCK_ID, streamfield)
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+        block_value, _ = block
+        template = Template(
+            "{% load fedit %}"
+            "{% fedit test_block from_context block=block block_id=block_id id=6 %}"
+        )
+
+        context = {
+            "object": self.basic_model,
+            "request": request,
+            "block": block_value,
+            "block_id": self.BLOCK_ID,
+            "wagtail_fedit_field": "content",
+            "wagtail_fedit_instance": self.basic_model,
+        }
+
+        tpl = template.render(Context(context))
+
+        self.assertHTMLEqual(
+            tpl,
+            wrap_adapter(request, adapters[6], context)
+        )
+
+
+    def test_render_from_context_missing(self):
+        streamfield = self.basic_model.content
+        block = find_block(self.BLOCK_ID, streamfield)
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+        block_value, _ = block
+        template = Template(
+            "{% load fedit %}"
+            "{% fedit test_block from_context block=block block_id=block_id id=6 %}"
+        )
+
+        context = {
+            "object": self.basic_model,
+            "request": request,
+            "block": block_value,
+            "block_id": self.BLOCK_ID,
+        }
+
+        tpl = template.render(Context(context))
+
+        self.assertHTMLEqual(
+            tpl,
+            block_value.render(context),
+        )
