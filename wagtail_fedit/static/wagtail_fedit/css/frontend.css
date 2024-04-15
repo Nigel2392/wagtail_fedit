@@ -7,12 +7,10 @@ html, body {
     display: flex;
 }
 
-.wagtail-fedit-field-wrapper,
-.wagtail-fedit-block-wrapper {
+.wagtail-fedit-adapter-wrapper {
     position: relative;
 }
-.wagtail-fedit-field-wrapper:has(> .wagtail-fedit-buttons button:hover)::after,
-.wagtail-fedit-block-wrapper:has(> .wagtail-fedit-buttons button:hover)::after {
+.wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons button:hover)::after {
     content: '';
     display: block;
     position: absolute;
@@ -25,7 +23,7 @@ html, body {
     pointer-events: none;
     z-index: 300;
 }
-.wagtail-fedit-field-wrapper:has(.wagtail-fedit-block-wrapper) > .wagtail-fedit-buttons {
+.wagtail-fedit-adapter-wrapper.wagtail-fedit-field:has(.wagtail-fedit-adapter) > .wagtail-fedit-buttons {
     right: 30px;
 }
 .wagtail-fedit-buttons {
@@ -50,7 +48,7 @@ html, body {
 /* .wagtail-fedit-field-wrapper > .wagtail-fedit-buttons { */
     /* position: relative; */
 /* } */
-.wagtail-fedit-field-wrapper > .wagtail-fedit-buttons button {
+.wagtail-fedit-adapter-wrapper > .wagtail-fedit-buttons button {
     display: inline-block;
     vertical-align: middle;
 }
