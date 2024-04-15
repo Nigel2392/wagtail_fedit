@@ -14,7 +14,9 @@ from django.http import (
 )
 from django.apps import apps
 from wagtail.models import (
-    RevisionMixin, 
+    RevisionMixin,
+    PAGE_TEMPLATE_VAR,
+    Page,
 )
 from wagtail.admin.views.generic import WagtailAdminTemplateMixin
 
@@ -174,11 +176,17 @@ class EditAdapterView(BaseAdapterView):
         
         self.adapter.form_valid(form)
 
+        context = self.get_context_data()
+        if isinstance(self.instance, Page):
+            # Add the page template variable to the context.
+            # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
+            context[PAGE_TEMPLATE_VAR] = self.instance
+
         # Render the frame HTML
         html = wrap_adapter(
             request=request,
             adapter=self.adapter,
-            context=self.get_context_data(),
+            context=context,
         )
 
         return JsonResponse({
