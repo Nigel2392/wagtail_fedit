@@ -80,6 +80,8 @@ class AdapterNode(Node):
                     RuntimeWarning,
                 )
 
+                context = context.flatten()
+
                 try:
                     return self.adapter.render_from_kwargs(
                         context, **kwargs,
