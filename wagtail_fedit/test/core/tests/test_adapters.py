@@ -26,6 +26,7 @@ adapters = {}
 class TestAdapter(BaseAdapter):
     identifier = "test"
     required_kwargs = ["test"]
+    js_constructor = "wagtail_fedit.ThisDoesntGetUsedAnyways"
 
     def __init__(self, object: Model, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
