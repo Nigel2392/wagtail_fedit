@@ -245,6 +245,10 @@ def get_field_content(request, instance, meta_field: models.Field, context, cont
     if hasattr(content, "render_as_block"):
         content = content.render_as_block(context)
 
+    # The content might otherwise have a render method.
+    elif hasattr(content, "render"):
+        content = content.render(context)
+
     return content
 
 def is_draft_capable(model):
