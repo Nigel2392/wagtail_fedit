@@ -9,6 +9,7 @@ html, body {
 
 .wagtail-fedit-adapter-wrapper {
     position: relative;
+    min-height: 24px;
 }
 .wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons button:hover)::after {
     content: '';

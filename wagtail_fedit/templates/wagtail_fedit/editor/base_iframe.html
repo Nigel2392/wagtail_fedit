@@ -27,9 +27,9 @@
         {% endblock %}
         <div class="messages" role="status">
             {# Always show messages div so it can be appended to by JS #}
-            {% if messages or form.errors %}
+            {% if messages or form.non_field_errors %}
                 <ul>
-                    {% if form.errors %}
+                    {% if form.non_field_errors %}
                         {% for error in form.non_field_errors %}
                             <li class="error">{{ error }}</li>
                         {% endfor %}
@@ -72,14 +72,15 @@
             
                 {% block content %}
                     {% block errors %}
-                        {% if form.errors or form.non_field_errors %}
+                        {% if form.errors %}
                             <div class="error-message">
                                 <h2>{{ view.get_error_title }}</h2>
                                 <ul>
-                                    {% for error in form.non_field_errors %}
-                                        <li>{{ error }}</li>
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li class="error">{{ field.label }}: {{ error }}</li>
+                                        {% endfor %}
                                     {% endfor %}
-                                    {{ form.errors.as_ul }}
                                 </ul>
                             </div>
                         {% endif %}
