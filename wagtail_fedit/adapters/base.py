@@ -32,6 +32,10 @@ import pickle
 
 
 
+class VARIABLES:
+    PY_SIZE_VAR = "editor_size"
+    FORM_SIZE_VAR = "data-editor-size"
+
 
 class PickleBlockSerializer:
     """
@@ -75,6 +79,9 @@ class BaseAdapter(FeditIFrameMixin):
     
     def get_element_id(self) -> str:
         raise NotImplementedError
+    
+    def get_form_attrs(self) -> dict:
+        return {}
     
     def get_form(self) -> "forms.Form":
         raise NotImplementedError

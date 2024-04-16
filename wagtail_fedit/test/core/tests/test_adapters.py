@@ -21,8 +21,6 @@ from .base import (
     BaseFEditTest,
 )
 
-import json
-
 adapters = {}
 
 class TestAdapter(BaseAdapter):
@@ -39,18 +37,17 @@ class TestAdapter(BaseAdapter):
     def render_content(self, parent_context: dict = None) -> str:
         return f"TestAdapter: {self.field_value}"
 
+class TestContextAdapter(TestAdapter):
+    identifier = "test_context"
+
+    def render_content(self, parent_context: dict = None) -> str:
+        return parent_context["testing"]
 
 class TestBlockAdapter(BlockAdapter, TestAdapter):
     identifier = "test_block"
 
 class TestFieldAdapter(FieldAdapter, TestAdapter):
     identifier = "test_field"
-
-class TestContextAdapter(TestAdapter):
-    identifier = "test_context"
-
-    def render_content(self, parent_context: dict = None) -> str:
-        return parent_context["testing"]
 
 adapter_registry.register(TestAdapter)
 adapter_registry.register(TestBlockAdapter)

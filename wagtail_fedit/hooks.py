@@ -5,6 +5,7 @@ def prefix(name):
     return f"wagtail_fedit.{name}"
 
 
+
 CONSTRUCT_ADAPTER_TOOLBAR = prefix("construct_adapter_toolbar")
 """
 ### wagtail_fedit.construct_adapter_toolbar
@@ -50,6 +51,22 @@ def register_renderers(renderer_map):
     renderer_map[RichTextField] =\
         lambda request, context, instance, value: richtext(value)
 ```
+"""
+
+
+FIELD_EDITOR_SIZE = prefix("field_editor_size")
+"""
+### wagtail_fedit.field_editor_size
+Control the size of the editor for the given model-field type.
+
+Example of how this hook is called:
+    
+    ```python
+    for hook in hooks.get_hooks(FEDIT_FIELD_EDITOR_SIZE):
+        size = hook(model_instance, model_field)
+        if size:
+            return size
+    ```
 """
 
 

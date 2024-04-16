@@ -7,8 +7,15 @@ from django.http import HttpRequest
 
 from wagtail.log_actions import log
 from wagtail.models import RevisionMixin
+from wagtail import hooks
 
-from .base import BaseAdapter
+from .base import (
+    BaseAdapter,
+    VARIABLES,
+)
+from ..hooks import (
+    FIELD_EDITOR_SIZE,
+)
 from ..utils import (
     use_related_form,
     model_diff,
@@ -113,7 +120,30 @@ class FieldAdapter(BaseAdapter):
     def get_element_id(self) -> str:
         m = self.model
         return f"field-{self.field_name}-{m._meta.app_label}-{m._meta.model_name}-{self.object.pk}"
-  
+      
+    def get_form_attrs(self) -> dict:
+        attrs = super().get_form_attrs()
+
+        size = getattr(self.object, f"{VARIABLES.PY_SIZE_VAR}_{self.field_name}", None)
+        if not size:
+
+            for hook in hooks.get_hooks(FIELD_EDITOR_SIZE):
+                size = hook(self.object, self.meta_field)
+                if size:
+                    break
+            
+        if not size \
+          and self.meta_field.is_relation \
+          and use_related_form(self.meta_field):
+            size = "full"
+        
+        if size:
+            return attrs | {
+                VARIABLES.FORM_SIZE_VAR: size,
+            }
+        
+        return attrs
+
     def get_form(self):
         if self.request.method == "POST":
             form = self.form_class(self.request.POST, request=self.request, instance=self.object)

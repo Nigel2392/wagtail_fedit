@@ -210,14 +210,16 @@ class WagtailFeditEditor {
                 // Check if we need to apply the fedit-full class to the modal
                 const formHeight = this.iframe.formElement.getBoundingClientRect().height;
                 const formWrapper = this.iframe.formWrapper;
-                if (
-                    (formWrapper && (
-                        formWrapper.classList.contains("fedit-full") ||
-                        (this.iframe.formElement.dataset.isRelation || "").toLowerCase() === "true"
-                    )) ||
-                    (formHeight > window.innerHeight)
-                ) {
-                    this.modal.classList.add("fedit-full");
+                const options = ["large", "full"]
+
+                for (const option of options) {
+                    if (formWrapper && (
+                        formWrapper.classList.contains(`fedit-${option}`) ||
+                        (this.iframe.formElement.dataset.editorSize || "").toLowerCase() === option
+                    )) {
+                        this.modal.classList.add(`fedit-${option}`);
+                        break;
+                    }
                 }
 
                 const url = window.location.href.split("#")[0];

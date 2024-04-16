@@ -16,6 +16,7 @@ from wagtail.models import (
 from .base import (
     BaseAdapter,
     AdapterError,
+    VARIABLES,
 )
 from ..forms import (
     blocks as block_forms,
@@ -66,6 +67,16 @@ class BlockAdapter(BaseAdapter):
     
     def get_element_id(self) -> str:
         return f"block-{self.kwargs['block_id']}-section"
+    
+    def get_form_attrs(self) -> dict:
+
+        size = getattr(self.block.block.meta, VARIABLES.PY_SIZE_VAR, None)
+        if size:
+            return super().get_form_attrs() | {
+                VARIABLES.FORM_SIZE_VAR: size,
+            }
+        
+        return {}
 
     def get_form(self):
 

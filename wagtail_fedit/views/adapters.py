@@ -138,6 +138,7 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             "field_name": self.adapter.field_name,
             "locked_for_user": self.locked_for_user,
             "shared_context": shared_context,
+            "form_attrs": self.adapter.get_form_attrs(),
             "locked": self.lock is not None,
         }
 
