@@ -183,6 +183,7 @@ def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict, run_
     }
 
     shared = adapter.encode_shared_context()
+    js_constructor = adapter.get_js_constructor()
     
     return render_to_string(
         "wagtail_fedit/content/editable_adapter.html",
@@ -191,6 +192,7 @@ def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict, run_
             "adapter": adapter,
             "buttons": items,
             "shared": shared,
+            "js_constructor": js_constructor,
             "shared_context": adapter.kwargs,
             "parent_context": context,
             "edit_url": reverse(

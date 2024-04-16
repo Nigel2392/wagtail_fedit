@@ -32,6 +32,7 @@ from ..forms import (
 
 class FieldAdapter(BaseAdapter):
     identifier = "field"
+    js_constructor = "wagtail_fedit.editors.FieldEditor"
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)

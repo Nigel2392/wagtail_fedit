@@ -29,6 +29,7 @@ from .. import utils
 class BlockAdapter(BaseAdapter):
     identifier = "block"
     required_kwargs = ["block"]
+    js_constructor = "wagtail_fedit.editors.BlockEditor"
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)

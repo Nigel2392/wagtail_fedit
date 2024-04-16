@@ -56,6 +56,7 @@ class BaseAdapter(FeditIFrameMixin):
     # wrapper_template        = None
     # run_context_processors  = True
     required_kwargs         = []
+    js_constructor          = None
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         self.object         = object
@@ -76,6 +77,15 @@ class BaseAdapter(FeditIFrameMixin):
         if not self.request.user.is_authenticated:
             return False
         return True
+        
+    def get_js_constructor(self) -> str:
+        if not self.js_constructor:
+            raise AdapterError("No JS constructor defined")
+        
+        return self.js_constructor
+
+    def get_response_data(self) -> dict:
+        return {}
     
     def get_element_id(self) -> str:
         raise NotImplementedError

@@ -194,5 +194,7 @@ class EditAdapterView(BaseAdapterView):
         return JsonResponse({
             "success": True,
             "html": html,
+            **self.adapter\
+              .get_response_data(),
         })
 
