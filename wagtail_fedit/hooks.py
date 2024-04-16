@@ -34,6 +34,45 @@ def register_renderers(renderer_map):
 ```
 """
 
+REGISTER_CSS = prefix("register_css")
+"""
+### wagtail_fedit.register_css
+Register a custom CSS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.
+
+Example of how this hook is used in wagtail_hooks.py:
+    
+    ```python
+    @hooks.register(REGISTER_CSS)
+    def register_css(request):
+        return [
+            format_html(
+                '<link rel="stylesheet" href="{0}">',
+                static('css/custom.css')
+            ),
+        ]
+    ```
+"""
+
+REGISTER_JS = prefix("register_js")
+"""
+### wagtail_fedit.register_js
+Register a custom JS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.
+This can be used to register custom adapter JS.
+
+Example of how this hook is used in wagtail_hooks.py:
+    
+    ```python
+    @hooks.register(REGISTER_JS)
+    def register_js(request):
+        return [
+            format_html(
+                '<script src="{0}"></script>',
+                static('js/custom.js')
+            ),
+        ]
+    ```
+"""
+
 
 REGISTER_FIELD_RENDERER  = prefix("register_field_renderer")
 """

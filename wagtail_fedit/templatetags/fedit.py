@@ -4,7 +4,6 @@ from django.template import (
 )
 from django.template.loader import render_to_string
 from django.template.context import (
-    make_context,
     Context,
 )
 from django.template.base import (
@@ -30,9 +29,12 @@ from ..adapters import (
 )
 from ..utils import (
     _can_edit,
+    FEDIT_PREVIEW_VAR,
 )
 from ..hooks import (
     CONSTRUCT_ADAPTER_TOOLBAR,
+    REGISTER_CSS,
+    REGISTER_JS,
 )
 
 
@@ -218,7 +220,36 @@ def render_adapter(context: Context, adapter: BaseAdapter) -> str:
     context["request"]                = adapter.request
 
     return adapter.render_content(context)
+
+
+@register.inclusion_tag("wagtail_fedit/_hook_output.html", name="fedit_scripts", takes_context=True)
+def static_hook_output(context, css_or_js) -> dict:
+    if css_or_js not in ["css", "js"]:
+        raise ValueError("Invalid argument, must be 'css' or 'js'")
+
+    request = context.get("request")
     
+    if css_or_js == "css":
+        hook_name = REGISTER_CSS
+    else:
+        hook_name = REGISTER_JS
+
+    if not getattr(request, FEDIT_PREVIEW_VAR, False):
+        return {}
+
+    files = []
+    for hook in hooks.get_hooks(hook_name):
+        ret = hook(request)
+        
+        if not isinstance(ret, (list, tuple)):
+            ret = [ret]
+
+        files.extend(ret)
+        
+    return {
+        "hook_output": files,
+    }
+
 
 def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None) -> dict:
     had_kwargs = False

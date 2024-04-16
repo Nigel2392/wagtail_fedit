@@ -1,3 +1,5 @@
+from django.utils.html import format_html
+from django.templatetags.static import static
 from wagtail import hooks
 from wagtail.models import Page
 from wagtail.fields import (
@@ -15,6 +17,8 @@ from ..hooks import (
     EXCLUDE_FROM_RELATED_FORMS,
     REGISTER_FIELD_RENDERER,
     FIELD_EDITOR_SIZE,
+    REGISTER_CSS,
+    REGISTER_JS,
 )
 
 @hooks.register(EXCLUDE_FROM_RELATED_FORMS)
@@ -42,3 +46,23 @@ def field_editor_size(model_instance, model_field):
     return None
 
 
+# <link rel="stylesheet" href="{% static 'wagtail_fedit/css/frontend.css' %}">
+# <script src="{% static 'wagtail_fedit/js/frontend.js' %}"></script>
+
+@hooks.register(REGISTER_CSS, order=-1)
+def register_css(request):
+    return [
+        format_html(
+            '<link rel="stylesheet" href="{0}">',
+            static('wagtail_fedit/css/frontend.css')
+        ),
+    ]
+
+@hooks.register(REGISTER_JS, order=-1)
+def register_js(request):
+    return [
+        format_html(
+            '<script src="{0}"></script>',
+            static('wagtail_fedit/js/frontend.js')
+        ),
+    ]
