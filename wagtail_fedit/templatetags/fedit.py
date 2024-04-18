@@ -178,6 +178,8 @@ def render_adapter(context: Context, adapter: BaseAdapter) -> str:
 
 @register.inclusion_tag("wagtail_fedit/_hook_output.html", name="fedit_scripts", takes_context=True)
 def static_hook_output(context, css_or_js) -> dict:
+    css_or_js = css_or_js.lower()
+
     if css_or_js not in ["css", "js"]:
         raise ValueError("Invalid argument, must be 'css' or 'js'")
 

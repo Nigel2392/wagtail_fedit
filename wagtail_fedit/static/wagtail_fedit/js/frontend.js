@@ -306,6 +306,10 @@ class BaseWagtailFeditEditor {
 
 
 class BaseFuncEditor extends BaseWagtailFeditEditor {
+    static get funcMap() {
+        return window
+    }
+
     onResponse(response) {
         const name = response.func.name;
         const targetElementSelector = response.func.target;
@@ -320,13 +324,20 @@ class BaseFuncEditor extends BaseWagtailFeditEditor {
             return;
         }
 
-        const func = window[name];
+        const func = this.constructor.funcMap[name];
         if (!func) {
             console.error("Function not found", name);
             return;
         }
 
         func(targetElement, response);
+    }
+}
+
+
+class WagtailFeditFuncEditor extends BaseFuncEditor {
+    static get funcMap() {
+        return window.wagtailFedit.funcs;
     }
 }
 
@@ -434,6 +445,7 @@ class WagtailFeditPublishMenu {
     }
 }
 
+
 function getEditorClass(element) {
     const editorClass = element.dataset.feditConstructor;
     if (editorClass) {
@@ -441,6 +453,7 @@ function getEditorClass(element) {
     }
     return null;
 }
+
 
 function initFEditors() {
     const editors = document.querySelectorAll(".wagtail-fedit-adapter-wrapper");
@@ -527,6 +540,13 @@ function initFEditors() {
     }
 }
 
+
+function wagtailFeditBackgroundImageAdapter(element, response) {
+    const url = response.url;
+    element.style.backgroundImage = `url(${url})`;
+}
+
+
 document.addEventListener("DOMContentLoaded", initFEditors);
 
 
@@ -541,8 +561,15 @@ window.wagtailFedit = {
     editors: {
         "wagtail_fedit.editors.BaseFuncEditor":   BaseFuncEditor,
         "wagtail_fedit.editors.BlockFieldEditor": BlockFieldEditor,
+        "wagtail_fedit.editors.WagtailFeditFuncEditor": WagtailFeditFuncEditor,
+    },
+    funcs: {
+        "wagtail_fedit.funcs.backgroundImageFunc": wagtailFeditBackgroundImageAdapter,
     },
     register: function (name, editor) {
         this.editors[name] = editor;
+    },
+    registerFunc: function (name, func) {
+        this.funcs[name] = func;
     },
 };

@@ -40,7 +40,6 @@ class FuncAdapterMixin:
             "name": self.kwargs["name"],
             "target": self.kwargs["target"],
         }
-        data["instance"] = dj_model_to_dict(self.object)
         return data
 
 class BaseFieldFuncAdapter(FuncAdapterMixin, FieldAdapter):
@@ -50,4 +49,9 @@ class BaseFieldFuncAdapter(FuncAdapterMixin, FieldAdapter):
 class BaseBlockFuncAdapter(FuncAdapterMixin, BlockAdapter):
     base_identifier = BlockAdapter.identifier
     required_kwargs = BlockAdapter.required_kwargs
+
+    def get_response_data(self, parent_context=None):
+        data = super().get_response_data(parent_context)
+        data["block"] = self.block.get_prep_value()
+        return data
 
