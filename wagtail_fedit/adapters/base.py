@@ -1,5 +1,5 @@
 from typing import (
-    Optional, Any,
+    TYPE_CHECKING, Any,
 )
 from django import forms
 from django.db import models
@@ -21,6 +21,11 @@ from ..utils import (
 from ..utils import (
     wrap_adapter,
 )
+
+if TYPE_CHECKING:
+    from ..toolbar import (
+        FeditToolbarComponent,
+    )
 
 class AdapterError(Exception):
     pass
@@ -99,7 +104,10 @@ class BaseAdapter(FeditIFrameMixin):
                 },
             }
         }
-    
+
+    def get_toolbar_buttons(self) -> list["FeditToolbarComponent"]:
+        return []
+
     def get_element_id(self) -> str:
         raise NotImplementedError
     

@@ -23,6 +23,7 @@ from wagtail.blocks.list_block import ListValue
 from wagtail import blocks
 
 from .toolbar import (
+    FeditToolbarComponent,
     FeditAdapterEditButton,
 )
 from .hooks import (
@@ -475,8 +476,9 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
     if not context:
         context = {}
 
-    items = [
+    items: list[FeditToolbarComponent] = [
         FeditAdapterEditButton(),
+        *adapter.get_toolbar_buttons(),
     ]
 
     for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
