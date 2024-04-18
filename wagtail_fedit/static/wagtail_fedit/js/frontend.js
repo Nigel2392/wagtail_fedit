@@ -305,9 +305,37 @@ class BaseWagtailFeditEditor {
 }
 
 
+class BaseFuncEditor extends BaseWagtailFeditEditor {
+    onResponse(response) {
+        const name = response.func.name;
+        const targetElementSelector = response.func.target;
+        if (!name || !targetElementSelector) {
+            console.error("Invalid response", response);
+            return;
+        }
+
+        const targetElement = document.querySelector(targetElementSelector);
+        if (!targetElement) {
+            console.error("Target element not found", targetElementSelector);
+            return;
+        }
+
+        const func = window[name];
+        if (!func) {
+            console.error("Function not found", name);
+            return;
+        }
+
+        func(targetElement, response);
+    }
+}
+
+
 class BlockFieldEditor extends BaseWagtailFeditEditor {
     onResponse(response) {
         const html = response.html;
+
+        // Fade out the old block
         const anim = this.wrapperElement.animate([
             {opacity: 1},
             {opacity: 0},
@@ -317,6 +345,7 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
         });
 
         anim.onfinish = () => {
+            // replace the HTML of the block we are editing with the new HTML
             const newBlock = document.createElement("div");
             newBlock.innerHTML = html;
             const blockWrapper = newBlock.firstElementChild;
@@ -325,9 +354,14 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
             this.wrapperElement.parentNode.removeChild(this.wrapperElement);
             blockWrapper.style.opacity = 0;
             this.wrapperElement = blockWrapper;
+
+            // reinitialize possibly new / replaced editor instances
             this.initNewEditors();
+
+            // reinitialize proper variables with from new HTML
             this.init();
 
+            // Fade in the new block
             const anim = blockWrapper.animate([
                 {opacity: 0},
                 {opacity: 1},
@@ -341,6 +375,7 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
         }
     }
 }
+
 
 class WagtailFeditPublishMenu {
     constructor(publishButton) {
@@ -498,11 +533,13 @@ document.addEventListener("DOMContentLoaded", initFEditors);
 window.wagtailFedit = {
     initFEditors,
     BaseWagtailFeditEditor,
+    BaseFuncEditor,
     BlockFieldEditor,
     WagtailFeditPublishMenu,
     WagtailFeditorAPI,
     iFrame,
     editors: {
+        "wagtail_fedit.editors.BaseFuncEditor":   BaseFuncEditor,
         "wagtail_fedit.editors.BlockFieldEditor": BlockFieldEditor,
     },
     register: function (name, editor) {

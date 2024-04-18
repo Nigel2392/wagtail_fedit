@@ -87,7 +87,18 @@ class BaseAdapter(FeditIFrameMixin):
         return self.js_constructor
 
     def get_response_data(self) -> dict:
-        return {}
+        return {
+            "adapter": {
+                "identifier":   self.identifier,
+                "constructor":  self.get_js_constructor(),
+                "element_id":   self.get_element_id(),
+                "model": {
+                    "pk":           self.object.pk,
+                    "app_label":    self.model._meta.app_label,
+                    "model_name":   self.model._meta.model_name,
+                },
+            }
+        }
     
     def get_element_id(self) -> str:
         raise NotImplementedError
