@@ -27,6 +27,11 @@ from .. import utils
 
 
 class BlockAdapter(BlockFieldReplacementAdapter):
+    """
+    An adapter for editing Wagtail blocks.
+    This will render the block and replace it on the frontend
+    on successful form submission.
+    """
     identifier = "block"
     required_kwargs = ["block"]
 

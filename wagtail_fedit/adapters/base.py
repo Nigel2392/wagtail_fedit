@@ -74,24 +74,42 @@ class BaseAdapter(FeditIFrameMixin):
 
     @property
     def field_value(self):
+        """
+        Call the value_from_object method on
+        the meta field to get the value from the instance.
+        """
         return self.meta_field.value_from_object(self.object)
     
     @property
     def model(self):
+        """
+        Return the model class of the object.
+        """
         return self.object.__class__
     
     def check_permissions(self):
+        """
+        Check if the user has the required permissions to edit the field.
+        If false; the field will be rendered as normal (read only).
+        """
         if not self.request.user.is_authenticated:
             return False
         return True
         
     def get_js_constructor(self) -> str:
+        """
+        Return the JS constructor for the adapter.
+        This is used to link actions from the adapter to the frontend.
+        """
         if not self.js_constructor:
             raise AdapterError("No JS constructor defined")
         
         return self.js_constructor
 
     def get_response_data(self) -> dict:
+        """
+        The data which is returned to the frontend on a successful form submission.
+        """
         return {
             "adapter": {
                 "identifier":   self.identifier,
@@ -106,21 +124,40 @@ class BaseAdapter(FeditIFrameMixin):
         }
 
     def get_toolbar_buttons(self) -> list["FeditToolbarComponent"]:
+        """
+        Extra possible toolbar buttons.
+        This is where for example; the edit icon goes.
+        """
         return []
 
     def get_element_id(self) -> str:
+        """
+        Return a unique identifier for the elements on the frontend.
+        """
         raise NotImplementedError
     
     def get_form_attrs(self) -> dict:
+        """
+        Extra possible form attributes rendered in the iFrame.
+        """
         return {}
     
     def get_form(self) -> "forms.Form":
+        """
+        Return the form which knows how to handle this datatype.
+        """
         raise NotImplementedError
 
     def form_valid(self, form: "forms.Form"):
+        """
+        Called if the form is valid; useful for saving the form or other things.
+        """
         pass
     
     def form_invalid(self, form: "forms.Form"):
+        """
+        Called if the form is not valid.
+        """
         pass
 
     @classmethod
@@ -141,12 +178,20 @@ class BaseAdapter(FeditIFrameMixin):
         raise NotImplementedError
     
     def encode_shared_context(self) -> dict:
+        """
+        Encode a dictionary to a string.
+        This will be passed as a GET parameter to the iFrame.
+        Make sure the data is not too large.
+        """
         if not self.kwargs:
             return ""
         return self.signer.sign_object(self.kwargs)# , serializer=PickleBlockSerializer)
 
     @classmethod
     def decode_shared_context(cls, context: str) -> dict:
+        """
+        Decode an encoded contex string back to a dictionary.
+        """
         if not context:
             return {}
         return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
@@ -165,40 +210,3 @@ class BlockFieldReplacementAdapter(BaseAdapter):
         )
         return data
 
-
-#     
-#     def get_wrapper_template(self) -> str:
-#         return self.wrapper_template
-#     
-#     def get_wrapper_context(self, parent_context: dict = None) -> dict:
-#         return {
-#             "adapter": self,
-#             "request": self.request,
-#             "wagtail_fedit_field": self.field_name,
-#             "wagtail_fedit_instance": self.object,
-#             "parent_context": parent_context,
-#             **self.kwargs,
-#         }
-# 
-#     def render_wrapped(self, parent_context: dict = None):
-#         """
-#         Render the output for the field.
-#         This should INCLUDE the wagtail-fedit wrapper.
-#         """
-# 
-#         template = self.get_wrapper_template()
-#         context = self.get_wrapper_context(parent_context)
-#         content = self.render_content()
-#         context["content"] = content
-# 
-#         if self.run_context_processors:
-#             return render_to_string(
-#                 template,
-#                 context,
-#                 request=self.request
-#             )
-#         
-#         return render_to_string(
-#             template,
-#             context
-#         )

@@ -31,6 +31,11 @@ from ..forms import (
 
 
 class FieldAdapter(BlockFieldReplacementAdapter):
+    """
+    An adapter for editing any model field.
+    This will render the field and replace it on the frontend
+    on successful form submission.
+    """
     identifier = "field"
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):

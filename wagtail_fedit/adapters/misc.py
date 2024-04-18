@@ -15,6 +15,11 @@ from wagtail.images.shortcuts import (
 
 
 class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
+    """
+    Adapter for background-images.
+    On succesful form submission; will return the URL of the image.
+    This is placed in the background-image property of the target element. 
+    """
     inline = True
     identifier = "field_bg_image"
     required_kwargs = FieldAdapter.required_kwargs + [
@@ -25,12 +30,6 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         kwargs["name"] = "wagtail_fedit.funcs.backgroundImageFunc"
         super().__init__(object, field_name, request, **kwargs)
-
-    # @classproperty
-    # def required_kwargs(cls):
-    #     kwargs = super().required_kwargs()
-    #     kwargs.pop("name")
-    #     return kwargs
 
     def render_content(self, parent_context=None):
         return ""

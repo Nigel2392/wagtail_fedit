@@ -17,12 +17,18 @@ class AdapterRegistry:
         self.adapters: dict[str, Type[BaseAdapter]] = {}
 
     def __getitem__(self, identifier: str) -> Type[BaseAdapter]:
+        """
+        Retrieve an adapter by its identifier or raise a RegistryLookUpError if not found.
+        """
         try:
             return self.adapters[identifier]
         except KeyError:
             raise RegistryLookUpError(f"No adapter found with identifier '{identifier}'.")
 
     def register(self, adapter_class: Type[BaseAdapter]):
+        """
+        Register an adapter class with the registry.
+        """
         if isinstance(adapter_class, BaseAdapter):
             raise AdapterSubclassError(f"{adapter_class.__class__.__name__} must be a subclass of BaseAdapter; got instance.")
         
@@ -32,6 +38,9 @@ class AdapterRegistry:
         self.adapters[adapter_class.identifier] = adapter_class
 
     def unregister(self, identifier):
+        """
+        Unregister an adapter by its identifier.
+        """
         if identifier not in self.adapters:
             raise RegistryLookUpError(f"No adapter found with identifier '{identifier}'.")
 
