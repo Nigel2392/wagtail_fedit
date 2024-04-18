@@ -42,7 +42,10 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
 
         filter_spec = self.kwargs.get("filter_spec", None)
         if not filter_spec:
-            filter_spec = []
+            filter_spec = "original"
+
+        if not isinstance(filter_spec, str):
+            filter_spec = "|".join(filter_spec)
 
         if image.is_svg() or self.kwargs.get("preserve_svg", False):
             filter = Filter(to_svg_safe_spec(filter_spec.split("|")))
