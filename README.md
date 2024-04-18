@@ -14,6 +14,8 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 - [Workflows](#workflows)
 - [Logs](#logs)
 - [Caveats](#caveats)
+- [Adapters Python](#adapters-python)
+- [Adapters Javascript](#adapters-javascript)
 - [Hooks](#hooks)
   - [Construct Adapter Toolbar](#wagtail_feditconstruct_adapter_toolbar)
   - [Register Type Renderer](#wagtail_feditregister_type_renderer)
@@ -197,6 +199,14 @@ Our new loop would then be:
     {% fedit block my_model_instance_var.content_field block=item block_id=item.id %}
 {% endfor %}
 ```
+
+## Adapters Python
+
+* TBA
+
+## Adapters Javascript
+
+* TBA
 
 ## Hooks
 
