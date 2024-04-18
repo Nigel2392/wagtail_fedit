@@ -18,6 +18,11 @@ class BlockWidgetWithErrors(BlockWidget):
         self.form_errors = None
 
     def render(self, name, value, attrs=None, renderer=None):
+        """
+        Render the custom blockwidget class with any form errors if they exist.
+        Wagtail does not know about the `form_errors` attribute; this is set later by the BlockForm
+        if the form is invalid.
+        """
         if not self.form_errors:
             return super().render(name, value, attrs, renderer)
         
@@ -25,7 +30,9 @@ class BlockWidgetWithErrors(BlockWidget):
 
 
 def get_block_form_class(block: blocks.Block):
-
+    """
+    Return a form class for a block.
+    """
     if isinstance(block, blocks.BoundBlock):
         block = block.block
 
@@ -51,12 +58,15 @@ class BlockEditForm(forms.Form):
     def full_clean(self):
         super().full_clean()
         if self.errors:
+            # Handle any errors which might be from sub-blocks.
             self.fields["value"].widget.form_errors = self.errors["value"]
 
     def save(self):
         block = self.cleaned_data["value"]
         self.block.value.update(block)
-
+        
+        # Can only save revisions if the parent instance is a RevisionMixin and a request is provided.
+        # Otherwise default to just saving the (live) model instance.
         if isinstance(self.parent_instance, RevisionMixin) and self.request:
             self.parent_instance = self.parent_instance.save_revision(
                 user=self.request.user,

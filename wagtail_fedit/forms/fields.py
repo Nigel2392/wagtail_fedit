@@ -15,6 +15,10 @@ from wagtail.models import (
 
 
 class PossiblePreviewForm(WagtailAdminModelForm):
+    """
+    A form that can save a revision if the model is a RevisionMixin.
+    Otherwise resorts to the default save method; this saves the (live) instance.
+    """
     def __init__(self, *args, request = None, **kwargs):
         self.request = request
         super().__init__(*args, **kwargs)
@@ -26,6 +30,9 @@ class PossiblePreviewForm(WagtailAdminModelForm):
         return instance
 
 def save_possible_revision(instance: models.Model, request: HttpRequest, **kwargs) -> models.Model:
+    """
+    Save an instance as a revision if the model supports it.
+    """
     if isinstance(instance, RevisionMixin):
         instance = instance.save_revision(
             user=request.user,
@@ -38,6 +45,10 @@ def save_possible_revision(instance: models.Model, request: HttpRequest, **kwarg
     return instance
 
 def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) -> Type[PossiblePreviewForm]:
+    """
+    Return a form class for a model with specific fields.
+    This is similar to django's modelform_factory.
+    """
 
     if hasattr(form_model, "get_fedit_form"):
         return form_model.get_fedit_form(form_fields)
