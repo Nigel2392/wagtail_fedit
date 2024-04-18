@@ -183,18 +183,17 @@ class EditAdapterView(BaseAdapterView):
             # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
             context[PAGE_TEMPLATE_VAR] = self.instance
 
-        # Render the frame HTML
-        html = wrap_adapter(
-            request=self.request,
-            adapter=self.adapter,
-            context=context,
-            run_context_processors=True,
-        )
+        ## Render the frame HTML
+        #html = wrap_adapter(
+        #    request=self.request,
+        #    adapter=self.adapter,
+        #    context=context,
+        #    run_context_processors=True,
+        #)
 
         return JsonResponse({
             "success": True,
-            "html": html,
             **self.adapter\
-              .get_response_data(),
+              .get_response_data(context),
         })
 

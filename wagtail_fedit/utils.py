@@ -1,10 +1,11 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from collections import namedtuple
 from urllib.parse import urlencode
 from django.db import models
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.template.loader import render_to_string
 from django.template.base import FilterExpression
 from django.conf import settings
 from django.urls import reverse
@@ -21,11 +22,19 @@ from wagtail.blocks.stream_block import StreamValue
 from wagtail.blocks.list_block import ListValue
 from wagtail import blocks
 
+from .toolbar import (
+    FeditAdapterEditButton,
+)
 from .hooks import (
     EXCLUDE_FROM_RELATED_FORMS,
     REGISTER_TYPE_RENDERER,
     REGISTER_FIELD_RENDERER,
+    CONSTRUCT_ADAPTER_TOOLBAR,
 )
+
+
+if TYPE_CHECKING:
+    from .adapters.base import BaseAdapter
 
 
 FEDIT_PREVIEW_VAR = "_wagtail_fedit_preview"
@@ -459,3 +468,48 @@ def _resolve_expressions(context, *expressions):
         return expression
     
     return tuple(map(_map, expressions))
+
+
+
+def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, run_context_processors: bool = False) -> str:
+    if not context:
+        context = {}
+
+    items = [
+        FeditAdapterEditButton(),
+    ]
+
+    for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
+        hook(items=items, adapter=adapter)
+
+    items = [item.render(request) for item in items]
+    items = list(filter(None, items))
+
+    reverse_kwargs = {
+        "adapter_id": adapter.identifier,
+        "field_name": adapter.field_name,
+        "app_label": adapter.object._meta.app_label,
+        "model_name": adapter.object._meta.model_name,
+        "model_id": adapter.object.pk,
+    }
+
+    shared = adapter.encode_shared_context()
+    js_constructor = adapter.get_js_constructor()
+    
+    return render_to_string(
+        "wagtail_fedit/content/editable_adapter.html",
+        {
+            "identifier": adapter.identifier,
+            "adapter": adapter,
+            "buttons": items,
+            "shared": shared,
+            "js_constructor": js_constructor,
+            "shared_context": adapter.kwargs,
+            "parent_context": context,
+            "edit_url": reverse(
+                "wagtail_fedit:edit",
+                kwargs=reverse_kwargs,
+            ),
+        },
+        request=request if run_context_processors else None,
+    )

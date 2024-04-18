@@ -10,7 +10,7 @@ from wagtail.models import RevisionMixin
 from wagtail import hooks
 
 from .base import (
-    BaseAdapter,
+    BlockFieldReplacementAdapter,
     VARIABLES,
 )
 from ..hooks import (
@@ -30,9 +30,8 @@ from ..forms import (
 
 
 
-class FieldAdapter(BaseAdapter):
+class FieldAdapter(BlockFieldReplacementAdapter):
     identifier = "field"
-    js_constructor = "wagtail_fedit.editors.FieldEditor"
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
@@ -208,7 +207,6 @@ class FieldAdapter(BaseAdapter):
                 content_changed=True,
                 **extra_log_kwargs,
             )
-
 
     def render_content(self, parent_context=None):
         return get_field_content(

@@ -18,7 +18,9 @@ from django.http import (
 from ..utils import (
     FeditIFrameMixin,
 )
-
+from ..utils import (
+    wrap_adapter,
+)
 
 class AdapterError(Exception):
     pass
@@ -129,6 +131,22 @@ class BaseAdapter(FeditIFrameMixin):
         if not context:
             return {}
         return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
+
+    
+class BlockFieldReplacementAdapter(BaseAdapter):
+    js_constructor = "wagtail_fedit.editors.BlockFieldEditor"
+
+    def get_response_data(self, parent_context = None):
+        data = super().get_response_data()
+        data["html"] = wrap_adapter(
+            request=self.request,
+            adapter=self,
+            context=parent_context,
+            run_context_processors=True
+        )
+        return data
+
+
 #     
 #     def get_wrapper_template(self) -> str:
 #         return self.wrapper_template

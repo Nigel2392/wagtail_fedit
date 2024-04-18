@@ -2,7 +2,6 @@ from typing import Type
 from django.template import (
     library, Node, TemplateSyntaxError,
 )
-from django.template.loader import render_to_string
 from django.template.context import (
     Context,
 )
@@ -18,9 +17,6 @@ from wagtail import hooks
 
 import warnings
 
-from ..toolbar import (
-    FeditAdapterEditButton,
-)
 from ..adapters import (
     adapter_registry,
     RegistryLookUpError,
@@ -28,11 +24,11 @@ from ..adapters import (
     AdapterError,
 )
 from ..utils import (
+    wrap_adapter,
     _can_edit,
     FEDIT_PREVIEW_VAR,
 )
 from ..hooks import (
-    CONSTRUCT_ADAPTER_TOOLBAR,
     REGISTER_CSS,
     REGISTER_JS,
 )
@@ -162,48 +158,6 @@ def do_render_fedit(parser: Parser, token: Token):
     )
 
 
-def wrap_adapter(request: HttpRequest, adapter: BaseAdapter, context: dict, run_context_processors: bool = False) -> str:
-    if not context:
-        context = {}
-
-    items = [
-        FeditAdapterEditButton(),
-    ]
-
-    for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
-        hook(items=items, adapter=adapter)
-
-    items = [item.render(request) for item in items]
-    items = list(filter(None, items))
-
-    reverse_kwargs = {
-        "adapter_id": adapter.identifier,
-        "field_name": adapter.field_name,
-        "app_label": adapter.object._meta.app_label,
-        "model_name": adapter.object._meta.model_name,
-        "model_id": adapter.object.pk,
-    }
-
-    shared = adapter.encode_shared_context()
-    js_constructor = adapter.get_js_constructor()
-    
-    return render_to_string(
-        "wagtail_fedit/content/editable_adapter.html",
-        {
-            "identifier": adapter.identifier,
-            "adapter": adapter,
-            "buttons": items,
-            "shared": shared,
-            "js_constructor": js_constructor,
-            "shared_context": adapter.kwargs,
-            "parent_context": context,
-            "edit_url": reverse(
-                "wagtail_fedit:edit",
-                kwargs=reverse_kwargs,
-            ),
-        },
-        request=request if run_context_processors else None,
-    )
 
 @register.simple_tag(takes_context=True)
 def render_adapter(context: Context, adapter: BaseAdapter) -> str:

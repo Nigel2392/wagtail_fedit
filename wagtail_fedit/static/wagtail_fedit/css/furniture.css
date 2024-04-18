@@ -101,13 +101,14 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
     height: 100%;
     gap: 1em;
 }
-.wagtail-fedit-form-wrapper form {
+.wagtail-fedit-form-wrapper #wagtail-fedit-form {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     flex: 1;
 }
-.wagtail-fedit-form-wrapper form input {
+.wagtail-fedit-form-wrapper #wagtail-fedit-form .field > input
+.wagtail-fedit-form-wrapper #wagtail-fedit-form .field > * > input {
     margin-bottom: 0.5em;
 }
 .wagtail-fedit-form-wrapper .wagtail-fedit-form {

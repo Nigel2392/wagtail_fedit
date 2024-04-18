@@ -117,7 +117,7 @@ class WagtailFeditorAPI {
 }
 
 
-class WagtailFeditEditor {
+class BaseWagtailFeditEditor {
     constructor(options) {
         const {
             element = null,
@@ -188,7 +188,7 @@ class WagtailFeditEditor {
                             cancelButton.addEventListener("click", this.closeModal.bind(this));
                             return;
                         }
-                        this.setWrapperHtml(response.html);
+                        this.onResponse(response);
                         this.closeModal();
 
                         const event = new CustomEvent("wagtail-fedit:change", {
@@ -248,45 +248,13 @@ class WagtailFeditEditor {
         this.modal.appendChild(closeBtn);
     }
 
-    setWrapperHtml(html) {
-        
-        const anim = this.wrapperElement.animate([
-            {opacity: 1},
-            {opacity: 0},
-        ], {
-            duration: 350,
-            easing: "ease-in-out",
-        });
-
-        anim.onfinish = () => {
-            const newBlock = document.createElement("div");
-            newBlock.innerHTML = html;
-            const blockWrapper = newBlock.firstElementChild;
-            blockWrapper.classList.add("wagtail-fedit-initialized");
-            this.wrapperElement.parentNode.insertBefore(blockWrapper, this.wrapperElement);
-            this.wrapperElement.parentNode.removeChild(this.wrapperElement);
-            blockWrapper.style.opacity = 0;
-            this.wrapperElement = blockWrapper;
-            this.initNewEditors();
-            this.init();
-
-            const anim = blockWrapper.animate([
-                {opacity: 0},
-                {opacity: 1},
-            ], {
-                duration: 350,
-                easing: "ease-in-out",
-            });
-            anim.onfinish = () => {
-                blockWrapper.style.opacity = 1;
-            };
-        }
-    }
-
     closeModal() {
         this.modalWrapper.remove();
         window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
         document.title = this.initialTitle;
+        if ("onModalClose" in this) {
+            this.onModalClose();
+        }
     }
 
     get modalWrapper() {
@@ -332,6 +300,44 @@ class WagtailFeditEditor {
                     console.error("No editor class found for element", editor);
                 }
             }
+        }
+    }
+}
+
+
+class BlockFieldEditor extends BaseWagtailFeditEditor {
+    onResponse(response) {
+        const html = response.html;
+        const anim = this.wrapperElement.animate([
+            {opacity: 1},
+            {opacity: 0},
+        ], {
+            duration: 350,
+            easing: "ease-in-out",
+        });
+
+        anim.onfinish = () => {
+            const newBlock = document.createElement("div");
+            newBlock.innerHTML = html;
+            const blockWrapper = newBlock.firstElementChild;
+            blockWrapper.classList.add("wagtail-fedit-initialized");
+            this.wrapperElement.parentNode.insertBefore(blockWrapper, this.wrapperElement);
+            this.wrapperElement.parentNode.removeChild(this.wrapperElement);
+            blockWrapper.style.opacity = 0;
+            this.wrapperElement = blockWrapper;
+            this.initNewEditors();
+            this.init();
+
+            const anim = blockWrapper.animate([
+                {opacity: 0},
+                {opacity: 1},
+            ], {
+                duration: 350,
+                easing: "ease-in-out",
+            });
+            anim.onfinish = () => {
+                blockWrapper.style.opacity = 1;
+            };
         }
     }
 }
@@ -491,13 +497,13 @@ document.addEventListener("DOMContentLoaded", initFEditors);
 
 window.wagtailFedit = {
     initFEditors,
-    WagtailFeditEditor,
+    BaseWagtailFeditEditor,
+    BlockFieldEditor,
     WagtailFeditPublishMenu,
     WagtailFeditorAPI,
     iFrame,
     editors: {
-        "wagtail_fedit.editors.BlockEditor": WagtailFeditEditor,
-        "wagtail_fedit.editors.FieldEditor": WagtailFeditEditor,
+        "wagtail_fedit.editors.BlockFieldEditor": BlockFieldEditor,
     },
     register: function (name, editor) {
         this.editors[name] = editor;
