@@ -11,6 +11,9 @@ html, body {
     position: relative;
     min-height: 24px;
 }
+.wagtail-fedit-field_bg_image {
+    display: inline-flex;
+}
 .wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons button:hover)::after {
     content: '';
     display: block;
