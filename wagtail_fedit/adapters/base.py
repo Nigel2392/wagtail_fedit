@@ -62,7 +62,8 @@ class BaseAdapter(FeditIFrameMixin):
     signer                  = Signer()
     # wrapper_template        = None
     # run_context_processors  = True
-    required_kwargs         = []
+    required_kwargs         = [] # Required keyword arguments for the adapter
+    absolute_tokens         = [] # Tokens which should be resolved absolutely (no parser.compile_filter)
     js_constructor          = None
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):

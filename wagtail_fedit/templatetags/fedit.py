@@ -148,7 +148,12 @@ def do_render_fedit(parser: Parser, token: Token):
             # mymodel.related_field.myfield
             model = parser.compile_filter(model_tokens.pop(0))
 
-    kwargs = get_kwargs(parser, tokens, adapter.required_kwargs)
+    kwargs = get_kwargs(
+        parser,
+        tokens,
+        adapter.required_kwargs,
+        adapter.absolute_tokens,
+    )
 
     return AdapterNode(
         adapter=adapter,
@@ -207,24 +212,41 @@ def static_hook_output(context, css_or_js) -> dict:
     }
 
 
-def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None) -> dict:
+def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None) -> dict:
     had_kwargs = False
     kwargs = {}
 
     if not kwarg_list:
         kwarg_list = []
 
+    if not absolute_tokens:
+        absolute_tokens = []
+
     for i, token in enumerate(tokens):
         split = token.split("=")
         if len(split) == 1 and len(kwarg_list) > i:
+            if split[0] in absolute_tokens:
+                kwargs[split[0]] = True
+                continue
+
             if had_kwargs:
                 raise ValueError("Unexpected positional argument after keyword argument")
             
             kwargs[kwarg_list[i]] = parser.compile_filter(token)
+        elif len(split) == 1:
+            if split[0] in absolute_tokens:
+                kwargs[split[0]] = True
+                continue
+            else:
+                key = split[0]
+                value = parser.compile_filter(key)
+                kwargs[key] = value
         else:
             key = split[0]
             # if key not in kwargs_names:
             #     raise ValueError(f"Unexpected keyword argument {key}")
+            if key in absolute_tokens:
+                raise ValueError(f"Keyword argument {key} cannot be resolved; it will not be parsed as a variable.")
             
             kwargs[key] = parser.compile_filter(split[1])
             had_kwargs = True

@@ -44,16 +44,24 @@ class TestContextAdapter(TestAdapter):
     def render_content(self, parent_context: dict = None) -> str:
         return parent_context["testing"]
 
+class TestAbsoluteTokensAdapter(TestAdapter):
+    identifier = "test_absolute_tokens"
+    absolute_tokens = ["absolute"]
+
+    def render_content(self, parent_context: dict = None) -> str:
+        return str(self.kwargs.get("absolute", False))
+
 class TestBlockAdapter(BlockAdapter, TestAdapter):
     identifier = "test_block"
 
 class TestFieldAdapter(FieldAdapter, TestAdapter):
-    identifier = "test_field"
+    identifier = "test_field"    
 
 adapter_registry.register(TestAdapter)
 adapter_registry.register(TestBlockAdapter)
 adapter_registry.register(TestFieldAdapter)
 adapter_registry.register(TestContextAdapter)
+adapter_registry.register(TestAbsoluteTokensAdapter)
 
 
 class TestBaseAdapter(BaseFEditTest):
@@ -137,6 +145,56 @@ class TestBaseAdapter(BaseFEditTest):
         self.assertEqual(
             adapter.render_content(),
             f"TestAdapter: {self.basic_model.title}"
+        )
+
+    def test_adapter_absolute_tokens(self):
+        tpl = Template(
+            "{% load fedit %}"
+            "{% fedit test_absolute_tokens object.title test='test' absolute id=4 %}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+            })
+        )
+
+        self.assertHTMLEqual(
+            tpl,
+            str(True),
+        )
+
+    def test_adapter_absolute_tokens_fail(self):
+        tpl = Template(
+            "{% load fedit %}"
+            "{% fedit test_absolute_tokens object.title test='test' id=4 %}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+            })
+        )
+
+        self.assertHTMLEqual(
+            tpl,
+            str(False),
         )
 
     def test_adapter_editable(self):
