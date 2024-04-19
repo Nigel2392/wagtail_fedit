@@ -25,6 +25,7 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     required_kwargs = FieldAdapter.required_kwargs + [
         "target",
     ]
+    absolute_tokens = []
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
