@@ -73,6 +73,9 @@ class BlockAdapter(BlockFieldReplacementAdapter):
 
     def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
         buttons = super().get_toolbar_buttons()
+        if not self.kwargs.get("admin", False):
+            return buttons
+        
         buttons.append(FeditAdapterAdminLinkButton(
             self.request, self,
         ))
