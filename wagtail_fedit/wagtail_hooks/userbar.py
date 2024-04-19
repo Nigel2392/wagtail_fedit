@@ -32,11 +32,12 @@ class FeditableModelComponent(FeditToolbarComponent):
     action_icon = None
     action_text = None
 
-    def __init__(self, instance):
+    def __init__(self, request, instance):
+        self.request = request
         self.instance = instance
 
-    def get_context_data(self, request):
-        return super().get_context_data(request) | {
+    def get_context_data(self):
+        return super().get_context_data() | {
             "hidden": not self.instance.has_unpublished_changes,
             "action_icon": self.action_icon,
             "action_text": self.action_text,
@@ -51,11 +52,11 @@ class UserBarActionPublishComponent(FeditableModelComponent):
     action_icon = "fedit-eye-open"
     action_text = _("Publish")
     
-    def is_shown(self, request):
-        if not super().is_shown(request):
+    def is_shown(self):
+        if not super().is_shown():
             return False
         
-        return user_can_publish(self.instance, request.user, check_for_changes=False)\
+        return user_can_publish(self.instance, self.request.user, check_for_changes=False)\
                and self.instance.has_unpublished_changes
 
 class UserBarActionUnpublishComponent(FeditableModelComponent):
@@ -63,22 +64,22 @@ class UserBarActionUnpublishComponent(FeditableModelComponent):
     action_icon = "fedit-eye-closed"
     action_text = _("Unpublish")
         
-    def is_shown(self, request):
-        if not super().is_shown(request):
+    def is_shown(self):
+        if not super().is_shown():
             return False
         
-        return user_can_unpublish(self.instance, request.user)
+        return user_can_unpublish(self.instance, self.request.user)
 
 class UserBarActionSubmitComponent(FeditableModelComponent):
     action_url = "wagtail_fedit:submit"
     action_icon = "fedit-check-list"
     action_text = _("Submit for moderation")
 
-    def is_shown(self, request):
-        if not super().is_shown(request):
+    def is_shown(self):
+        if not super().is_shown():
             return False
         
-        return user_can_submit_for_moderation(self.instance, request.user, check_for_changes=False)\
+        return user_can_submit_for_moderation(self.instance, self.request.user, check_for_changes=False)\
                and self.instance.has_unpublished_changes
 
 class UserBarActionCancelComponent(FeditableModelComponent):
@@ -86,8 +87,8 @@ class UserBarActionCancelComponent(FeditableModelComponent):
     action_icon = "fedit-stop-sign"
     action_text = _("Cancel Workflow")
 
-    def is_shown(self, request):
-        if not super().is_shown(request):
+    def is_shown(self):
+        if not super().is_shown():
             return False
         
         if not is_draft_capable(self.instance):
@@ -173,15 +174,15 @@ class WagtailFeditPublishItem(BaseWagtailFeditItem):
     def get_context_data(self, request):
 
         buttons = [
-            UserBarActionPublishComponent(self.model),
-            UserBarActionSubmitComponent(self.model),
-            UserBarActionUnpublishComponent(self.model),
-            UserBarActionCancelComponent(self.model),
+            UserBarActionPublishComponent(request, self.model),
+            UserBarActionSubmitComponent(request, self.model),
+            UserBarActionUnpublishComponent(request, self.model),
+            UserBarActionCancelComponent(request, self.model),
         ]
 
         return super().get_context_data(request) | {
             "buttons": list(
-                filter(None, map(lambda x: x.render(request), buttons))
+                filter(None, map(lambda x: x.render(), buttons))
             ),
         }
 

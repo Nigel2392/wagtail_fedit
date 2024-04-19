@@ -78,6 +78,9 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         shared_context = request.GET.get("shared_context")
         if shared_context:
             self.shared_context = self.adapter_class.decode_shared_context(
+                request,
+                self.instance,
+                field_name,
                 shared_context,
             )
         else:

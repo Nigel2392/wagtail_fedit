@@ -23,7 +23,7 @@ from wagtail.blocks.list_block import ListValue
 from wagtail import blocks
 
 from .toolbar import (
-    FeditToolbarComponent,
+    FeditAdapterComponent,
     FeditAdapterEditButton,
 )
 from .hooks import (
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from .adapters.base import BaseAdapter
 
 
+TEMPLATE_TAG_NAME = "fedit"
 FEDIT_PREVIEW_VAR = "_wagtail_fedit_preview"
 USERBAR_MODEL_VAR = "_wagtail_fedit_userbar_model"
 
@@ -476,15 +477,15 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
     if not context:
         context = {}
 
-    items: list[FeditToolbarComponent] = [
-        FeditAdapterEditButton(),
+    items: list[FeditAdapterComponent] = [
         *adapter.get_toolbar_buttons(),
+        FeditAdapterEditButton(request, adapter),
     ]
 
     for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
         hook(items=items, adapter=adapter)
 
-    items = [item.render(request) for item in items]
+    items = [item.render() for item in items]
     items = list(filter(None, items))
 
     reverse_kwargs = {

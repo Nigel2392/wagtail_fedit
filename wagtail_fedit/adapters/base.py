@@ -12,13 +12,12 @@ from django.core.signing import (
 )
 from django.http import (
     HttpRequest,
-    HttpResponse,
 )
-
+from ..settings import (
+    SIGN_SHARED_CONTEXT,
+)
 from ..utils import (
     FeditIFrameMixin,
-)
-from ..utils import (
     wrap_adapter,
 )
 
@@ -35,7 +34,7 @@ def content_id_from_parts(*parts: Any) -> str:
     return "-".join(map(slugify, map(str, parts)))
 
 
-import pickle
+import pickle, json, base64
 
 
 
@@ -56,10 +55,21 @@ class PickleBlockSerializer:
     def loads(self, data):
         return pickle.loads(data)
 
+class Base85JSONSerializer:
+    """
+    Simple wrapper around base85 and json to be used in signing.dumps and
+    signing.loads.
+    """
+
+    def dumps(self, obj):
+        return base64.b85encode(json.dumps(obj).encode("utf-8")).decode("utf-8")
+
+    def loads(self, data):
+        return json.loads(base64.b85decode(data).decode("utf-8"))
 
 class BaseAdapter(FeditIFrameMixin):
     identifier              = None
-    signer                  = Signer()
+    signer: Signer          = Signer()
     # wrapper_template        = None
     # run_context_processors  = True
     required_kwargs         = [] # Required keyword arguments for the adapter
@@ -76,6 +86,26 @@ class BaseAdapter(FeditIFrameMixin):
         self.meta_field     = object._meta.get_field(field_name)
         self.request        = request
         self.kwargs         = kwargs
+
+    @classmethod
+    def usage_string(cls) -> str:
+        """
+        Return a string which describes how to use the adapter.
+        """
+        s = []
+        for i, token in enumerate(cls.absolute_tokens):
+            s.append(f"{token}")
+            if i < len(cls.absolute_tokens) - 1:
+                s.append(" ")
+        
+        if cls.absolute_tokens and cls.required_kwargs:
+            s.append(" ")
+
+        for i, kwarg in enumerate(cls.required_kwargs):
+            s.append(f"{kwarg}=value")
+            if i < len(cls.required_kwargs) - 1:
+                s.append(" ")
+        return "".join(s)
 
     @property
     def field_value(self):
@@ -127,6 +157,12 @@ class BaseAdapter(FeditIFrameMixin):
                 },
             }
         }
+    
+    def get_admin_url(self) -> str:
+        """
+        Return the admin URL for the object.
+        """
+        raise NotImplementedError
 
     def get_toolbar_buttons(self) -> list["FeditToolbarComponent"]:
         """
@@ -190,17 +226,28 @@ class BaseAdapter(FeditIFrameMixin):
         """
         if not self.kwargs:
             return ""
-        return self.signer.sign_object(self.kwargs)# , serializer=PickleBlockSerializer)
+        # return self.signer.sign_object(self.kwargs)# , serializer=PickleBlockSerializer)
+        if SIGN_SHARED_CONTEXT:
+            return self.signer.sign_object(self.kwargs, compress=True)
+        
+        serializer = Base85JSONSerializer()
+        return serializer.dumps(self.kwargs)
 
     @classmethod
-    def decode_shared_context(cls, context: str) -> dict:
+    def decode_shared_context(cls, request: HttpRequest, object: models.Model, field: str, context: str) -> dict:
         """
         Decode an encoded contex string back to a dictionary.
         """
         if not context:
             return {}
-        return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
-
+        if SIGN_SHARED_CONTEXT:
+            return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
+        try:
+            serializer = Base85JSONSerializer()
+            return serializer.loads(context)
+        except json.JSONDecodeError:
+            pass
+        return {}
     
 class BlockFieldReplacementAdapter(BaseAdapter):
     js_constructor = "wagtail_fedit.editors.BlockFieldEditor"

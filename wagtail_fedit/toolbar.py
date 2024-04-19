@@ -1,60 +1,48 @@
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .adapters import BaseAdapter
 
 class FeditToolbarComponent:
     template_name = None
     permissions: list[str] = []
 
-    def __init__(self):
-        pass
+    def __init__(self, request):
+        self.request = request
 
-    def get_context_data(self, request):
+    def get_context_data(self):
         return {
             "self": self,
-            "request": request,
+            "request": self.request,
         }
     
-    def is_shown(self, request):
-        if not all([request, request.user.is_authenticated]):
+    def is_shown(self):
+        if not all([self.request, self.request.user.is_authenticated]):
             return False
         
         if not self.permissions:
             return True
         
-        return request.user.has_perms(self.permissions)
+        return self.request.user.has_perms(self.permissions)
     
-    def render(self, request):
-        if not self.is_shown(request):
+    def render(self):
+        if not self.is_shown():
             return ""
 
         return mark_safe(render_to_string(
             self.template_name,
-            self.get_context_data(request),
+            self.get_context_data(),
         ))
 
 
-class FeditBlockEditButton(FeditToolbarComponent):
-    """
-        Required button class for the edit modal to function.
-        This button is handled by the script in `wagtail_fedit/js/frontend.js`
-    """
-    template_name = "wagtail_fedit/content/buttons/edit_block.html"
-    permissions = [
-        "wagtailadmin.access_admin",
-    ]
+class FeditAdapterComponent(FeditToolbarComponent):
+    def __init__(self, request, adapter: "BaseAdapter"):
+        super().__init__(request)
+        self.adapter = adapter
 
-
-class FeditFieldEditButton(FeditToolbarComponent):
-    """
-        Required button class for the edit modal to function.
-        This button is handled by the script in `wagtail_fedit/js/frontend.js`
-    """
-    template_name = "wagtail_fedit/content/buttons/edit_field.html"
-    permissions = [
-        "wagtailadmin.access_admin",
-    ]
-
-class FeditAdapterEditButton(FeditToolbarComponent):
+class FeditAdapterEditButton(FeditAdapterComponent):
     """
         Required button class for the edit modal to function.
         This button is handled by the script in `wagtail_fedit/js/frontend.js`
@@ -63,3 +51,18 @@ class FeditAdapterEditButton(FeditToolbarComponent):
     permissions = [
         "wagtailadmin.access_admin",
     ]
+
+class FeditAdapterAdminLinkButton(FeditAdapterComponent):
+    """
+        Required button class for the edit modal to function.
+        This button is handled by the script in `wagtail_fedit/js/frontend.js`
+    """
+    template_name = "wagtail_fedit/content/buttons/admin_link.html"
+    permissions = [
+        "wagtailadmin.access_admin",
+    ]
+
+    def get_context_data(self):
+        return super().get_context_data() | {
+            "admin_url": self.adapter.get_admin_url(),
+        }

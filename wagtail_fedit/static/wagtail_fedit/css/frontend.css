@@ -52,10 +52,12 @@ html, body {
 /* .wagtail-fedit-field-wrapper > .wagtail-fedit-buttons { */
     /* position: relative; */
 /* } */
+.wagtail-fedit-adapter-wrapper > .wagtail-fedit-buttons .wagtail-fedit-toolbar-button,
 .wagtail-fedit-adapter-wrapper > .wagtail-fedit-buttons button {
     display: inline-block;
     vertical-align: middle;
 }
+.wagtail-fedit-buttons .wagtail-fedit-toolbar-button,
 .wagtail-fedit-buttons button {
     border: none;
     background-color: white;

@@ -27,6 +27,7 @@ from ..utils import (
     wrap_adapter,
     _can_edit,
     FEDIT_PREVIEW_VAR,
+    TEMPLATE_TAG_NAME,
 )
 from ..hooks import (
     REGISTER_CSS,
@@ -119,7 +120,7 @@ class AdapterNode(Node):
         return wrap_adapter(request, adapter, context)
 
 
-@register.tag(name="fedit")
+@register.tag(name=TEMPLATE_TAG_NAME)
 def do_render_fedit(parser: Parser, token: Token):
 
     tokens = token.split_contents()

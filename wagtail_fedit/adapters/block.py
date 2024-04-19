@@ -22,7 +22,13 @@ from ..forms import (
     blocks as block_forms,
 )
 from .. import utils
-
+from wagtail.admin.admin_url_finder import (
+    AdminURLFinder,
+)
+from ..toolbar import (
+    FeditAdapterComponent,
+    FeditAdapterAdminLinkButton,
+)
 
 
 
@@ -34,6 +40,9 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     """
     identifier = "block"
     required_kwargs = ["block"]
+    absolute_tokens = [ # override; remove "inline"
+        "admin" # allows for displaying admin URLs
+    ]
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
@@ -55,6 +64,19 @@ class BlockAdapter(BlockFieldReplacementAdapter):
                 raise AdapterError("Block not found; did you provide the correct block ID?")
             
             self.block, _ = result
+
+    def get_admin_url(self) -> str:
+        finder = AdminURLFinder(self.request.user)
+        url = finder.get_edit_url(self.object)
+        hash = f"#block-{self.kwargs['block_id']}-section"
+        return f"{url}{hash}"
+
+    def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
+        buttons = super().get_toolbar_buttons()
+        buttons.append(FeditAdapterAdminLinkButton(
+            self.request, self,
+        ))
+        return buttons
 
     def get_header_title(self):
 
