@@ -78,7 +78,6 @@ Getting Started
 
        {% wagtailuserbar %}
 
-       <script src="{% static 'wagtail_fedit/js/frontend.js' %}"></script>
        {# Load all registered Javascript required for the adapters. Only included inside edit view! #}
        {% fedit_scripts "js" %}
    </body>
