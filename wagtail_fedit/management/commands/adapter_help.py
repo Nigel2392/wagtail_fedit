@@ -11,7 +11,7 @@ class Command(BaseCommand):
         LB = "\n"
 
         s = [
-            " Registered Adapters",
+            "Registered Adapters",
             "====================",
             " * The first argument is the identifier of the adapter.",
             " * The second argument is the model and field to edit. instance.modelfield",
