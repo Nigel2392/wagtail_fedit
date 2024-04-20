@@ -38,6 +38,7 @@ Getting Started
    ]
    ```
 2. Run `py ./manage.py collectstatic`.
+3. Run `py ./manage.py adapter_help` to see all your options and their requirements.
 
 ## Getting Editing!
 
