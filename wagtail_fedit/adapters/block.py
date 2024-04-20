@@ -42,8 +42,8 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     usage_description = "This adapter is used to edit a block of a streamfield."
     help_text_dict = {
         "block": "the block instance to edit. This can be a regular block isntance or a BoundBlock.",
-        "block_id": "the block ID to edit, required if block is not a BoundBlock.",
-        "admin": "if passed; the adapter will display admin URLs.",
+        "block_id": "the ID of the block to edit, required if block is not a BoundBlock.",
+        "admin": "if passed; the adapter will a quick- link to the Wagtail Admin for this block.",
     }
     required_kwargs = [
         "block",

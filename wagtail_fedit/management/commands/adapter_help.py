@@ -17,7 +17,8 @@ class Command(BaseCommand):
             " * The second argument is the model and field to edit. instance.modelfield",
             " * Absolute arguments (missing an equal sign) are optional and treated as booleans.",
             " * Keyword arguments wrapped in square brackets are optional. [key=value]",
-            " * The value of the adapter is the value of the field.",
+            " * Extra keyword arguments are optional; must be serializable to JSON and should not be too complex.",
+            "   This is due to limits in URL-size when sharing context between views.",
         ]
 
         for identifier, adapter_class in adapter_registry.adapters.items():

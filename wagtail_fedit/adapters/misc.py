@@ -24,7 +24,7 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     identifier = "field_bg_image"
     usage_description = "This adapter is used for changing a css property of a target element to a background-image."
     help_text_dict = {
-        "target": "the target element to apply the background-image to.",
+        "target": "the target element to apply the background-image to - this should be a css selector.",
         "css_variable_name": "the CSS variable name to apply the background-image to. element.style.setProperty(css_variable_name, url);",
     }
     required_kwargs = FieldAdapter.required_kwargs + [
