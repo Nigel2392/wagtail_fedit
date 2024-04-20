@@ -19,8 +19,8 @@ jobs:
           pip install wagtail==5.2
       - name: Migrate database
         run: |
+          python wagtail_fedit/test/manage.py makemigrations --initial
           python wagtail_fedit/test/manage.py makemigrations
-          python wagtail_fedit/test/manage.py migrate
       - name: Run tests
         run: |
           python wagtail_fedit/test/manage.py test
