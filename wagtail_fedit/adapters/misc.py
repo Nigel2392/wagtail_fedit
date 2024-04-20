@@ -25,6 +25,9 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     required_kwargs = FieldAdapter.required_kwargs + [
         "target",
     ]
+    optional_kwargs = [
+        "css_variable_name",
+    ]
     absolute_tokens = []
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
 
@@ -60,4 +63,6 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
 
         return data | {
             "url": rendition.url,
+            "css_variable_name":\
+                self.kwargs.get("css_variable_name", None) or "background-image",
         }

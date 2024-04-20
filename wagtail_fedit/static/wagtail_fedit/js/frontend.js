@@ -543,7 +543,16 @@ function initFEditors() {
 
 function wagtailFeditBackgroundImageAdapter(element, response) {
     const url = response.url;
-    element.style.backgroundImage = `url(${url})`;
+    const cssVar = response.css_variable_name;
+    if (cssVar) {
+        if (cssVar.startsWith("--")) {
+            element.style.setProperty(cssVar, `url(${url})`);
+        } else {
+            element.style.setProperty(cssVar, `url(${url})`);
+        }
+    } else {
+        element.style.backgroundImage = `url(${url})`;
+    }
 }
 
 
