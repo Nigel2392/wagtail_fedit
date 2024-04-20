@@ -39,9 +39,14 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     on successful form submission.
     """
     identifier = "block"
-    required_kwargs = ["block"]
+    required_kwargs = [
+        "block",
+    ]
+    optional_kwargs = [
+        "block_id",
+    ]
     absolute_tokens = [ # override; remove "inline"
-        "admin" # allows for displaying admin URLs
+        "admin", # allows for displaying admin URLs
     ]
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
@@ -49,10 +54,12 @@ class BlockAdapter(BlockFieldReplacementAdapter):
 
         self.block = self.kwargs.pop("block", None)
         if self.block:
-            if not isinstance(self.block, BoundBlock):
-                raise AdapterError("Invalid block type")
+            if not hasattr(self.block, "id") and not "block_id" in self.kwargs:
+                raise AdapterError("Invalid block type, block must have an `id` attribute or provide a `block_id`")
+            
+            if hasattr(self.block, "id"):
+                self.kwargs["block_id"] = self.block.id
 
-            self.kwargs["block_id"] = self.block.id
         else:
             block_id = self.kwargs.get("block_id", None)
             if block_id is None:

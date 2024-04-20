@@ -70,9 +70,10 @@ class Base85JSONSerializer:
 class BaseAdapter(FeditIFrameMixin):
     identifier              = None
     signer: Signer          = Signer()
-    # wrapper_template        = None
-    # run_context_processors  = True
-    required_kwargs         = [] # Required keyword arguments for the adapter
+    # Required keyword arguments for the adapter
+    required_kwargs         = []
+    # Optional keyword arguments for the adapter, these are only used to print the help example.
+    optional_kwargs         = []
     # Tokens which should be resolved absolutely (no parser.compile_filter)
     # These are NOT required.
     absolute_tokens         = [
@@ -105,6 +106,18 @@ class BaseAdapter(FeditIFrameMixin):
             s.append(f"{kwarg}=value")
             if i < len(cls.required_kwargs) - 1:
                 s.append(" ")
+
+        if (
+            cls.required_kwargs and cls.optional_kwargs or\
+            not cls.required_kwargs and cls.absolute_tokens and cls.optional_kwargs
+        ):
+            s.append(" ")
+        
+        for i, kwarg in enumerate(cls.optional_kwargs):
+            s.append(f"[{kwarg}=value]")
+            if i < len(cls.optional_kwargs) - 1:
+                s.append(" ")
+                
         return "".join(s)
 
     @property

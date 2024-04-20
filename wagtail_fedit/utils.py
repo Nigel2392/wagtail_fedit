@@ -452,27 +452,6 @@ def lock_info(object, user) -> _lock_info:
     return _lock_info(lock, locked_for_user)
 
 
-def get_hooks(hook_name):
-    """
-        Return the hooks for a given hook name in the wagtail_fedit namespace.
-    """
-    for hook in hooks.get_hooks(f"wagtail_fedit.{hook_name}"):
-        yield hook
-
-    
-def _resolve_expressions(context, *expressions):
-    """
-        Resolve a list of possible templatetag filterexpressions.
-    """
-    def _map(expression):
-        if isinstance(expression, FilterExpression):
-            return expression.resolve(context)
-        return expression
-    
-    return tuple(map(_map, expressions))
-
-
-
 def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, run_context_processors: bool = False) -> str:
     if not context:
         context = {}
