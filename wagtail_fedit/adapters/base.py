@@ -119,6 +119,20 @@ class BaseAdapter(FeditIFrameMixin):
                 s.append(" ")
                 
         return "".join(s)
+    
+    @classmethod
+    def usage_help_text(cls) -> list[str]:
+        """
+        Return a help text which describes how to use the adapter.
+        This might be a good time to exalain the kwargs.
+        """
+        if "inline" in cls.absolute_tokens:
+            s = [
+                "This adapter is used to edit a field of a model instance.",
+                "inline: if passed; the adapter will be rendered with inline styles.",
+            ]
+            return s
+        return []
 
     @property
     def field_value(self):

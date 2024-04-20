@@ -49,6 +49,15 @@ class BlockAdapter(BlockFieldReplacementAdapter):
         "admin", # allows for displaying admin URLs
     ]
 
+    @classmethod
+    def usage_help_text(cls) -> list[str]:
+        return [
+            "This adapter is used to edit a block of a streamfield.",
+            "block: the block instance to edit. This can be a regular block isntance or a BoundBlock.",
+            "block_id: the block ID to edit, required if block is not a BoundBlock.",
+            "admin: if passed; the adapter will display admin URLs.",
+        ]
+
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
 

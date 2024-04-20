@@ -24,14 +24,19 @@ class Command(BaseCommand):
             s.append(
                 f"    {{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.usage_string()} %}}",
             )
+            help_text = adapter_class.usage_help_text()
+            if help_text:
+                help_text = "\n      * ".join(help_text)
+                s.append(f"      * {help_text}")
+                s.append("")
+            else:
+                s.append("")
 
         if supports_color():
             style = color_style()
-            s = "\n|".join(s)
-            s = style.SUCCESS(f'|{s}')
+            s = style.SUCCESS("\n".join(s))
         else:
-            s = "\n|".join(s)
-            s = f'|{s}'
+            s = "\n".join(s)
         self.stdout.write("\n")
         self.stdout.write(s)
         self.stdout.write("\n")

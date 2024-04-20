@@ -60,9 +60,9 @@ Getting Started
    </head>
    <body>
        {# Adress the model.field or model.my.related.field you wish to edit. #}
-       {# Editable fields get a special `inline` argument. #}
-       {# if True the button is not placed with an absolute CSS position. #}
-       <h1>{% fedit field self.title inline=True or False %}</h1>
+       {# For help on arguments for the adapters please run the adapter_help command. #}
+       {# Example: `python3 ./manage.py adapter_help` #}
+       <h1>{% fedit field self.title inline %}</h1>
 
        <main class="my-streamfield-content">
            {% fedit field self.content %}

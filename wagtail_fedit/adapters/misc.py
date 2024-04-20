@@ -31,6 +31,14 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     absolute_tokens = []
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
 
+    @classmethod
+    def usage_help_text(cls) -> list[str]:
+        return [
+            "This adapter is used to edit a field of a model instance.",
+            "target: the target element to apply the background-image to.",
+            "css_variable_name: the CSS variable name to apply the background-image to. element.style.setProperty(css_variable_name, url);",
+        ]
+
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         kwargs["name"] = "wagtail_fedit.funcs.backgroundImageFunc"
         super().__init__(object, field_name, request, **kwargs)
