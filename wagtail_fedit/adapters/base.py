@@ -79,6 +79,13 @@ class BaseAdapter(FeditIFrameMixin):
     absolute_tokens         = [
         "inline",
     ]
+    # An optional description to be displayed when running the help command.
+    usage_description       = "This adapter is used to edit a field of a model instance."
+    # A dictionary of help text for the adapter.
+    help_text_dict          = {}
+
+    # The JS constructor for the adapter.
+    # This will receive the data after a successful form submission.
     js_constructor          = None
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
@@ -127,12 +134,11 @@ class BaseAdapter(FeditIFrameMixin):
         This might be a good time to exalain the kwargs.
         """
         if "inline" in cls.absolute_tokens:
-            s = [
-                "This adapter is used to edit a field of a model instance.",
-                "inline: if passed; the adapter will be rendered with inline styles.",
-            ]
-            return s
-        return []
+            return {
+                "inline": "if passed; the adapter will be rendered with inline styles.",
+                **cls.help_text_dict,
+            }
+        return cls.help_text_dict
 
     @property
     def field_value(self):

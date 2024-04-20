@@ -8,6 +8,8 @@ class Command(BaseCommand):
     help = "Print an example of how to use all registered adapters."
 
     def handle(self, *args, **options):
+        LB = "\n"
+
         s = [
             " Registered Adapters",
             "====================",
@@ -21,24 +23,31 @@ class Command(BaseCommand):
         ]
 
         for identifier, adapter_class in adapter_registry.adapters.items():
+            DISTANCE = "    "
             s.append(
-                f"    {{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.usage_string()} %}}",
+                f"{DISTANCE}{{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.usage_string()} %}}",
             )
+
+            HELP_DISTANCE = DISTANCE + "  "
+            description = adapter_class.usage_description
+            if description:
+                s.append(f"{HELP_DISTANCE}{description}")
+                
             help_text = adapter_class.usage_help_text()
             if help_text:
-                help_text = "\n      * ".join(help_text)
-                s.append(f"      * {help_text}")
-                s.append("")
-            else:
-                s.append("")
+                mid = f"{HELP_DISTANCE}* "
+                help_text = f"{LB}{mid}".join([f"{k}: {v}" for k, v in help_text.items()])
+                s.append(f"{mid}{help_text}")
+
+            s.append("")
 
         if supports_color():
             style = color_style()
-            s = style.SUCCESS("\n".join(s))
+            s = style.SUCCESS(LB.join(s))
         else:
-            s = "\n".join(s)
-        self.stdout.write("\n")
+            s = LB.join(s)
+        self.stdout.write(LB)
         self.stdout.write(s)
-        self.stdout.write("\n")
+        self.stdout.write(LB)
 
 
