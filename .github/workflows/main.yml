@@ -16,7 +16,6 @@ jobs:
           pip install -e .
       - name: Migrate database
         run: |
-          python wagtail_fedit/test/manage.py makemigrations --initial
           python wagtail_fedit/test/manage.py makemigrations
       - name: Run tests
         run: |
