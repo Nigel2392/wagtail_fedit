@@ -33,17 +33,17 @@ class Command(BaseCommand):
 
             DISTANCE = "    "
             s.append(
-                f"{DISTANCE}{{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.usage_string()} %}}",
+                f"{DISTANCE}{{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.get_usage_string()} %}}",
             )
 
             HELP_DISTANCE = DISTANCE + "  "
-            description = adapter_class.usage_description
+            description = adapter_class.get_usage_description()
             if description:
                 s.append(
                     f"{HELP_DISTANCE}{description}",
                 )
                 
-            help_text = adapter_class.usage_help_text()
+            help_text = adapter_class.get_usage_help_text()
             if help_text:
                 mid = f"{HELP_DISTANCE} * "
                 help_text = f"{LB}{mid}".join([

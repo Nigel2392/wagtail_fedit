@@ -96,7 +96,7 @@ class BaseAdapter(FeditIFrameMixin):
         self.kwargs         = kwargs
 
     @classmethod
-    def usage_string(cls) -> str:
+    def get_usage_string(cls) -> str:
         """
         Return a string which describes how to use the adapter.
         """
@@ -128,7 +128,14 @@ class BaseAdapter(FeditIFrameMixin):
         return "".join(s)
     
     @classmethod
-    def usage_help_text(cls) -> list[str]:
+    def get_usage_description(cls) -> str:
+        """
+        Return a description of how the adapter is used.
+        """
+        return cls.usage_description
+    
+    @classmethod
+    def get_usage_help_text(cls) -> list[str]:
         """
         Return a help text which describes how to use the adapter.
         This might be a good time to exalain the kwargs.
