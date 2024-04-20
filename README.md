@@ -61,7 +61,8 @@ Getting Started
        <meta charset="UTF-8">
        <meta name="viewport" content="width=device-width, initial-scale=1.0">
        <title>Document</title>
-       <link rel="stylesheet" href="{% static 'wagtail_fedit/css/frontend.css' %}">
+       {# Load all registered CSS required for the adapters. Only included inside edit view! #}
+       {% fedit_scripts "css" %}
    </head>
    <body>
        {# Adress the model.field or model.my.related.field you wish to edit. #}
@@ -76,6 +77,8 @@ Getting Started
        {% wagtailuserbar %}
 
        <script src="{% static 'wagtail_fedit/js/frontend.js' %}"></script>
+       {# Load all registered Javascript required for the adapters. Only included inside edit view! #}
+       {% fedit_scripts "js" %}
    </body>
    </html>
 
@@ -242,11 +245,15 @@ class MyPage(Page):
 2. We have the following HTML template:
 
 ```django-html
+...
+
 {% load fedit %}
 {% fedit colorizer page.color target=".my-colorized-div" %}
 <div class="my-colorized-div" style="color: {{ page.color }}">
     <h1>Colorized Text!</h1>
 </div>
+
+...
 ```
 
 ###  Adapters Python
@@ -339,9 +346,32 @@ We now need to create the javascript function to actually apply the color to the
 This function will be called `myColorizerJavascriptFunction`, as defined in the adapter's `__init__` method.
 
 ```javascript
+// myapp/static/myapp/js/custom.js
 function myColorizerJavascriptFunction(element, response) {
     element.style.color = response.color;
 }
+```
+
+We must then register this javascript file to be included in the frontend editing interface.
+
+This should be done in a `wagtail_hooks.py` file.
+
+```python
+# myapp/wagtail_hooks.py
+
+from django.utils.html import format_html
+from django.templatetags.static import static
+from wagtail_fedit.hooks import REGISTER_JS
+from wagtail import hooks
+
+@hooks.register(REGISTER_JS)
+def register_js(request):
+    return [
+        format_html(
+            '<script src="{0}"></script>',
+            static('myapp/js/custom.js')
+        ),
+    ]
 ```
 
 ## Hooks
