@@ -34,13 +34,15 @@
                                         {% if entry.comment %}
                                             <span class="report__results--comment">{% trans "Comment" %}: <em>{{ entry.comment }}</em></span>
                                         {% endif %}
-                                        {% if entry.revision and entry.content_changed and is_page %}
+                                        {% if entry.revision and entry.content_changed and LOG_ACTION_TEMPLATES_AVAILABLE %}
                                             {% if entry.revision == view.object.latest_revision %}{% trans 'Current draft' as status_label %}{% status status_label classname="w-status--primary" %}{% endif %}
                                             {% include "wagtailadmin/pages/revisions/_actions.html" with revision=entry.revision page=view.object %}
                                         {% endif %}
                                     </td>
                                 {% else %}
-                                    {% include "wagtailsnippets/snippets/revisions/_actions.html" with instance=entry value=entry.message object=view.object revision_enabled=True can_publish=True draftstate_enabled=True %}
+                                    <td>
+
+                                    </td>
                                 {% endif %}
                                 <td>
                                     {% include "wagtailadmin/shared/user_avatar.html" with user=entry.user username=entry.user_display_name %}

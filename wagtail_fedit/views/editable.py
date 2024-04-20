@@ -1,6 +1,7 @@
 from typing import Any
 from django.db import models
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 from django.shortcuts import redirect
@@ -34,6 +35,7 @@ from .. import forms as block_forms
 from ..utils import (
     FEDIT_PREVIEW_VAR,
     USERBAR_MODEL_VAR,
+    LOG_ACTION_TEMPLATES_AVAILABLE,
     FeditPermissionCheck,
     with_userbar_model,
     # user_can_publish,
@@ -270,12 +272,14 @@ class PublishView(BaseActionView):
         elif issubclass(log_entry_model, ModelLogEntry):
             log_entries = log_entry_model.objects\
                 .filter(object_id=self.object.pk)\
+                .filter(content_type=ContentType.objects.get_for_model(self.object))\
                 .order_by("-timestamp")
                 
         else:
             log_entries = None
 
-        if log_entries:
+        has_existing_published = log_entries.filter(action="wagtail.publish").exists()
+        if log_entries and has_existing_published:
             log_entries = log_entries.filter(
                 timestamp__gt=models.Subquery(
                     log_entries.filter(action="wagtail.publish")\
@@ -300,12 +304,15 @@ class PublishView(BaseActionView):
             log_entry_count = log_entries.count()
             log_entries = log_entries[:MAX_LOG_ENTRIES_DISPLAYED]
 
+
         context.update({
             "log_entries": log_entries,
             "has_more_entries": log_entry_count > MAX_LOG_ENTRIES_DISPLAYED,
             "log_entry_count": log_entry_count,
             "last_published_at": self.object.last_published_at,
             "is_page": isinstance(self.object, Page),
+            
+            "LOG_ACTION_TEMPLATES_AVAILABLE": LOG_ACTION_TEMPLATES_AVAILABLE,
         })
 
         return context

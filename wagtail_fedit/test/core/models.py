@@ -4,6 +4,9 @@ from django.utils.text import slugify
 from wagtail.snippets.models import register_snippet
 from django.template import Template, Context
 from wagtail import blocks
+from wagtail.admin.panels import (
+    FieldPanel,
+)
 from wagtail.fields import (
     StreamField,
     StreamValue,
@@ -155,3 +158,15 @@ class EditableLockModel(BaseEditableMixin, WorkflowMixin, DraftStateMixin, Revis
             user=user,
             policy=self.get_permissions_policy()
         )
+
+
+class EditablePageModel(Page):
+    body = models.TextField()
+    content: StreamValue = StreamField([
+        ("heading_component", HeadingComponent()),
+        ("flat_menu_component", FlatMenuComponent())
+    ], use_json_field=True)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("content")
+    ]

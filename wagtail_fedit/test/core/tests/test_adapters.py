@@ -55,7 +55,7 @@ class TestBlockAdapter(BlockAdapter, TestAdapter):
     identifier = "test_block"
 
 class TestFieldAdapter(FieldAdapter, TestAdapter):
-    identifier = "test_field"    
+    identifier = "test_field"
 
 adapter_registry.register(TestAdapter)
 adapter_registry.register(TestBlockAdapter)

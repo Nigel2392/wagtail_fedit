@@ -6,11 +6,9 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.template.loader import render_to_string
-from django.template.base import FilterExpression
 from django.conf import settings
 from django.urls import reverse
 
-from wagtail import hooks
 from wagtail.models import (
     DraftStateMixin,
     WorkflowMixin,
@@ -20,7 +18,11 @@ from wagtail.models import (
 from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.blocks.stream_block import StreamValue
 from wagtail.blocks.list_block import ListValue
-from wagtail import blocks
+from wagtail import (
+    hooks,
+    blocks,
+    VERSION as WAGTAIL_VERSION,
+)
 
 from .toolbar import (
     FeditAdapterComponent,
@@ -41,6 +43,7 @@ if TYPE_CHECKING:
 TEMPLATE_TAG_NAME = "fedit"
 FEDIT_PREVIEW_VAR = "_wagtail_fedit_preview"
 USERBAR_MODEL_VAR = "_wagtail_fedit_userbar_model"
+LOG_ACTION_TEMPLATES_AVAILABLE = WAGTAIL_VERSION < (6, 1, 0)
 
 
 class FeditPermissionCheck:

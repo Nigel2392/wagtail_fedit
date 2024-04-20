@@ -1,14 +1,23 @@
 from django.contrib.contenttypes.models import (
     ContentType,
 )
+from wagtail.log_actions import (
+    registry,
+    log,
+)
 from wagtail.models import (
+    Page,
     Workflow,
     WorkflowTask,
     WorkflowContentType,
     GroupApprovalTask,
+    ModelLogEntry,
 )
 from .base import (
     BaseFEditTest,
+)
+from ..models import (
+    EditableFullModel,
 )
 from wagtail_fedit.views import (
     PublishView,
@@ -16,7 +25,11 @@ from wagtail_fedit.views import (
     UnpublishView,
     CancelView,
 )
+from wagtail_fedit.utils import (
+    LOG_ACTION_TEMPLATES_AVAILABLE,
+)
 
+registry.register_model(EditableFullModel, ModelLogEntry)
 
 class TestSubmitViews(BaseFEditTest):
 
@@ -34,6 +47,109 @@ class TestSubmitViews(BaseFEditTest):
         if check_status:
             self.assertEqual(response.status_code, check_status, msg=f"Request failed for {url_name}")
         return response
+    
+    def test_get_publish(self):
+        self.client.force_login(self.admin_user)
+
+        for model in [self.page_model, self.full_model]:
+    
+            revision = model.save_revision(
+                user=self.admin_user,
+                clean=False,
+            )
+
+            log(
+                instance=model,
+                action="wagtail_fedit.edit_field",
+                user=self.admin_user,
+                revision=revision,
+                content_changed=True,
+            )
+
+            log(
+                instance=model,
+                action="wagtail_fedit.edit_block",
+                user=self.admin_user,
+                revision=revision,
+                content_changed=True,
+            )
+
+            url = self.get_url_for("publish",
+                app_label=model._meta.app_label,
+                model_name=model._meta.model_name,
+                model_id=model.pk,
+            )
+
+            try:
+                response = self.client.get(url)
+                content = response.content.decode()
+
+                self.assertEqual(response.status_code, 200)
+
+                self.assertIn('class="wagtail-fedit-log-entries"', content)
+                
+                if LOG_ACTION_TEMPLATES_AVAILABLE:
+                    if isinstance(model, Page):
+                        self.assertIn('ul class="actions"', content) # Supported for pages
+                    else:
+                        self.assertNotIn('ul class="actions"', content) # Not supported for snippets / regular models
+
+            except Exception as e:
+                if isinstance(e, AssertionError):
+                    self.fail(str(e))
+
+                self.fail(f"Request failed for {url} with error: {e}")
+
+    def test_get_submit(self):
+        self.client.force_login(self.admin_user)
+
+        url = self.get_url_for("submit",
+            app_label=self.full_model._meta.app_label,
+            model_name=self.full_model._meta.model_name,
+            model_id=self.full_model.pk,
+        )
+
+        try:
+            response = self.client.get(url)
+            content = response.content.decode()
+        except Exception as e:
+            self.fail(f"Request failed for {url} with error: {e}")
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_unpublish(self):
+        self.client.force_login(self.admin_user)
+
+        url = self.get_url_for("unpublish",
+            app_label=self.full_model._meta.app_label,
+            model_name=self.full_model._meta.model_name,
+            model_id=self.full_model.pk,
+        )
+
+        try:
+            response = self.client.get(url)
+            content = response.content.decode()
+        except Exception as e:
+            self.fail(f"Request failed for {url} with error: {e}")
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_cancel(self):
+        self.client.force_login(self.admin_user)
+
+        url = self.get_url_for("cancel",
+            app_label=self.full_model._meta.app_label,
+            model_name=self.full_model._meta.model_name,
+            model_id=self.full_model.pk,
+        )
+
+        try:
+            response = self.client.get(url)
+            content = response.content.decode()
+        except Exception as e:
+            self.fail(f"Request failed for {url} with error: {e}")
+
+        self.assertEqual(response.status_code, 200)
 
     def test_publish(self):
         self.client.force_login(self.admin_user)

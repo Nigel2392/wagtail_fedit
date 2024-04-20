@@ -7,8 +7,12 @@ from django.contrib.auth.models import (
     Permission,
     AnonymousUser,
 )
+from wagtail.models import (
+    Page,
+)
 from ..models import (
     BasicModel,
+    EditablePageModel,
     EditableFullModel,
     EditableDraftModel,
     EditableRevisionModel,
@@ -119,7 +123,15 @@ class BaseFEditTest(TestCase):
         super().setUp()
 
         self.request_factory = RequestFactory()
-
+        root_page: Page = Page.add_root(title="Root Page")
+        self.page_model = root_page.add_child(
+            instance=EditablePageModel(
+                title="Editable Page",
+                body="Editable Page Body",
+                content=TEST_BLOCK_DATA,
+                url_path="/home/editable-page/",
+            )
+        )
         self.full_model = EditableFullModel.objects.create(
             title="Full Model",
             body="Full Model Body",
