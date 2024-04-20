@@ -55,17 +55,11 @@ class PickleBlockSerializer:
     def loads(self, data):
         return pickle.loads(data)
 
-class Base85JSONSerializer:
-    """
-    Simple wrapper around base85 and json to be used in signing.dumps and
-    signing.loads.
-    """
+def Base85_json_dumps(obj):
+    return base64.b85encode(json.dumps(obj).encode("utf-8")).decode("utf-8")
 
-    def dumps(self, obj):
-        return base64.b85encode(json.dumps(obj).encode("utf-8")).decode("utf-8")
-
-    def loads(self, data):
-        return json.loads(base64.b85decode(data).decode("utf-8"))
+def Base85_json_loads(data):
+    return json.loads(base64.b85decode(data).decode("utf-8"))
 
 class BaseAdapter(FeditIFrameMixin):
     identifier              = None
@@ -270,8 +264,7 @@ class BaseAdapter(FeditIFrameMixin):
         if SIGN_SHARED_CONTEXT:
             return self.signer.sign_object(self.kwargs, compress=True)
         
-        serializer = Base85JSONSerializer()
-        return serializer.dumps(self.kwargs)
+        return Base85_json_dumps(self.kwargs)
 
     @classmethod
     def decode_shared_context(cls, request: HttpRequest, object: models.Model, field: str, context: str) -> dict:
@@ -283,8 +276,7 @@ class BaseAdapter(FeditIFrameMixin):
         if SIGN_SHARED_CONTEXT:
             return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
         try:
-            serializer = Base85JSONSerializer()
-            return serializer.loads(context)
+            return Base85_json_loads(context)
         except json.JSONDecodeError:
             pass
         return {}

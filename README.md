@@ -14,8 +14,9 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 - [Workflows](#workflows)
 - [Logs](#logs)
 - [Caveats](#caveats)
-- [Adapters Python](#adapters-python)
-- [Adapters Javascript](#adapters-javascript)
+- [Adapters](#adapters)
+  - [Adapters Python](#adapters-python)
+  - [Adapters Javascript](#adapters-javascript)
 - [Hooks](#hooks)
   - [Construct Adapter Toolbar](#wagtail_feditconstruct_adapter_toolbar)
   - [Register Type Renderer](#wagtail_feditregister_type_renderer)
@@ -201,13 +202,129 @@ Our new loop would then be:
 {% endfor %}
 ```
 
-## Adapters Python
+## Adapters
 
-* TBA
+Creating a custom adapter is relatively simple.  
+We highly recommend you to inherit from `BaseFieldFuncAdapter` or `BaseBlockFuncAdapter`.  
+These adapters are basically pre-setup to callback to a javascript function on successful form submission.  
+This will save you the most amount of work.
 
-## Adapters Javascript
+We will create an adapter to change the color of a text field.
 
-* TBA
+Our adapter will be called `colorizer`.
+
+1. Our model is defined as follows:
+
+```python
+from wagtail.models import Page
+from wagtail.admin.panels import FieldPanel
+from django.db import models
+
+class MyPage(Page):
+    COLOR_CHOICES = [
+        ("#000000", "Black"),
+        ("#FFFFFF", "White"),
+        ("#FF0000", "Red"),
+        ("#00FF00", "Green"),
+        ("#0000FF", "Blue"),
+    ]
+
+    color = models.CharField(max_length=7, default="#000000", choices=COLOR_CHOICES)
+
+    content_panels = Page.content_panels + [
+        FieldPanel("color"),
+    ]
+```
+
+2. We have the following HTML template:
+
+```django-html
+{% load fedit %}
+{% fedit colorizer page.color target=".my-colorized-div" %}
+<div class="my-colorized-div" style="color: {{ page.color }}">
+    <h1>Colorized Text!</h1>
+</div>
+```
+
+###  Adapters Python
+
+We will get started creating the adapter definition.  
+Adapters can be defined anywhere; we recommend a separate `adapters.py` file.
+
+Adapter instances also have access to the following variables:
+
+* `self.object` - The model instance.
+* `self.field_name` - The field name.
+* `self.meta_field` - The models.Field instance.
+* `self.field_value` - The field value (Retrieved with `self.meta_field.value_from_object(self.object)`)
+* `self.request` - The django HTTP request object.
+* `self.kwargs` - Any shared context / keyword arguments for this adapter.
+
+```python
+# myapp/adapters.py
+
+from wagtail_fedit.adapters import BaseFieldFuncAdapter
+
+class ColorizerAdapter(BaseFieldFuncAdapter):
+    # Required keyword arguments for the template tag are defined by the superclass.
+    # required_kwargs = [
+    #   "target",
+    #   "name", # the function name, override in __init__ method.
+    # ]
+
+    # Optional kwargs are used to inform inside of the adapter_help command.
+    # They are only for developer convenience.
+    # optional_kwargs = []
+
+    # How the adapter will be adressed inside of the template tag.
+    identifier = "colorizer"
+
+    # A simple description of what this adapter does.
+    usage_description = "Change the color of the text for the given target element."
+
+    # Optional explanation of keyword arguments
+    help_text_dict = {
+        "target": "The target element to apply the color to.",
+    }
+
+    def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
+        kwargs["name"] = "myColorizerJavascriptFunction"
+        super().__init__(object, field_name, request, **kwargs)
+
+    def render_content(self, parent_context=None):
+        # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
+        return ""
+        
+    def get_response_data(self, parent_context=None):
+        data = super().get_response_data(parent_context)
+        return data | {
+            "color": self.field_value,
+        }
+```
+
+We must then register the adapter to make sure it is available for templates.
+
+This should be done in a `wagtail_hooks.py` file.
+
+```python
+# myapp/wagtail_hooks.py
+
+from wagtail_fedit.adapters import adapter_registry
+from myapp.adapters import ColorizerAdapter
+
+adapter_registry.register(ColorizerAdapter)
+```
+
+###  Adapters Javascript
+
+We now need to create the javascript function to actually apply the color to the styles of the element.  
+This function will be called `myColorizerJavascriptFunction`, as defined in the adapter's `__init__` method.
+
+```javascript
+function myColorizerJavascriptFunction(element, response) {
+    element.style.color = response.color;
+}
+```
 
 ## Hooks
 
