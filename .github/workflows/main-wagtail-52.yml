@@ -14,7 +14,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e .
+      - name: Install Wagtail 5.2
+        run:
           pip install wagtail==5.2
+      - name: Migrate database
+        run: |
+          python wagtail_fedit/test/manage.py makemigrations
+          python wagtail_fedit/test/manage.py migrate
       - name: Run tests
         run: |
           python wagtail_fedit/test/manage.py test
