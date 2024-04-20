@@ -26,6 +26,8 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
   - [Register CSS](#wagtail_feditregister_css)
   - [Register JS](#wagtail_feditregister_js)
   - [Field Editor Size](#wagtail_feditfield_editor_size)
+- [Settings](#settings)
+  - [Sign Shared Context](#wagtail_fedit_sign_shared_context)
 - [How your content is rendered](#how-your-content-is-rendered)
   - [Rendered output HTML](#rendered-editable-output-html)
 - [Implemented](#implemented)
