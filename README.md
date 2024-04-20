@@ -23,6 +23,9 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
   - [Register Field Renderer](#wagtail_feditregister_field_renderer)
   - [Exclude Related Forms](#wagtail_feditexclude_related_forms)
   - [Action Menu Item Is Shown](#wagtail_feditaction_menu_item_is_shown)
+  - [Register CSS](#wagtail_feditregister_css)
+  - [Register JS](#wagtail_feditregister_js)
+  - [Field Editor Size](#wagtail_feditfield_editor_size)
 - [How your content is rendered](#how-your-content-is-rendered)
   - [Rendered output HTML](#rendered-editable-output-html)
 - [Implemented](#implemented)
@@ -263,7 +266,10 @@ Adapter instances also have access to the following variables:
 ```python
 # myapp/adapters.py
 
-from wagtail_fedit.adapters import BaseFieldFuncAdapter
+from wagtail_fedit.adapters import (
+    BaseFieldFuncAdapter,
+    VARIABLES,
+)
 
 class ColorizerAdapter(BaseFieldFuncAdapter):
     # Required keyword arguments for the template tag are defined by the superclass.
@@ -296,10 +302,22 @@ class ColorizerAdapter(BaseFieldFuncAdapter):
         return ""
         
     def get_response_data(self, parent_context=None):
+        """
+        Return the data to be sent to the frontend adapter.
+        """
         data = super().get_response_data(parent_context)
         return data | {
             "color": self.field_value,
         }
+
+    def get_form_attrs(self) -> dict:
+        """
+        Return form attributes for the form inside of the edit modal.
+        This can be used to control editor size.
+        """
+        attrs = super().get_form_attrs()
+        attrs[VARIABLES.FORM_SIZE_VAR] = "full" # Fullscreen, there is also `large`.
+        return attrs
 ```
 
 We must then register the adapter to make sure it is available for templates.
@@ -361,6 +379,55 @@ def register_renderers(renderer_map):
     )
 ```
 
+### wagtail_fedit.register_css
+
+Register a custom CSS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.
+
+Example of how this hook is used in wagtail_hooks.py:
+    
+```python
+@hooks.register(REGISTER_CSS)
+def register_css(request):
+    return [
+        format_html(
+            '<link rel="stylesheet" href="{0}">',
+            static('css/custom.css')
+        ),
+    ]
+```
+
+### wagtail_fedit.field_editor_size
+
+Control the size of the editor for the given model-field type.
+
+Example of how this hook is called:
+    
+```python
+for hook in hooks.get_hooks(FEDIT_FIELD_EDITOR_SIZE):
+    size = hook(model_instance, model_field)
+    if size:
+        return size
+```
+
+### wagtail_fedit.register_js
+
+Register a custom JS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.
+
+This can be used to register custom adapter JS.
+
+Example of how this hook is used in wagtail_hooks.py:
+    
+    ```python
+    @hooks.register(REGISTER_JS)
+    def register_js(request):
+        return [
+            format_html(
+                '<script src="{0}"></script>',
+                static('js/custom.js')
+            ),
+        ]
+    ```
+
 ### wagtail_fedit.register_field_renderer
 
 Register a custom renderer for a field.
@@ -414,6 +481,17 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
     if result is not None:
         return result # <- bool
 ```
+
+## Settings
+
+### `WAGTAIL_FEDIT_SIGN_SHARED_CONTEXT`
+
+Default: `True`
+
+Sign the shared context with a secret key.  
+This is useful to prevent tampering with the shared context.  
+It will also be compressed with zlib if available.  
+It might not be in your site's security model to need this.
 
 ## How your content is rendered
 
