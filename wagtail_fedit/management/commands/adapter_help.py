@@ -35,7 +35,7 @@ class Command(BaseCommand):
                 
             help_text = adapter_class.usage_help_text()
             if help_text:
-                mid = f"{HELP_DISTANCE}* "
+                mid = f"{HELP_DISTANCE} * "
                 help_text = f"{LB}{mid}".join([f"{k}: {v}" for k, v in help_text.items()])
                 s.append(f"{mid}{help_text}")
 
