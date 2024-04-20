@@ -18,11 +18,18 @@ class Command(BaseCommand):
             " * Absolute arguments (missing an equal sign) are optional and treated as booleans.",
             " * Keyword arguments wrapped in square brackets are optional. [key=value]",
             " * The value of the adapter is the value of the field.",
-            "====================",
-            "",
         ]
 
         for identifier, adapter_class in adapter_registry.adapters.items():
+
+            s.append(
+                "==========",
+            )
+
+            s.append(
+                ""
+            )
+
             DISTANCE = "    "
             s.append(
                 f"{DISTANCE}{{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.usage_string()} %}}",
@@ -31,13 +38,19 @@ class Command(BaseCommand):
             HELP_DISTANCE = DISTANCE + "  "
             description = adapter_class.usage_description
             if description:
-                s.append(f"{HELP_DISTANCE}{description}")
+                s.append(
+                    f"{HELP_DISTANCE}{description}",
+                )
                 
             help_text = adapter_class.usage_help_text()
             if help_text:
                 mid = f"{HELP_DISTANCE} * "
-                help_text = f"{LB}{mid}".join([f"{k}: {v}" for k, v in help_text.items()])
-                s.append(f"{mid}{help_text}")
+                help_text = f"{LB}{mid}".join([
+                    f"{k}: {v}" for k, v in help_text.items()
+                ])
+                s.append(
+                    f"{mid}{help_text}",
+                )
 
             s.append("")
 
