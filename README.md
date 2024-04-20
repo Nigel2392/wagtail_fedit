@@ -211,9 +211,9 @@ Our new loop would then be:
 
 ## Adapters
 
-Creating a custom adapter is relatively simple.  
-We highly recommend you to inherit from `BaseFieldFuncAdapter` or `BaseBlockFuncAdapter`.  
-These adapters are basically pre-setup to callback to a javascript function on successful form submission.  
+Creating a custom adapter is relatively simple.
+We highly recommend you to inherit from `BaseFieldFuncAdapter` or `BaseBlockFuncAdapter`.
+These adapters are basically pre-setup to callback to a javascript function on successful form submission.
 This will save you the most amount of work.
 
 We will create an adapter to change the color of a text field.
@@ -257,9 +257,9 @@ class MyPage(Page):
 ...
 ```
 
-###  Adapters Python
+### Adapters Python
 
-We will get started creating the adapter definition.  
+We will get started creating the adapter definition.
 Adapters can be defined anywhere; we recommend a separate `adapters.py` file.
 
 Adapter instances also have access to the following variables:
@@ -308,7 +308,7 @@ class ColorizerAdapter(BaseFieldFuncAdapter):
     def render_content(self, parent_context=None):
         # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
         return ""
-        
+      
     def get_response_data(self, parent_context=None):
         """
         Return the data to be sent to the frontend adapter.
@@ -341,9 +341,9 @@ from myapp.adapters import ColorizerAdapter
 adapter_registry.register(ColorizerAdapter)
 ```
 
-###  Adapters Javascript
+### Adapters Javascript
 
-We now need to create the javascript function to actually apply the color to the styles of the element.  
+We now need to create the javascript function to actually apply the color to the styles of the element.
 This function will be called `myColorizerJavascriptFunction`, as defined in the adapter's `__init__` method.
 
 ```javascript
@@ -415,7 +415,7 @@ def register_renderers(renderer_map):
 Register a custom CSS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.
 
 Example of how this hook is used in wagtail_hooks.py:
-    
+
 ```python
 @hooks.register(REGISTER_CSS)
 def register_css(request):
@@ -432,7 +432,7 @@ def register_css(request):
 Control the size of the editor for the given model-field type.
 
 Example of how this hook is called:
-    
+
 ```python
 for hook in hooks.get_hooks(FEDIT_FIELD_EDITOR_SIZE):
     size = hook(model_instance, model_field)
@@ -447,17 +447,8 @@ Register a custom JS file to be included when the utils.FEDIT_PREVIEW_VAR is set
 This can be used to register custom adapter JS.
 
 Example of how this hook is used in wagtail_hooks.py:
-    
-    ```python
-    @hooks.register(REGISTER_JS)
-    def register_js(request):
-        return [
-            format_html(
-                '<script src="{0}"></script>',
-                static('js/custom.js')
-            ),
-        ]
-    ```
+
+    ``python     @hooks.register(REGISTER_JS)     def register_js(request):         return [             format_html(                 '<script src="{0}"></script>',                 static('js/custom.js')             ),         ]     ``
 
 ### wagtail_fedit.register_field_renderer
 
@@ -519,9 +510,9 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
 
 Default: `True`
 
-Sign the shared context with a secret key.  
-This is useful to prevent tampering with the shared context.  
-It will also be compressed with zlib if available.  
+Sign the shared context with a secret key.
+This is useful to prevent tampering with the shared context.
+It will also be compressed with zlib if available.
 It might not be in your site's security model to need this.
 
 ## How your content is rendered
@@ -533,12 +524,12 @@ Your block and field are wrapped in a `div`, any CSS for your templates should k
 ### Rendered editable output HTML
 
 ```html
-<div class="wagtail-fedit-adapter-wrapper{%if shared_context.inline%} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}"{% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}">
+{% load fedit %}<div id="{{ adapter.get_element_id }}" class="wagtail-fedit-adapter-wrapper{% if shared_context.inline or adapter.inline %} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}" data-fedit-constructor="{{ js_constructor }}" {% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}">
     <div class="wagtail-fedit-buttons">
         {% for button in buttons %}
-            {{ button }} {# Edit button; more buttons MIGHT possibly be added in the future. #}
+            {{ button }}
         {% endfor %}
-    </div>{{ content|safe }}
+    </div>{% render_adapter adapter %}
 </div>
 ```
 
