@@ -1,0 +1,23 @@
+name: test_wagtail_fedit_wagtail_61
+on: [pull_request, push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install wagtail==6.1rc1
+      - name: Run tests
+        run: |
+          python wagtail_fedit/test/manage.py test
+      - name: Run tests in parallel
+        run: |
+          python wagtail_fedit/test/manage.py test --parallel auto
