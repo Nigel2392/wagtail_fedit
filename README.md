@@ -28,6 +28,7 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
   - [Field Editor Size](#wagtail_feditfield_editor_size)
 - [Settings](#settings)
   - [Sign Shared Context](#wagtail_fedit_sign_shared_context)
+  - [Share With Sessions](#wagtail_fedit_share_with_sessions)
 - [How your content is rendered](#how-your-content-is-rendered)
   - [Rendered output HTML](#rendered-editable-output-html)
 - [Implemented](#implemented)
@@ -308,7 +309,7 @@ class ColorizerAdapter(BaseFieldFuncAdapter):
     def render_content(self, parent_context=None):
         # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
         return ""
-      
+    
     def get_response_data(self, parent_context=None):
         """
         Return the data to be sent to the frontend adapter.
@@ -514,6 +515,15 @@ Sign the shared context with a secret key.
 This is useful to prevent tampering with the shared context.
 It will also be compressed with zlib if available.
 It might not be in your site's security model to need this.
+
+### `WAGTAIL_FEDIT_SHARE_WITH_SESSIONS`
+
+Default: `False`
+
+Share the context through the session data.
+This is useful if you are running into limits with the URL length.
+This will store the context in the session and pass the session
+key to the iFrame instead of the context.
 
 ## How your content is rendered
 
