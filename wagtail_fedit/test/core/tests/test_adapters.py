@@ -230,6 +230,40 @@ class TestBaseAdapter(BaseFEditTest):
             wrap_adapter(request, adapters[4], {})
         )
 
+    def test_adapter_editable_as_var(self):
+        self.assertEqual(TestAdapter.required_kwargs, ["test"])
+
+        tpl = Template(
+            "{% load fedit %}"
+            "{% fedit test object.title test='test' id=5 as test_adapter_as_variable_name %}"
+            "{{ test_adapter_as_variable_name }}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+            })
+        )
+
+        self.assertHTMLEqual(
+            tpl,
+            wrap_adapter(request, adapters[5], {})
+        )
+
     def test_context_processors_run(self):
         tpl = Template(
             "{% load fedit %}"
@@ -303,13 +337,13 @@ class TestBlockAdapter(BaseFEditTest):
     def test_render_as_var(self):
         streamfield = self.basic_model.content
         block = find_block(self.BLOCK_ID, streamfield)
-        
+
         request = self.request_factory.get(
             self.get_editable_url(
                 self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
             )
         )
-        
+
         request.user = self.admin_user
         setattr(
             request,
@@ -433,5 +467,35 @@ class TestFieldAdapter(BaseFEditTest):
             self.assertHTMLEqual(
                 tpl,
                 wrap_adapter(request, adapters[7], {})
+            )
+
+        def test_render_as_var(self):
+            request = self.request_factory.get(
+                self.get_editable_url(
+                    self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+                )
+            )
+            request.user = self.admin_user
+            setattr(
+                request,
+                FEDIT_PREVIEW_VAR,
+                True,
+            )
+            template = Template(
+                "{% load fedit %}"
+                "{% fedit test_field object.title test=True id=8 as test %}"
+                "{{ test }}"
+            )
+    
+            context = {
+                "object": self.basic_model,
+                "request": request,
+            }
+    
+            tpl = template.render(Context(context))
+    
+            self.assertHTMLEqual(
+                tpl,
+                wrap_adapter(request, adapters[8], {})
             )
     
