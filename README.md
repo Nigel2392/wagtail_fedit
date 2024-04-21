@@ -59,6 +59,8 @@ Getting Started
 
    **Any model can be edited**; you just can't access the specific frontend editing interface URL for that model if it does not inherit from `PreviewableMixin`.
 
+   I.E: If a random model which does not inherit from `PreviewableMixin` appears on an editable page; **you will be able to edit it.**
+
 2. Define a template for your model.
 
    Example:
