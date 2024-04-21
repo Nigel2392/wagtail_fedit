@@ -28,6 +28,11 @@ class FuncAdapterMixin:
         
         return f"{cls.base_identifier}_func"
     
+    def get_element_id_parts(self) -> list[str]:
+        return super().get_element_id_parts() + [
+            self.kwargs["target"],
+        ]
+
     @classproperty
     def required_kwargs(cls):
 

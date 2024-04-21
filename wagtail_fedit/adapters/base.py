@@ -3,6 +3,7 @@ from typing import (
 )
 from django import forms
 from django.db import models
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import (
     slugify,
@@ -17,6 +18,7 @@ from ..settings import (
     SIGN_SHARED_CONTEXT,
     SHARE_WITH_SESSIONS,
     USE_ADAPTER_SESSION_ID,
+    TRACK_LOCALES,
 )
 from ..utils import (
     FeditIFrameMixin,
@@ -95,9 +97,16 @@ class BaseAdapter(FeditIFrameMixin):
     js_constructor          = None
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
-        self.object         = object
-        self.request        = request
-        self.kwargs         = kwargs
+        self.object           = object
+        self.request          = request
+        self.kwargs           = kwargs
+
+        if hasattr(request, "LANGUAGE_CODE") and TRACK_LOCALES:
+            if "LANGUAGE_CODE" not in self.kwargs:
+                self.kwargs["LANGUAGE_CODE"] = request.LANGUAGE_CODE
+
+            if self.kwargs["LANGUAGE_CODE"] != request.LANGUAGE_CODE:
+                translation.activate(self.kwargs["LANGUAGE_CODE"])
 
         if self.field_required:
             self.field_name     = field_name

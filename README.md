@@ -565,6 +565,18 @@ Use the get_element_id method of the adapter to generate a session ID.
 This is useful to not clutter session data too much.
 If `False`, the session ID will be generated each time the page is loaded.
 
+### `WAGTAIL_FEDIT_TRACK_LOCALES`
+
+Default: `False`
+
+Track the locales of the users across the views.
+
+**This sets the initial request.LANGUAGE_CODE (if available) in the shared context.**
+
+If this is false, there is no guarantee that the language of a saved field/model
+will be the same as it initially was, generally it will be - however this might mess up with Wagtail's `Page.locale` and
+the page not being available in the context afterwards.
+
 ## How your content is rendered
 
 (**Maintainer's note:** In my experience this doesn't mess the CSS up too much, or even at all for most content - **if** you don't get hyperspecific with your CSS selectors and structure your templates well.)

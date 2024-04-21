@@ -121,11 +121,7 @@ class FieldAdapter(BlockFieldReplacementAdapter):
             }
 
         return super().get_help_text()
-          
-    def get_element_id(self) -> str:
-        m = self.model
-        return f"field-{self.field_name}-{m._meta.app_label}-{m._meta.model_name}-{self.object.pk}"
-      
+    
     def get_form_attrs(self) -> dict:
         attrs = super().get_form_attrs()
 

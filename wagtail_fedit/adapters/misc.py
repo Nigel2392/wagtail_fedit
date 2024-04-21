@@ -39,7 +39,7 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
 
     def render_content(self, parent_context=None):
         return ""
-
+    
     def get_response_data(self, parent_context=None):
         data = super().get_response_data(parent_context)
         image = getattr(self.object, self.field_name, None)
