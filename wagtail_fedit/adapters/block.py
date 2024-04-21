@@ -158,9 +158,6 @@ class BlockAdapter(BlockFieldReplacementAdapter):
                 **extra_log_kwargs,
             )
 
-        if settings.USE_I18N:
-            translation.activate(self.request.LANGUAGE_CODE)
-
     @classmethod
     def render_from_kwargs(cls, context, **kwargs):
         if "block" not in kwargs:
