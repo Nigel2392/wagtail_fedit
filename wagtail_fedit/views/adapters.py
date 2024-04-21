@@ -25,14 +25,14 @@ from ..adapters import (
     BaseAdapter,
     RegistryLookUpError,
 )
-from ..templatetags.fedit import (
-    wrap_adapter,
-)
 from ..utils import (
     FeditPermissionCheck,
     FeditIFrameMixin,
     FEDIT_PREVIEW_VAR,
     lock_info,
+)
+from .mixins import (
+    LocaleMixin,
 )
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
@@ -69,6 +69,8 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             self.instance = model_instance.latest_revision.as_object()
         else:
             self.instance = model_instance
+
+        LocaleMixin.setup_locale(self.instance)
 
         if not field_name and self.adapter_class.field_required:
             return HttpResponseBadRequest("Field name is required for object")

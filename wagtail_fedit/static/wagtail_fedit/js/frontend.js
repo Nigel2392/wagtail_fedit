@@ -114,6 +114,41 @@ class WagtailFeditorAPI {
     closeModal() {
         this.#editor.closeModal();
     }
+
+    updateHtml(html) {
+
+        const update = (innerHtml) => {
+            const blockWrapper = this.#editor.wrapperElement;
+            const element = document.createElement("div");
+            element.innerHTML = innerHtml;
+            const newBlockWrapper = element.firstElementChild;
+            newBlockWrapper.classList.add("wagtail-fedit-initialized");
+            blockWrapper.parentNode.insertBefore(newBlockWrapper, blockWrapper);
+            blockWrapper.parentNode.removeChild(blockWrapper);
+            this.#editor.wrapperElement = newBlockWrapper;
+            this.#editor.initNewEditors();
+            this.#editor.init();
+
+            return blockWrapper;
+        }
+
+        if (typeof html === "string") {
+            update(html);
+            return;
+        }
+
+        if (typeof html === "function") {
+            this.#editor.wrapperElement.editorAPI = this;
+            html(update);
+            return;
+        }
+    }
+
+    execRelated(func) {
+        for (const wrapper of this.#editor.relatedWrappers) {
+            func(wrapper.editorAPI);
+        }
+    }
 }
 
 
@@ -127,11 +162,13 @@ class BaseWagtailFeditEditor {
         
         /**@type {HTMLElement} */
         this.wrapperElement = element;
+        this.api = new WagtailFeditorAPI(this);
         this.sharedContext = null;
         this.modalHtml = null;
         this.editBtn = null;
         this.init();
         this.iframe = null;
+
 
         if (window.location.hash === `#${this.wrapperElement.id}`) {
             this.makeModal();
@@ -283,8 +320,7 @@ class BaseWagtailFeditEditor {
         this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
         this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
 
-        const api = new WagtailFeditorAPI(this);
-        this.wrapperElement.editorAPI = api;
+        this.wrapperElement.editorAPI = this.api;
 
         this.editBtn.addEventListener("click", async (e) => {
             e.preventDefault();
@@ -350,44 +386,34 @@ class WagtailFeditFuncEditor extends BaseFuncEditor {
 class BlockFieldEditor extends BaseWagtailFeditEditor {
     onResponse(response) {
         const html = response.html;
+        for (const wrapper of this.relatedWrappers) {
+            wrapper.editorAPI.updateHtml((update) => {
+                // Fade out the old block
+                const anim = wrapper.animate([
+                   {opacity: 1},
+                   {opacity: 0},
+                ], {
+                   duration: 350,
+                   easing: "ease-in-out",
+                });
+            
+                anim.onfinish = () => {
 
-        // Fade out the old block
-        const anim = this.wrapperElement.animate([
-            {opacity: 1},
-            {opacity: 0},
-        ], {
-            duration: 350,
-            easing: "ease-in-out",
-        });
-
-        anim.onfinish = () => {
-            // replace the HTML of the block we are editing with the new HTML
-            const newBlock = document.createElement("div");
-            newBlock.innerHTML = html;
-            const blockWrapper = newBlock.firstElementChild;
-            blockWrapper.classList.add("wagtail-fedit-initialized");
-            this.wrapperElement.parentNode.insertBefore(blockWrapper, this.wrapperElement);
-            this.wrapperElement.parentNode.removeChild(this.wrapperElement);
-            blockWrapper.style.opacity = 0;
-            this.wrapperElement = blockWrapper;
-
-            // reinitialize possibly new / replaced editor instances
-            this.initNewEditors();
-
-            // reinitialize proper variables with from new HTML
-            this.init();
-
-            // Fade in the new block
-            const anim = blockWrapper.animate([
-                {opacity: 0},
-                {opacity: 1},
-            ], {
-                duration: 350,
-                easing: "ease-in-out",
+                   const blockWrapper = update(html);
+                
+                   // Fade in the new block
+                   const anim = blockWrapper.animate([
+                       {opacity: 0},
+                       {opacity: 1},
+                   ], {
+                       duration: 350,
+                       easing: "ease-in-out",
+                   });
+                   anim.onfinish = () => {
+                       blockWrapper.style.opacity = 1;
+                   };
+                }
             });
-            anim.onfinish = () => {
-                blockWrapper.style.opacity = 1;
-            };
         }
     }
 }

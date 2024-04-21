@@ -3,9 +3,10 @@ from django.db import models
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView
-from django.shortcuts import redirect
+from django.utils import translation
 from django.urls import reverse
+from django.shortcuts import redirect
+from django.views.generic import TemplateView
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
@@ -47,6 +48,7 @@ from ..utils import (
 from .mixins import (
     ObjectViewMixin,
     LockViewMixin,
+    LocaleMixin,
 )
 
 
@@ -65,7 +67,7 @@ def get_publish_action(object):
     return PublishRevisionAction
 
 
-class BaseFeditView(ObjectViewMixin, FeditPermissionCheck, TemplateView):
+class BaseFeditView(LocaleMixin, ObjectViewMixin, FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
         if self.error_response:
             return self.error_response

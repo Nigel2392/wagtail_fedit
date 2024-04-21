@@ -1,5 +1,5 @@
 from typing import Any
-from django.utils.translation import gettext_lazy as _
+from django.utils import translation
 from django.apps import apps
 from django.http import (
     HttpRequest,
@@ -41,3 +41,20 @@ class LockViewMixin:
             self.object, request.user,
         )
 
+
+class LocaleMixin:
+    def setup(self, *args, **kwargs) -> None:
+        super().setup(*args, **kwargs)
+        self.setup_locale(self.object)
+
+    @staticmethod
+    def setup_locale(object):
+        if hasattr(object, "get_locale"):
+            locale = object.get_locale()
+        elif hasattr(object, "locale"):
+            locale = object.locale
+        else:
+            locale = None
+
+        if locale:
+            translation.activate(locale.language_code)
