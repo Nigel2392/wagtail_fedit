@@ -57,7 +57,7 @@ Getting Started
 
    It is however not always required for your model to inherit from `PreviewableMixin`.
 
-   **Any model can be edited**; you just can't access the specific edit URL for that model if it does not.
+   **Any model can be edited**; you just can't access the specific frontend editing interface URL for that model if it does not inherit from `PreviewableMixin`.
 
 2. Define a template for your model.
 
