@@ -15,6 +15,7 @@ from django.http import (
 )
 from ..settings import (
     SIGN_SHARED_CONTEXT,
+    SHARE_WITH_SESSIONS,
 )
 from ..utils import (
     FeditIFrameMixin,
@@ -219,7 +220,12 @@ class BaseAdapter(FeditIFrameMixin):
         """
         Return a unique identifier for the elements on the frontend.
         """
-        raise NotImplementedError
+        return content_id_from_parts(
+            self.model._meta.app_label,
+            self.model._meta.model_name,
+            self.object.pk,
+            self.field_name,
+        )
     
     def get_form_attrs(self) -> dict:
         """
@@ -270,19 +276,28 @@ class BaseAdapter(FeditIFrameMixin):
         """
         if not self.kwargs:
             return ""
+        if SHARE_WITH_SESSIONS:
+            id = self.get_element_id()
+            self.request.session[id] = self.kwargs
+            self.request.session.modified = True
+            return id
         # return self.signer.sign_object(self.kwargs)# , serializer=PickleBlockSerializer)
         if SIGN_SHARED_CONTEXT:
             return self.signer.sign_object(self.kwargs, compress=True)
         
         return Base85_json_dumps(self.kwargs)
 
+
     @classmethod
     def decode_shared_context(cls, request: HttpRequest, object: models.Model, field: str, context: str) -> dict:
         """
         Decode an encoded contex string back to a dictionary.
         """
-        if not context:
-            return {}
+        if SHARE_WITH_SESSIONS:
+            if not context:
+                return {}
+            return request.session.get(context, {})
+        
         if SIGN_SHARED_CONTEXT:
             return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
         try:
