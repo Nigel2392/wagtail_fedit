@@ -8,6 +8,7 @@ from wagtail.admin.panels import (
 )
 
 from .base import (
+    VARIABLES,
     BlockFieldReplacementAdapter,
     AdapterError,
 )
@@ -34,6 +35,11 @@ class ModelAdapter(BlockFieldReplacementAdapter):
         else:
             self.edit_handler = model_utils.get_edit_handler(self.object.__class__)
 
+    def get_form_attrs(self) -> dict:
+        attrs = super().get_form_attrs()
+        return attrs | {
+            VARIABLES.FORM_SIZE_VAR: "full",
+        }
 
     def get_header_title(self):
         instance_string = get_model_string(self.object)
