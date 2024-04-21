@@ -36,9 +36,12 @@ class FuncAdapterMixin:
 
     def get_response_data(self, parent_context=None):
         data = super().get_response_data(parent_context)
+        name = self.kwargs["name"]
+        target = self.kwargs["target"]
+        target = target.format(object=self.object)
         data["func"] = {
-            "name": self.kwargs["name"],
-            "target": self.kwargs["target"],
+            "name": name,
+            "target": target,
         }
         return data
 
