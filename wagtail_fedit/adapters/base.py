@@ -63,6 +63,10 @@ def Base85_json_loads(data):
 
 class BaseAdapter(FeditIFrameMixin):
     identifier              = None
+
+    # The template used to render the form.
+    template_name           = "wagtail_fedit/editor/adapter_iframe.html"
+
     signer: Signer          = Signer()
     # Required keyword arguments for the adapter
     required_kwargs         = []
@@ -140,6 +144,12 @@ class BaseAdapter(FeditIFrameMixin):
                 **cls.help_text_dict,
             }
         return cls.help_text_dict
+    
+    def get_template_names(self) -> list[str]:
+        """
+        Return the template names for the adapter.
+        """
+        return [self.template_name]
 
     @property
     def field_value(self):

@@ -1,0 +1,13 @@
+{% load i18n wagtailadmin_tags %}
+<form id="wagtail-fedit-form" data-edit-form action="{{ edit_url }}" method="post" {% for k, v in form_attrs.items %}{{ k }}="{{ v|safe }}" {% endfor %}>
+    {% csrf_token %}
+    {% block form %}
+        {% panel id="wagtail-fedit-editor" icon="draft" heading=meta_field.verbose_name %}
+            <div class="wagtail-fedit-form">
+                {% for field in form %}
+                    {% include "./field.html" %}
+                {% endfor %}
+            </div>
+        {% endpanel %}
+    {% endblock %}
+</form>

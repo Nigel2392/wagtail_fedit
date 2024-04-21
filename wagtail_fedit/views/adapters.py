@@ -37,7 +37,6 @@ from ..utils import (
 
 @method_decorator(xframe_options_sameorigin, name="dispatch")
 class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTemplateMixin, View):
-    template_name = "wagtail_fedit/editor/adapter_iframe.html"
     ERROR_TITLE = _("Validation Errors")
 
     def dispatch(self, 
@@ -107,7 +106,10 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             request, adapter_id, field_name, app_label, model_name, model_id,
         )
     
-
+    @property
+    def template_name(self):
+        return self.adapter.get_template_names()
+    
     def render_to_response(self, context: dict[str, Any], success: bool = True, extra: dict = None, **response_kwargs: Any) -> HttpResponse:
         if not extra:
             extra = {}

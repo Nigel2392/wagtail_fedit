@@ -1,0 +1,14 @@
+{% block errors %}
+    {% if form.errors %}
+        <div class="error-message">
+            <h2>{{ view.get_error_title }}</h2>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li class="error">{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}
