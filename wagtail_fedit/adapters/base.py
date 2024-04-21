@@ -138,6 +138,13 @@ class BaseAdapter(FeditIFrameMixin):
                 
         return "".join(s)
     
+    def get_form_context(self, **kwargs):
+        return {
+            "adapter": self,
+            "field_name": self.field_name,
+            "meta_field": self.meta_field,
+        }
+
     @classmethod
     def get_usage_description(cls) -> str:
         """

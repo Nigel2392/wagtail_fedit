@@ -1,11 +1,14 @@
 from django.db import models
+from django.conf import settings
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from django.utils.safestring import mark_safe
 from django.http import HttpRequest
 
 from wagtail.log_actions import log
 from wagtail.blocks import (
     StreamValue,
+    BoundBlock,
 )
 from wagtail.models import (
     RevisionMixin,
@@ -154,6 +157,9 @@ class BlockAdapter(BlockFieldReplacementAdapter):
                 content_changed=True,
                 **extra_log_kwargs,
             )
+
+        if settings.USE_I18N:
+            translation.activate(self.request.LANGUAGE_CODE)
 
     @classmethod
     def render_from_kwargs(cls, context, **kwargs):

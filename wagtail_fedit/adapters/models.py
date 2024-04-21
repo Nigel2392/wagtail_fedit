@@ -22,12 +22,17 @@ class ModelAdapter(BlockFieldReplacementAdapter):
     This will render the model and replace it on the frontend
     on successful form submission.
     """
+    template_name = "wagtail_fedit/editor/adapter_edit_handler.html"
     identifier = "model"
     field_required = False
     usage_description = _("This adapter is used for directly editing a model instance.")
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
+        if isinstance(self.object, Page):
+            self.edit_handler = page_utils._get_page_edit_handler(self.object.__class__)
+        else:
+            self.edit_handler = model_utils.get_edit_handler(self.object.__class__)
 
 
     def get_header_title(self):
@@ -43,14 +48,17 @@ class ModelAdapter(BlockFieldReplacementAdapter):
         m = self.model
         return f"model-{m._meta.app_label}-{m._meta.model_name}-{self.object.pk}"
     
+    def get_form_context(self, **kwargs):
+        context = super().get_form_context(**kwargs)
+        bound_panel = self.edit_handler.get_bound_panel(
+            instance=self.object, request=self.request, form=kwargs["form"],
+        )
+        context["edit_handler"] = bound_panel
+        return context
+
     @property
     def form_class(self):
-        if isinstance(self.object, Page):
-            edit_handler = page_utils._get_page_edit_handler(self.object.__class__)
-        else:
-            edit_handler = model_utils.get_edit_handler(self.object.__class__)
-
-        return edit_handler.get_form_class()
+        return self.edit_handler.get_form_class()
 
     def get_form(self):
         if self.request.method == "POST":

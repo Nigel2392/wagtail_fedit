@@ -1,0 +1,5 @@
+{% load i18n wagtailadmin_tags %}
+<form id="wagtail-fedit-form" data-edit-form action="{{ edit_url }}" method="post" {% for k, v in form_attrs.items %}{{ k }}="{{ v|safe }}" {% endfor %}>
+    {% csrf_token %}
+    {{ edit_handler.render_form_content }}
+</form>

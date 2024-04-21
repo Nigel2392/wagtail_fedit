@@ -151,14 +151,21 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         if self.adapter.field_required:
             verbose_name = self.adapter.meta_field.verbose_name
 
+        extra = {}
+        if "form" in kwargs:
+            extra.update(
+                self.adapter.get_form_context(
+                    **kwargs,
+                ),
+            )
+
         return super().get_context_data(**kwargs) | {
             "verbose_name": verbose_name,
-            "meta_field": self.adapter.meta_field,
-            "field_name": self.adapter.field_name,
             "locked_for_user": self.locked_for_user,
             "shared_context": shared_context,
             "form_attrs": self.adapter.get_form_attrs(),
             "locked": self.lock is not None,
+            **extra,
         }
 
 class EditAdapterView(BaseAdapterView):

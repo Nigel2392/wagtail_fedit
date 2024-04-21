@@ -1,0 +1,7 @@
+{% extends "./base_iframe.html" %}
+
+{% block content %}
+    <div class="wagtail-fedit-form-wrapper">
+        {% include "./adapter_edit_handler_form.html" with edit_url=edit_url form_attrs=form_attrs form=form meta_field=meta_field %}
+    </div>
+{% endblock %}
