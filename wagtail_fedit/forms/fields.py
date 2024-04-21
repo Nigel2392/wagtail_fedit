@@ -1,5 +1,6 @@
 
 from typing import Type
+from django import forms
 from django.db import models
 from django.utils.translation import gettext as _
 from django.http import (
@@ -12,6 +13,39 @@ from wagtail.models import (
     RevisionMixin,
 )
 
+from ..hooks import (
+    REGISTER_FIELD_WIDGETS,
+)
+
+from wagtail import hooks
+
+_looked_for_widgets = False
+_widgets = {}
+
+def _look_for_widgets():
+    global _looked_for_widgets
+    if not _looked_for_widgets:
+        _looked_for_widgets = True
+        for fn in hooks.get_hooks(REGISTER_FIELD_WIDGETS):
+            _widgets.update(fn(_widgets))
+
+def get_widget_for_field(field: models.Field) -> Type[forms.Widget]:
+    """
+    Return a widget for a field.
+    """
+    _look_for_widgets()
+    global _widgets
+
+    if isinstance(field, models.ForeignKey):
+        field = field.related_model
+        widget = _widgets.get(field)
+    else:
+        widget = _widgets.get(field.__class__)
+        
+    if widget is None:
+        pass
+
+    return widget
 
 
 class PossiblePreviewForm(WagtailAdminModelForm):
@@ -22,6 +56,15 @@ class PossiblePreviewForm(WagtailAdminModelForm):
     def __init__(self, *args, request = None, **kwargs):
         self.request = request
         super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            meta_field = self._meta.model._meta.get_field(field.name)
+            widget = get_widget_for_field(meta_field)
+            if widget:
+                if not isinstance(field.widget, widget):
+                    field.widget = widget()
+                else:
+                    field.widget = widget
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -52,7 +95,10 @@ def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) 
 
     if hasattr(form_model, "get_fedit_form"):
         return form_model.get_fedit_form(form_fields)
-
+    
+    # if form_fields == "__all__" or form_fields == ["__all__"]:
+    #     form_fields = [f.name for f in form_model._meta.fields]
+    
     class Form(PossiblePreviewForm):
         class Meta:
             model = form_model

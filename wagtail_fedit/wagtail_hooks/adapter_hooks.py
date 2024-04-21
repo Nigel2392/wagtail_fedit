@@ -9,17 +9,23 @@ from wagtail.fields import (
 from wagtail.templatetags.wagtailcore_tags import (
     richtext,
 )
-from wagtail.images.models import (
-    Image,
+from wagtail.images import (
+    get_image_model,
 )
-from wagtail.documents.models import Document
+from wagtail.images.widgets import AdminImageChooser
+from wagtail.documents import get_document_model
+from wagtail.documents.widgets import AdminDocumentChooser
 from ..hooks import (
     EXCLUDE_FROM_RELATED_FORMS,
     REGISTER_FIELD_RENDERER,
+    REGISTER_FIELD_WIDGETS,
     FIELD_EDITOR_SIZE,
     REGISTER_CSS,
     REGISTER_JS,
 )
+
+Image = get_image_model()
+Document = get_document_model()
 
 @hooks.register(EXCLUDE_FROM_RELATED_FORMS)
 def exclude_related_forms(field):
@@ -34,6 +40,11 @@ def register_renderers(renderer_map):
     # It will render the RichText field as a RichText block.
     renderer_map[RichTextField] = lambda request, context, instance, value: richtext(value)
 
+@hooks.register(REGISTER_FIELD_WIDGETS)
+def register_field_widgets(widgets):
+    widgets[Image] = AdminImageChooser
+    widgets[Document] = AdminDocumentChooser
+    return widgets
 
 @hooks.register(FIELD_EDITOR_SIZE)
 def field_editor_size(model_instance, model_field):

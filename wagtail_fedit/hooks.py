@@ -92,6 +92,21 @@ def register_renderers(renderer_map):
 ```
 """
 
+REGISTER_FIELD_WIDGETS = prefix("register_field_widgets")
+"""
+### wagtail_fedit.register_field_widgets
+Register a custom widget for a field.
+
+Example of how this hook is used in wagtail_hooks.py:
+    
+    ```python
+    @hooks.register(REGISTER_FIELD_WIDGETS)
+    def register_field_widgets(widgets):
+        widgets[RichTextField] = AdminRichTextField
+        return widgets
+    ```
+"""
+
 
 FIELD_EDITOR_SIZE = prefix("field_editor_size")
 """
