@@ -19,6 +19,7 @@ class Command(BaseCommand):
             " * Keyword arguments wrapped in square brackets are optional. [key=value]",
             " * Extra keyword arguments are optional; must be serializable to JSON and should not be too complex.",
             "   This is due to limits in URL-size when sharing context between views.",
+            " * You can specify 'as varname' as the last arguments to the templatetag to store the adapter HTML in a context variable.",
         ]
 
         for identifier, adapter_class in adapter_registry.adapters.items():

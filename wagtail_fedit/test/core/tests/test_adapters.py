@@ -300,6 +300,43 @@ class TestBlockAdapter(BaseFEditTest):
             wrap_adapter(request, adapters[5], {})
         )
 
+    def test_render_as_var(self):
+        streamfield = self.basic_model.content
+        block = find_block(self.BLOCK_ID, streamfield)
+        
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        
+        request.user = self.admin_user
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+        block_value, _ = block
+        template = Template(
+            "{% load fedit %}"
+            "{% fedit test_block object.content block=block block_id=block_id id=6 as test %}"
+            "{{ test }}"
+        )
+
+        context = {
+            "object": self.basic_model,
+            "request": request,
+            "block": block_value,
+            "block_id": self.BLOCK_ID,
+        }
+
+        tpl = template.render(Context(context))
+
+        self.assertHTMLEqual(
+            tpl,
+            wrap_adapter(request, adapters[6], {})
+        )
+
     def test_render_from_context(self):
         streamfield = self.basic_model.content
         block = find_block(self.BLOCK_ID, streamfield)

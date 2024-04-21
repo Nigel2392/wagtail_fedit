@@ -279,18 +279,23 @@ class BaseAdapter(FeditIFrameMixin):
         """
         if not self.kwargs:
             return ""
+        
         if SHARE_WITH_SESSIONS:
             if USE_ADAPTER_SESSION_ID:
+                # This ID should be uniquely generated for each adapter instance.
+                # But this is not always possible - hence why we allow UUID's.
                 id = self.get_element_id()
             else:
+                # Set in kwargs, try not to clutter session data too much.
                 id = self.kwargs.setdefault(
                     "wagtail_fedit_uuid",
                     str(uuid.uuid4())
                 )
+                
             self.request.session[id] = self.kwargs
             self.request.session.modified = True
             return id
-        # return self.signer.sign_object(self.kwargs)# , serializer=PickleBlockSerializer)
+        
         if SIGN_SHARED_CONTEXT:
             return self.signer.sign_object(self.kwargs, compress=True)
         
@@ -309,6 +314,7 @@ class BaseAdapter(FeditIFrameMixin):
         
         if SIGN_SHARED_CONTEXT:
             return cls.signer.unsign_object(context)# , serializer=PickleBlockSerializer)
+        
         try:
             return Base85_json_loads(context)
         except json.JSONDecodeError:

@@ -29,6 +29,7 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 - [Settings](#settings)
   - [Sign Shared Context](#wagtail_fedit_sign_shared_context)
   - [Share With Sessions](#wagtail_fedit_share_with_sessions)
+  - [Use Adapter Session ID](#wagtail_fedit_use_adapter_session_id)
 - [How your content is rendered](#how-your-content-is-rendered)
   - [Rendered output HTML](#rendered-editable-output-html)
 - [Implemented](#implemented)

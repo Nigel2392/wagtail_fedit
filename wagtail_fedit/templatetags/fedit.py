@@ -42,15 +42,22 @@ WARNING_FIELD_NAME_NOT_AVAILABLE = "Field name is not available in the context f
 WARNING_MODEL_INSTANCE_NOT_AVAILABLE = "Model instance is not available in the context for %(object)s."
 
 
+def as_var(var: str, context: Context, value: str) -> str:
+    if not var:
+        return value
+
+    context[var] = value
+    return ""
 
 class AdapterNode(Node):
     signer = signing.TimestampSigner()
 
-    def __init__(self, adapter: Type[BaseAdapter], model: FilterExpression, getters: list[str], **kwargs):
+    def __init__(self, adapter: Type[BaseAdapter], model: FilterExpression, getters: list[str], as_var: str = None, **kwargs):
         self.adapter = adapter
         self.model = model
         self.getters = getters
         self.kwargs = kwargs
+        self.as_var = as_var
 
     def _resolve_expressions(self, context, model, **kwargs):
         for k, v in kwargs.items():
@@ -90,9 +97,9 @@ class AdapterNode(Node):
                 context = context.flatten()
 
                 try:
-                    return self.adapter.render_from_kwargs(
+                    return as_var(self.as_var, context, self.adapter.render_from_kwargs(
                         context, **kwargs,
-                    )
+                    ))
                 except AdapterError as e:
                     raise TemplateSyntaxError(str(e))
 
@@ -115,9 +122,9 @@ class AdapterNode(Node):
 
         if not adapter.check_permissions()\
           or not _can_edit(request, obj):
-            return adapter.render_content(context)
+            return as_var(self.as_var, context, adapter.render_content(context))
 
-        return wrap_adapter(request, adapter, context)
+        return as_var(self.as_var, context, wrap_adapter(request, adapter, context))
 
 
 @register.tag(name=TEMPLATE_TAG_NAME)
@@ -149,6 +156,12 @@ def do_render_fedit(parser: Parser, token: Token):
             # mymodel.related_field.myfield
             model = parser.compile_filter(model_tokens.pop(0))
 
+    as_var = None
+    if tokens and tokens[len(tokens)-2] == "as":
+        as_var = tokens.pop(len(tokens)-1)
+        tokens.pop(len(tokens)-1)
+
+
     kwargs = get_kwargs(
         parser,
         tokens,
@@ -160,6 +173,7 @@ def do_render_fedit(parser: Parser, token: Token):
         adapter=adapter,
         model=model,
         getters=model_tokens,
+        as_var=as_var,
         **kwargs,
     )
 
