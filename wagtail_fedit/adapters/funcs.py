@@ -19,6 +19,7 @@ class FuncAdapterMixin:
     base_identifier = None
     base_required_kwargs = []
     js_constructor = "wagtail_fedit.editors.BaseFuncEditor"
+    js_function = None
 
     @classproperty
     def identifier(cls):
@@ -29,6 +30,12 @@ class FuncAdapterMixin:
     
     @classproperty
     def required_kwargs(cls):
+
+        if cls.js_function:
+            return cls.base_required_kwargs + [
+                "target",
+            ]
+
         return cls.base_required_kwargs + [
             "name",
             "target",
@@ -36,7 +43,7 @@ class FuncAdapterMixin:
 
     def get_response_data(self, parent_context=None):
         data = super().get_response_data(parent_context)
-        name = self.kwargs["name"]
+        name = self.js_function or self.kwargs["name"]
         target = self.kwargs["target"]
         target = target.format(object=self.object)
         data["func"] = {

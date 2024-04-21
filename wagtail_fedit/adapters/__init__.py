@@ -15,6 +15,9 @@ from .block import (
 from .field import (
     FieldAdapter,
 )
+from .models import (
+    ModelAdapter,
+)
 from .funcs import (
     FuncAdapterMixin,
     BaseFieldFuncAdapter,

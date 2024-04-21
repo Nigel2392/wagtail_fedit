@@ -66,7 +66,11 @@ def Base85_json_loads(data):
     return json.loads(base64.b85decode(data).decode("utf-8"))
 
 class BaseAdapter(FeditIFrameMixin):
+    # How the adapter is identified on inside of the templatetag.
     identifier              = None
+
+    # If the templatetag required the first argument to be model.field or just model
+    field_required          = True
 
     # The template used to render the form.
     template_name           = "wagtail_fedit/editor/adapter_iframe.html"
@@ -92,10 +96,15 @@ class BaseAdapter(FeditIFrameMixin):
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         self.object         = object
-        self.field_name     = field_name
-        self.meta_field     = object._meta.get_field(field_name)
         self.request        = request
         self.kwargs         = kwargs
+
+        if self.field_required:
+            self.field_name     = field_name
+            self.meta_field     = object._meta.get_field(field_name)
+        else:
+            self.field_name     = None
+            self.meta_field     = None
 
     @classmethod
     def get_usage_string(cls) -> str:
@@ -189,7 +198,7 @@ class BaseAdapter(FeditIFrameMixin):
         
         return self.js_constructor
 
-    def get_response_data(self) -> dict:
+    def get_response_data(self, parent_context) -> dict:
         """
         The data which is returned to the frontend on a successful form submission.
         """
@@ -218,16 +227,24 @@ class BaseAdapter(FeditIFrameMixin):
         This is where for example; the edit icon goes.
         """
         return []
+    
+    def get_element_id_parts(self) -> list[str]:
+        """
+        Return the parts of the element ID.
+        """
+        return [
+            self.model._meta.app_label,
+            self.model._meta.model_name,
+            self.object.pk,
+            self.field_name,
+        ]
 
     def get_element_id(self) -> str:
         """
         Return a unique identifier for the elements on the frontend.
         """
         return content_id_from_parts(
-            self.model._meta.app_label,
-            self.model._meta.model_name,
-            self.object.pk,
-            self.field_name,
+            *self.get_element_id_parts(),
         )
     
     def get_form_attrs(self) -> dict:
@@ -321,11 +338,12 @@ class BaseAdapter(FeditIFrameMixin):
             pass
         return {}
     
+    
 class BlockFieldReplacementAdapter(BaseAdapter):
     js_constructor = "wagtail_fedit.editors.BlockFieldEditor"
 
     def get_response_data(self, parent_context = None):
-        data = super().get_response_data()
+        data = super().get_response_data(parent_context)
         data["html"] = wrap_adapter(
             request=self.request,
             adapter=self,

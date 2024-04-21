@@ -51,9 +51,10 @@ Getting Started
 
 ## Getting Editing!
 
-1. Make sure the models you wish to edit inherit from PreviewableMixin.
-
+1. If you want to get into the frontend-editing interface for a model it must inherit from `PreviewableMixin`.
    **This is a requirement.**
+   It is however not always required for your model to inherit from `PreviewableMixin`.
+   **Any model can be edited**; you just can't access the specific edit URL for that model if it does not.
 2. Define a template for your model.
 
    Example:
@@ -311,7 +312,7 @@ class ColorizerAdapter(BaseFieldFuncAdapter):
     def render_content(self, parent_context=None):
         # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
         return ""
-    
+  
     def get_response_data(self, parent_context=None):
         """
         Return the data to be sent to the frontend adapter.
@@ -470,10 +471,11 @@ def register_renderers(renderer_map):
 ```
 
 ### wagtail_fedit.register_field_widgets
+
 Register a custom widget for a field.
 
 Example of how this hook is used in wagtail_hooks.py:
-    
+
 ```python
 @hooks.register(REGISTER_FIELD_WIDGETS)
 def register_field_widgets(widgets):

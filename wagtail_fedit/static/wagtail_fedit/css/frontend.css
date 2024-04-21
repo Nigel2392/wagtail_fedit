@@ -27,7 +27,7 @@ html, body {
     pointer-events: none;
     z-index: 300;
 }
-.wagtail-fedit-adapter-wrapper.wagtail-fedit-field:has(.wagtail-fedit-adapter-wrapper) > .wagtail-fedit-buttons {
+.wagtail-fedit-adapter-wrapper:not(.wagtail-fedit-block):has(.wagtail-fedit-adapter-wrapper) > .wagtail-fedit-buttons {
     right: 30px;
 }
 .wagtail-fedit-buttons {
@@ -37,6 +37,11 @@ html, body {
     position: absolute;
     right: 0;
     z-index: 1;
+}
+
+.wagtail-fedit-adapter-wrapper.wagtail-fedit-inline {
+    display: flex;
+    flex-direction: row;
 }
 
 .wagtail-fedit-inline > .wagtail-fedit-buttons {

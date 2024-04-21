@@ -9,6 +9,10 @@ urlpatterns = [
         "edit/<str:adapter_id>/<str:app_label>/<str:model_name>/<str:model_id>/<str:field_name>/", 
         views.EditAdapterView.as_view(), name="edit"
     ),
+    path(
+        "edit/<str:adapter_id>/<str:app_label>/<str:model_name>/<str:model_id>/", 
+        views.EditAdapterView.as_view(), name="edit"
+    ),
 ]
 
 model_based_views = (

@@ -79,7 +79,7 @@ class AdapterNode(Node):
 
         if "wagtail_fedit_field" in context\
             and "wagtail_fedit_instance" in context\
-            and not model:
+            and not model and self.adapter.field_required:
 
             field_name = context["wagtail_fedit_field"]
             obj = context["wagtail_fedit_instance"]
@@ -103,14 +103,17 @@ class AdapterNode(Node):
                 except AdapterError as e:
                     raise TemplateSyntaxError(str(e))
 
-            field_name = getters[len(getters)-1]
+            field_name = None
             obj = model
-            for i in range(len(getters) - 1):
-                getter = getters[i]
-                try:
-                    obj = getattr(obj, getter)
-                except AttributeError:
-                    raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
+            if getters:
+                field_name = getters[len(getters) - 1]
+
+                for i in range(len(getters) - 1):
+                    getter = getters[i]
+                    try:
+                        obj = getattr(obj, getter)
+                    except AttributeError:
+                        raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
 
         request = context.get("request")
         adapter = self.adapter(
@@ -144,14 +147,16 @@ def do_render_fedit(parser: Parser, token: Token):
     if tokens:
         model__field = tokens.pop(0)
         model_tokens = model__field.split(".")
-
+        
         if len(model_tokens) < 2:
-            if model_tokens[0] != "from_context":
+            if model_tokens[0] != "from_context" and adapter.field_required:
                 raise TemplateSyntaxError(
                     "Model and field name are required: 'mymodel.myfield' or 'from_context'",
                 )
 
-        if len(model_tokens) > 1:
+        if len(model_tokens) > 1 or (
+            model_tokens[0] != "from_context" and not adapter.field_required
+        ):
             # mymodel.myfield
             # mymodel.related_field.myfield
             model = parser.compile_filter(model_tokens.pop(0))
@@ -160,7 +165,6 @@ def do_render_fedit(parser: Parser, token: Token):
     if tokens and tokens[len(tokens)-2] == "as":
         as_var = tokens.pop(len(tokens)-1)
         tokens.pop(len(tokens)-1)
-
 
     kwargs = get_kwargs(
         parser,

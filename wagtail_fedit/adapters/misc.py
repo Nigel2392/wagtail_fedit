@@ -35,10 +35,7 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     ]
     absolute_tokens = []
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
-
-    def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
-        kwargs["name"] = "wagtail_fedit.funcs.backgroundImageFunc"
-        super().__init__(object, field_name, request, **kwargs)
+    js_function = "wagtail_fedit.funcs.backgroundImageFunc"
 
     def render_content(self, parent_context=None):
         return ""

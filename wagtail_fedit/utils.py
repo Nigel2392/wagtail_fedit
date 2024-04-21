@@ -472,11 +472,13 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
 
     reverse_kwargs = {
         "adapter_id": adapter.identifier,
-        "field_name": adapter.field_name,
         "app_label": adapter.object._meta.app_label,
         "model_name": adapter.object._meta.model_name,
         "model_id": adapter.object.pk,
     }
+
+    if adapter.field_name is not None:
+        reverse_kwargs["field_name"] = adapter.field_name
 
     shared = adapter.encode_shared_context()
     js_constructor = adapter.get_js_constructor()
@@ -488,6 +490,7 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
             "adapter": adapter,
             "buttons": items,
             "shared": shared,
+            "unique_id": adapter.get_element_id(),
             "js_constructor": js_constructor,
             "shared_context": adapter.kwargs,
             "parent_context": context,

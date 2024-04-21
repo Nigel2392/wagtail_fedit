@@ -42,10 +42,10 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
     def dispatch(self, 
             request:    HttpRequest,
             adapter_id: str = None,
-            field_name: str = None,
             app_label:  str = None,
             model_name: str = None,
             model_id:   Any = None,
+            field_name: str = None,
         ) -> None:
 
         # Fetch the adapter class from the registry
@@ -70,9 +70,11 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         else:
             self.instance = model_instance
 
-        if not hasattr(self.instance, field_name):
-            return HttpResponseBadRequest("Invalid field name for object")
+        if not field_name and self.adapter_class.field_required:
+            return HttpResponseBadRequest("Field name is required for object")
 
+        if field_name and not hasattr(self.instance, field_name) and self.adapter_class.field_required:
+            return HttpResponseBadRequest("Invalid field name for object")
 
         shared_context = request.GET.get("shared_context")
         if shared_context:
@@ -103,7 +105,12 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         )
 
         return super().dispatch(
-            request, adapter_id, field_name, app_label, model_name, model_id,
+            request,
+            adapter_id=adapter_id,
+            field_name=field_name,
+            app_label=app_label,
+            model_name=model_name,
+            model_id=model_id,
         )
     
     @property
@@ -138,7 +145,12 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             shared_context =\
                 self.request.GET["shared_context"]
 
+        verbose_name = self.model._meta.verbose_name
+        if self.adapter.field_required:
+            verbose_name = self.adapter.meta_field.verbose_name
+
         return super().get_context_data(**kwargs) | {
+            "verbose_name": verbose_name,
             "meta_field": self.adapter.meta_field,
             "field_name": self.adapter.field_name,
             "locked_for_user": self.locked_for_user,

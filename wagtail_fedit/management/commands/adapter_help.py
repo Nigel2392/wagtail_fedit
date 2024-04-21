@@ -14,7 +14,7 @@ class Command(BaseCommand):
             "Registered Adapters",
             "====================",
             " * The first argument is the identifier of the adapter.",
-            " * The second argument is the model and field to edit. instance.modelfield",
+            " * The second argument is the model and/or field to edit. instance.modelfield or instance",
             " * Absolute arguments (missing an equal sign) are optional and treated as booleans.",
             " * Keyword arguments wrapped in square brackets are optional. [key=value]",
             " * Extra keyword arguments are optional; must be serializable to JSON and should not be too complex.",
@@ -33,8 +33,13 @@ class Command(BaseCommand):
             )
 
             DISTANCE = "    "
+
+            getter = "instance"
+            if adapter_class.field_required:
+                getter += ".modelfield"
+
             s.append(
-                f"{DISTANCE}{{% {TEMPLATE_TAG_NAME} {identifier} instance.modelfield {adapter_class.get_usage_string()} %}}",
+                f"{DISTANCE}{{% {TEMPLATE_TAG_NAME} {identifier} {getter} {adapter_class.get_usage_string()} %}}",
             )
 
             HELP_DISTANCE = DISTANCE + "  "

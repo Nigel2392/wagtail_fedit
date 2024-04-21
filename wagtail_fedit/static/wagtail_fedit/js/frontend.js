@@ -139,6 +139,11 @@ class BaseWagtailFeditEditor {
         }
     }
 
+    get relatedWrappers() {
+        const wrapperId = this.wrapperElement.dataset.wrapperId;
+        return document.querySelectorAll(`[data-wrapper-id="${wrapperId}"]`);
+    }
+
     focus() {
         this.wrapperElement.focus();
     }
