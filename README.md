@@ -52,9 +52,13 @@ Getting Started
 ## Getting Editing!
 
 1. If you want to get into the frontend-editing interface for a model it must inherit from `PreviewableMixin`.
+
    **This is a requirement.**
+
    It is however not always required for your model to inherit from `PreviewableMixin`.
+
    **Any model can be edited**; you just can't access the specific edit URL for that model if it does not.
+
 2. Define a template for your model.
 
    Example:
