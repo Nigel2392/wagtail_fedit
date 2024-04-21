@@ -2,6 +2,9 @@ from django.utils.html import format_html
 from django.templatetags.static import static
 from wagtail import hooks
 from wagtail.models import Page
+from wagtail.admin.widgets import (
+    AdminPageChooser,
+)
 from wagtail.fields import (
     RichTextField,
     StreamField,
@@ -44,6 +47,7 @@ def register_renderers(renderer_map):
 def register_field_widgets(widgets):
     widgets[Image] = AdminImageChooser
     widgets[Document] = AdminDocumentChooser
+    widgets[Page] = AdminPageChooser
     return widgets
 
 @hooks.register(FIELD_EDITOR_SIZE)
