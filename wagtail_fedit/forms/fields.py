@@ -48,7 +48,7 @@ def get_widget_for_field(field: models.Field) -> Type[forms.Widget]:
     return widget
 
 
-class PossiblePreviewForm(WagtailAdminModelForm):
+class PossibleRevisionForm(WagtailAdminModelForm):
     """
     A form that can save a revision if the model is a RevisionMixin.
     Otherwise resorts to the default save method; this saves the (live) instance.
@@ -56,15 +56,6 @@ class PossiblePreviewForm(WagtailAdminModelForm):
     def __init__(self, *args, request = None, **kwargs):
         self.request = request
         super().__init__(*args, **kwargs)
-
-        for key, field in self.fields.items():
-            meta_field = self._meta.model._meta.get_field(key)
-            widget = get_widget_for_field(meta_field)
-            if widget:
-                if not isinstance(field.widget, widget):
-                    field.widget = widget()
-                else:
-                    field.widget = widget
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -87,21 +78,30 @@ def save_possible_revision(instance: models.Model, request: HttpRequest, **kwarg
 
     return instance
 
-def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) -> Type[PossiblePreviewForm]:
+def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) -> Type[PossibleRevisionForm]:
     """
     Return a form class for a model with specific fields.
-    This is similar to django's modelform_factory.
+    This is similar to django's modelform_factory, but with the added benefit of using the custom widgets.
+    It also keeps the revision functionality in mind.
     """
 
     if hasattr(form_model, "get_fedit_form"):
         return form_model.get_fedit_form(form_fields)
     
-    # if form_fields == "__all__" or form_fields == ["__all__"]:
-    #     form_fields = [f.name for f in form_model._meta.fields]
+    if form_fields == "__all__" or tuple(form_fields) == ("__all__", ):
+        form_fields = [f.name for f in form_model._meta.fields]
     
-    class Form(PossiblePreviewForm):
+    form_widgets = {}
+    for field_name in form_fields:
+        field = form_model._meta.get_field(field_name)
+        widget = get_widget_for_field(field)
+        if widget:
+            form_widgets[field_name] = widget
+
+    class RevisionForm(PossibleRevisionForm):
         class Meta:
             model = form_model
             fields = form_fields
+            widgets = form_widgets
 
-    return Form
+    return RevisionForm

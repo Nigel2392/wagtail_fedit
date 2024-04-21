@@ -21,6 +21,7 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
   - [Construct Adapter Toolbar](#wagtail_feditconstruct_adapter_toolbar)
   - [Register Type Renderer](#wagtail_feditregister_type_renderer)
   - [Register Field Renderer](#wagtail_feditregister_field_renderer)
+  - [Register Field Widgets](#wagtail_feditregister_field_widgets)
   - [Exclude Related Forms](#wagtail_feditexclude_related_forms)
   - [Action Menu Item Is Shown](#wagtail_feditaction_menu_item_is_shown)
   - [Register CSS](#wagtail_feditregister_css)
@@ -466,6 +467,18 @@ def register_renderers(renderer_map):
     # It will render the RichText field as a RichText block.
     renderer_map[RichTextField] =\
         lambda request, context, instance, value: richtext(value)
+```
+
+### wagtail_fedit.register_field_widgets
+Register a custom widget for a field.
+
+Example of how this hook is used in wagtail_hooks.py:
+    
+```python
+@hooks.register(REGISTER_FIELD_WIDGETS)
+def register_field_widgets(widgets):
+    widgets[RichTextField] = AdminRichTextField
+    return widgets
 ```
 
 ### wagtail_fedit.exclude_related_forms
