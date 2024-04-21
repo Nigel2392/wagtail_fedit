@@ -458,7 +458,16 @@ This can be used to register custom adapter JS.
 
 Example of how this hook is used in wagtail_hooks.py:
 
-    ``python     @hooks.register(REGISTER_JS)     def register_js(request):         return [             format_html(                 '<script src="{0}"></script>',                 static('js/custom.js')             ),         ]     ``
+```python
+@hooks.register(REGISTER_JS)
+def register_js(request):
+    return [
+        format_html(
+            '<script src="{0}"></script>',
+            static('js/custom.js')
+        ),
+    ]
+```
 
 ### wagtail_fedit.register_field_renderer
 
