@@ -170,7 +170,7 @@ class BaseAdapter(FeditIFrameMixin):
         Call the value_from_object method on
         the meta field to get the value from the instance.
         """
-        return self.meta_field.value_from_object(self.object)
+        return getattr(self.object, self.field_name)
     
     @property
     def model(self):

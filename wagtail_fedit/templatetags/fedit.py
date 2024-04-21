@@ -87,6 +87,7 @@ class AdapterNode(Node):
         elif not model and "wagtail_fedit_instance" in context and not self.adapter.field_required:
             obj = context["wagtail_fedit_instance"]
             field_name = None
+            
         else:
 
             if not model:
@@ -117,6 +118,7 @@ class AdapterNode(Node):
                         obj = getattr(obj, getter)
                     except AttributeError:
                         raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
+                    
 
         request = context.get("request")
         adapter = self.adapter(
@@ -151,15 +153,19 @@ def do_render_fedit(parser: Parser, token: Token):
         model__field = tokens.pop(0)
         model_tokens = model__field.split(".")
         
+        # If the field is required; the length must be at least 2,
+        # or the first token must be "from_context"
         if len(model_tokens) < 2:
             if model_tokens[0] != "from_context" and adapter.field_required:
                 raise TemplateSyntaxError(
                     "Model and field name are required: 'mymodel.myfield' or 'from_context'",
                 )
 
+        # If the field is not required; the length could be 1 by specifying only a model.
         if len(model_tokens) > 1 or (
             model_tokens[0] != "from_context" and not adapter.field_required
         ):
+            # mymodel
             # mymodel.myfield
             # mymodel.related_field.myfield
             model = parser.compile_filter(model_tokens.pop(0))

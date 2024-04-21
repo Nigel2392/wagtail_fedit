@@ -188,6 +188,14 @@ class BaseFEditTest(TestCase):
             locked_by=self.admin_user,
             has_unpublished_changes=True,
         )
+
+        self.basic_model.related_field = self.basic_model.__class__.objects.create(
+            title="Related Field",
+            body="Related Field Body",
+            content=TEST_BLOCK_DATA,
+        )
+
+        self.basic_model.save()
         
         self.models: list[models.Model] = [
             self.full_model,

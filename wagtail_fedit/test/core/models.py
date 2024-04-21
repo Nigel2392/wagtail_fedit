@@ -99,6 +99,7 @@ class BasicModel(models.Model):
         ("heading_component", HeadingComponent()),
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
+    related_field = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
 
     def render_as_content(self, request, context=None):
         return f"<h1>{self.title}</h1><p>{self.body}</p>"

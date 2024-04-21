@@ -504,6 +504,36 @@ class TestFieldAdapter(BaseFEditTest):
                 wrap_adapter(request, adapters[8], {})
             )
 
+        def test_render_related_field(self):
+            request = self.request_factory.get(
+                self.get_editable_url(
+                    self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+                )
+            )
+            request.user = self.admin_user
+            setattr(
+                request,
+                FEDIT_PREVIEW_VAR,
+                True,
+            )
+            template = Template(
+                "{% load fedit %}"
+                "{% fedit test_field object.related_field test=True id=8 as test %}"
+                "{{ test }}"
+            )
+
+            context = {
+                "object": self.basic_model,
+                "request": request,
+            }
+    
+            tpl = template.render(Context(context))
+    
+            self.assertHTMLEqual(
+                tpl,
+                wrap_adapter(request, adapters[8], {})
+            )
+
 class TestModelAdapter(BaseFEditTest):
     
         def test_render(self):
@@ -594,4 +624,3 @@ class TestModelAdapter(BaseFEditTest):
                 tpl,
                 wrap_adapter(request, adapters[11], context)
             )
-
