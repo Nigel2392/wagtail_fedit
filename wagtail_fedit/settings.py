@@ -19,3 +19,11 @@ This will store the context in the session and pass the session
 key to the iFrame instead of the context.
 """
 
+USE_ADAPTER_SESSION_ID = getattr(settings, "WAGTAIL_FEDIT_USE_ADAPTER_SESSION_ID", True)
+"""
+Use the get_element_id method of the adapter to generate a session ID.
+This is useful to not clutter session data too much.
+If `False`, the session ID will be generated each time the page is loaded.
+"""
+
+

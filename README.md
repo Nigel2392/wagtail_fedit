@@ -525,6 +525,15 @@ This is useful if you are running into limits with the URL length.
 This will store the context in the session and pass the session
 key to the iFrame instead of the context.
 
+### `WAGTAIL_FEDIT_USE_ADAPTER_SESSION_ID`
+
+Default: `True`
+
+Use the get_element_id method of the adapter to generate a session ID.
+*This could __maybe__ interfere with other editable- block's session data, but is highly unlikely!*
+This is useful to not clutter session data too much.
+If `False`, the session ID will be generated each time the page is loaded.
+
 ## How your content is rendered
 
 (**Maintainer's note:** In my experience this doesn't mess the CSS up too much, or even at all for most content - **if** you don't get hyperspecific with your CSS selectors and structure your templates well.)

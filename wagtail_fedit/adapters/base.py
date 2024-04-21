@@ -16,11 +16,14 @@ from django.http import (
 from ..settings import (
     SIGN_SHARED_CONTEXT,
     SHARE_WITH_SESSIONS,
+    USE_ADAPTER_SESSION_ID,
 )
 from ..utils import (
     FeditIFrameMixin,
     wrap_adapter,
 )
+
+import uuid
 
 if TYPE_CHECKING:
     from ..toolbar import (
@@ -277,7 +280,13 @@ class BaseAdapter(FeditIFrameMixin):
         if not self.kwargs:
             return ""
         if SHARE_WITH_SESSIONS:
-            id = self.get_element_id()
+            if USE_ADAPTER_SESSION_ID:
+                id = self.get_element_id()
+            else:
+                id = self.kwargs.setdefault(
+                    "wagtail_fedit_uuid",
+                    str(uuid.uuid4())
+                )
             self.request.session[id] = self.kwargs
             self.request.session.modified = True
             return id
