@@ -41,7 +41,7 @@ def get_widget_for_field(field: models.Field) -> Type[forms.Widget]:
         widget = _widgets.get(field)
     else:
         widget = _widgets.get(field.__class__)
-        
+
     if widget is None:
         pass
 
@@ -57,8 +57,8 @@ class PossiblePreviewForm(WagtailAdminModelForm):
         self.request = request
         super().__init__(*args, **kwargs)
 
-        for field in self.fields.values():
-            meta_field = self._meta.model._meta.get_field(field.name)
+        for key, field in self.fields.items():
+            meta_field = self._meta.model._meta.get_field(key)
             widget = get_widget_for_field(meta_field)
             if widget:
                 if not isinstance(field.widget, widget):
