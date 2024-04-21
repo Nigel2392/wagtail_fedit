@@ -9,6 +9,7 @@ from wagtail_fedit.adapters import (
     adapter_registry,
     BlockAdapter,
     FieldAdapter,
+    ModelAdapter,
 )
 from wagtail_fedit.utils import (
     FEDIT_PREVIEW_VAR,
@@ -57,9 +58,13 @@ class TestBlockAdapter(BlockAdapter, TestAdapter):
 class TestFieldAdapter(FieldAdapter, TestAdapter):
     identifier = "test_field"
 
+class TestModelAdapter(ModelAdapter, TestAdapter):
+    identifier = "test_model"
+
 adapter_registry.register(TestAdapter)
 adapter_registry.register(TestBlockAdapter)
 adapter_registry.register(TestFieldAdapter)
+adapter_registry.register(TestModelAdapter)
 adapter_registry.register(TestContextAdapter)
 adapter_registry.register(TestAbsoluteTokensAdapter)
 
@@ -498,4 +503,95 @@ class TestFieldAdapter(BaseFEditTest):
                 tpl,
                 wrap_adapter(request, adapters[8], {})
             )
+
+class TestModelAdapter(BaseFEditTest):
     
+        def test_render(self):
+            request = self.request_factory.get(
+                self.get_editable_url(
+                    self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+                )
+            )
+            request.user = self.admin_user
+            setattr(
+                request,
+                FEDIT_PREVIEW_VAR,
+                True,
+            )
+            template = Template(
+                "{% load fedit %}"
+                "{% fedit test_model object test=True id=9 %}"
+            )
+    
+            context = {
+                "object": self.basic_model,
+                "request": request,
+            }
+    
+            tpl = template.render(Context(context))
+    
+            self.assertHTMLEqual(
+                tpl,
+                wrap_adapter(request, adapters[9], {})
+            )
+    
+        def test_render_as_var(self):
+            request = self.request_factory.get(
+                self.get_editable_url(
+                    self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+                )
+            )
+            request.user = self.admin_user
+            setattr(
+                request,
+                FEDIT_PREVIEW_VAR,
+                True,
+            )
+            template = Template(
+                "{% load fedit %}"
+                "{% fedit test_model object test=True id=10 as test %}"
+                "{{ test }}"
+            )
+    
+            context = {
+                "object": self.basic_model,
+                "request": request,
+            }
+    
+            tpl = template.render(Context(context))
+    
+            self.assertHTMLEqual(
+                tpl,
+                wrap_adapter(request, adapters[10], {})
+            )
+    
+        def test_render_from_context(self):
+            request = self.request_factory.get(
+                self.get_editable_url(
+                    self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+                )
+            )
+            request.user = self.admin_user
+            setattr(
+                request,
+                FEDIT_PREVIEW_VAR,
+                True,
+            )
+            template = Template(
+                "{% load fedit %}"
+                "{% fedit test_model from_context test=True id=11 %}"
+            )
+    
+            context = {
+                "object": self.basic_model,
+                "request": request,
+                "wagtail_fedit_instance": self.basic_model,
+            }
+    
+            tpl = template.render(Context(context))
+    
+            self.assertHTMLEqual(
+                tpl,
+                wrap_adapter(request, adapters[11], context)
+            )
+

@@ -84,6 +84,9 @@ class AdapterNode(Node):
             field_name = context["wagtail_fedit_field"]
             obj = context["wagtail_fedit_instance"]
 
+        elif not model and "wagtail_fedit_instance" in context and not self.adapter.field_required:
+            obj = context["wagtail_fedit_instance"]
+            field_name = None
         else:
 
             if not model:

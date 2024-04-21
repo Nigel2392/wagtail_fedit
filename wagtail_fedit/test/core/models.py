@@ -100,6 +100,9 @@ class BasicModel(models.Model):
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
 
+    def render_as_content(self, request, context=None):
+        return f"<h1>{self.title}</h1><p>{self.body}</p>"
+
 @register_snippet
 class EditableFullModel(BaseEditableMixin, FEditableMixin):
     title = models.CharField(max_length=255)
