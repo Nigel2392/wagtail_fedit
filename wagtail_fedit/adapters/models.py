@@ -5,6 +5,7 @@ from wagtail.models import Page
 from wagtail.admin.panels import (
     page_utils,
     model_utils,
+    TabbedInterface,
 )
 
 from .base import (
@@ -37,10 +38,12 @@ class ModelAdapter(BlockFieldReplacementAdapter):
 
     def get_form_attrs(self) -> dict:
         attrs = super().get_form_attrs()
-        return attrs | {
-            VARIABLES.FORM_SIZE_VAR: "full",
-        }
-
+        if isinstance(self.edit_handler, TabbedInterface):
+            attrs[VARIABLES.FORM_SIZE_VAR] = "full"
+        elif len(self.edit_handler.children) > 4:
+            attrs[VARIABLES.FORM_SIZE_VAR] = "large"
+        return attrs
+        
     def get_header_title(self):
         instance_string = get_model_string(self.object)
         return _("Edit model %(instance_string)s") % {
