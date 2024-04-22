@@ -1,5 +1,5 @@
 from typing import (
-    TYPE_CHECKING, Any,
+    TYPE_CHECKING, Any, Type,
 )
 from django import forms
 from django.db import models
@@ -67,7 +67,85 @@ def Base85_json_dumps(obj):
 def Base85_json_loads(data):
     return json.loads(base64.b85decode(data).decode("utf-8"))
 
-class BaseAdapter(FeditIFrameMixin):
+
+
+class Keyword:
+    def __init__(self, name: str, optional: bool = False, absolute: bool = False, default=None, help_text: str = None, type_hint: Type[Any] = None):
+        self.name = name
+        self.optional = optional
+        self.absolute = absolute
+        self.default = default
+        self.help_text = help_text
+        self.type_hint = type_hint
+
+        if self.default and self.absolute or self.default and not self.optional:
+            raise AdapterError("Keywords cannot be absolute or required and have a default value")
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        s = ["Keyword", self.name]
+        if self.optional:
+            s.append("optional")
+        elif not self.absolute:
+            s.append("required")
+        if self.absolute:
+            s.append("absolute")
+        if self.default:
+            s.append(f"default={self.default}")
+        if self.help_text:
+            s.append(f"help_text='{self.help_text}'")
+        if self.type_hint:
+            s.append(f"type: {self.type_hint}")
+        s = " ".join(s)
+        return f"<{s}>"
+
+def _get_keywords(bases, attrs):
+    if "keywords" in attrs:
+        return list(attrs["keywords"])
+    
+    for base in bases:
+        if hasattr(base, "keywords"):
+            return list(base.keywords)
+        
+    return list()
+
+def _sort_keywords(keywords):
+    _s = sorted(keywords, key=lambda x: (not x.absolute, x.optional))
+    return _s
+
+class AdapterMeta(type):
+    def __new__(cls, name, bases, attrs):
+        keywords: list[Keyword] = _get_keywords(bases, attrs)
+        required_kwargs = []
+        absolute_tokens = []
+        optional_kwargs = {}
+
+        for keyword in keywords:
+            if keyword.absolute:
+                absolute_tokens.append(keyword.name)
+            elif keyword.optional:
+                if keyword.default:
+                    optional_kwargs[keyword.name] = keyword.default
+                else:
+                    optional_kwargs[keyword.name] = None
+            else:
+                required_kwargs.append(keyword.name)
+
+        cls = super().__new__(cls, name, bases, attrs)
+
+        cls.required_kwargs: tuple[str]     = set(required_kwargs)
+        cls.absolute_tokens: tuple[str]     = set(absolute_tokens)
+        cls.optional_kwargs: dict[str, Any] = optional_kwargs
+        cls.keywords:        tuple[Keyword] = tuple(
+            _sort_keywords(keywords)
+        )
+
+        return cls
+
+
+class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
     # How the adapter is identified on inside of the templatetag.
     identifier              = None
 
@@ -78,19 +156,18 @@ class BaseAdapter(FeditIFrameMixin):
     template_name           = "wagtail_fedit/editor/adapter_iframe.html"
 
     signer: Signer          = Signer()
-    # Required keyword arguments for the adapter
-    required_kwargs         = []
-    # Optional keyword arguments for the adapter, these are only used to print the help example.
-    optional_kwargs         = []
-    # Tokens which should be resolved absolutely (no parser.compile_filter)
-    # These are NOT required.
-    absolute_tokens         = [
-        "inline",
-    ]
+    
+    # Keyword arguments for the adapter
+    keywords: tuple[Keyword]     = (
+        Keyword(
+            "inline",
+            absolute=True,
+            help_text="if passed; the adapter will be rendered with inline styles."
+        ),
+    )
+
     # An optional description to be displayed when running the help command.
     usage_description       = "This adapter is used to edit a field of a model instance."
-    # A dictionary of help text for the adapter.
-    help_text_dict          = {}
 
     # The JS constructor for the adapter.
     # This will receive the data after a successful form submission.
@@ -121,31 +198,29 @@ class BaseAdapter(FeditIFrameMixin):
         Return a string which describes how to use the adapter.
         """
         s = []
-        for i, token in enumerate(cls.absolute_tokens):
-            s.append(f"{token}")
-            if i < len(cls.absolute_tokens) - 1:
-                s.append(" ")
-        
-        if cls.absolute_tokens and cls.required_kwargs:
-            s.append(" ")
+        for keyword in cls.keywords:
 
-        for i, kwarg in enumerate(cls.required_kwargs):
-            s.append(f"{kwarg}=value")
-            if i < len(cls.required_kwargs) - 1:
-                s.append(" ")
+            k = []
 
-        if (
-            cls.required_kwargs and cls.optional_kwargs or\
-            not cls.required_kwargs and cls.absolute_tokens and cls.optional_kwargs
-        ):
-            s.append(" ")
-        
-        for i, kwarg in enumerate(cls.optional_kwargs):
-            s.append(f"[{kwarg}=value]")
-            if i < len(cls.optional_kwargs) - 1:
-                s.append(" ")
+            if keyword.optional:
+                k.append("?")
+            if keyword.absolute:
+                k.append("!")
+
+            k.append(keyword.name)
+
+            if keyword.type_hint and not keyword.absolute:
+                if isinstance(keyword.type_hint, str):
+                    k.append(f": {keyword.type_hint}")
+                else:
+                    k.append(f": {keyword.type_hint.__name__}")
+                    
+            if keyword.default and not keyword.absolute:
+                k.append(f"={keyword.default}")
+
+            s.append("".join(k))
                 
-        return "".join(s)
+        return " ".join(s)
     
     def get_form_context(self, **kwargs):
         return {
@@ -167,12 +242,11 @@ class BaseAdapter(FeditIFrameMixin):
         Return a help text which describes how to use the adapter.
         This might be a good time to exalain the kwargs.
         """
-        if "inline" in cls.absolute_tokens:
-            return {
-                "inline": "if passed; the adapter will be rendered with inline styles.",
-                **cls.help_text_dict,
-            }
-        return cls.help_text_dict
+        d = {}
+        for keyword in cls.keywords:
+            if keyword.name not in d:
+                d[keyword.name] = keyword.help_text
+        return d
     
     def get_template_names(self) -> list[str]:
         """

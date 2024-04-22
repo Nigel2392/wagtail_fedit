@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Any
 from django.template import (
     library, Node, TemplateSyntaxError,
 )
@@ -180,6 +180,7 @@ def do_render_fedit(parser: Parser, token: Token):
         tokens,
         adapter.required_kwargs,
         adapter.absolute_tokens,
+        adapter.optional_kwargs,
     )
 
     return AdapterNode(
@@ -240,15 +241,18 @@ def static_hook_output(context, css_or_js) -> dict:
     }
 
 
-def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None) -> dict:
+def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None, optional_tokens: dict[str, Any] = None) -> dict:
     had_kwargs = False
     kwargs = {}
 
     if not kwarg_list:
-        kwarg_list = []
+        kwarg_list = set()
 
     if not absolute_tokens:
-        absolute_tokens = []
+        absolute_tokens = set()
+
+    if not optional_tokens:
+        optional_tokens = {}
 
     for i, token in enumerate(tokens):
         split = token.split("=")
@@ -282,6 +286,10 @@ def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, 
     for kwarg in kwarg_list:
         if kwarg not in kwargs:
             raise TemplateSyntaxError(f"Missing required keyword argument {kwarg}")
+        
+    for key, value in optional_tokens.items():
+        if key not in kwargs:
+            kwargs[key] = value
 
     return kwargs
 

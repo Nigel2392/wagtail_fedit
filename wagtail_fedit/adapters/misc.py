@@ -1,5 +1,6 @@
 from django.http import HttpRequest
 from django.utils.functional import classproperty
+from .base import Keyword
 from .field import (
     FieldAdapter,
 )
@@ -23,17 +24,19 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
     inline = True
     identifier = "field_bg_image"
     usage_description = "This adapter is used for changing a css property of a target element to a background-image."
-    help_text_dict = {
-        "target": "the target element to apply the background-image to - this should be a css selector.",
-        "css_variable_name": "the CSS variable name to apply the background-image to. element.style.setProperty(css_variable_name, url);",
-    }
-    required_kwargs = FieldAdapter.required_kwargs + [
-        "target",
-    ]
-    optional_kwargs = [
-        "css_variable_name",
-    ]
-    absolute_tokens = []
+    keywords = (
+        Keyword(
+            "target",
+            help_text="The target element to apply the background-image to - this should be a css selector.",
+            type_hint="str",
+        ),
+        Keyword(
+            "css_variable_name",
+            optional=True,
+            help_text="The CSS variable name to apply the background-image to. element.style.setProperty(css_variable_name, url);",
+            type_hint="str",
+        ),
+    )
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
     js_function = "wagtail_fedit.funcs.backgroundImageFunc"
 

@@ -14,6 +14,7 @@ from wagtail.models import (
 from .base import (
     BlockFieldReplacementAdapter,
     AdapterError,
+    Keyword,
     VARIABLES,
 )
 from ..forms import (
@@ -38,20 +39,21 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     """
     identifier = "block"
     usage_description = "This adapter is used to edit a block of a streamfield."
-    help_text_dict = {
-        "block": "the block instance to edit. This can be a regular block isntance or a BoundBlock.",
-        "block_id": "the ID of the block to edit, required if block is not a BoundBlock.",
-        "admin": "if passed; the adapter will a quick- link to the Wagtail Admin for this block.",
-    }
-    required_kwargs = [
-        "block",
-    ]
-    optional_kwargs = [
-        "block_id",
-    ]
-    absolute_tokens = [ # override; remove "inline"
-        "admin", # allows for displaying admin URLs
-    ]
+    keywords = (
+        Keyword("block",
+            help_text="the block instance to edit. This can be a regular block instance or a BoundBlock.",
+            type_hint="blocks.Block"
+        ),
+        Keyword("block_id",
+            optional=True,
+            help_text="the ID of the block to edit, required if block is not a BoundBlock.",
+            type_hint="int"
+        ),
+        Keyword("admin",
+            absolute=True,
+            help_text="if passed; the adapter will a quick- link to the Wagtail Admin for this block."
+        ),
+    )
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)

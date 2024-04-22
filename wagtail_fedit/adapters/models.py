@@ -10,6 +10,7 @@ from wagtail.admin.panels import (
 
 from .base import (
     VARIABLES,
+    Keyword,
     BlockFieldReplacementAdapter,
     AdapterError,
 )
@@ -28,6 +29,14 @@ class ModelAdapter(BlockFieldReplacementAdapter):
     identifier = "model"
     field_required = False
     usage_description = _("This adapter is used for directly editing a model instance.")
+    keywords = BlockFieldReplacementAdapter.keywords + (
+        Keyword(
+            "render_method",
+            optional=True,
+            help_text="The method to call on the object to render it as content. Default is 'render_as_content'.",
+            type_hint="str",
+        ),
+    )
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
@@ -43,19 +52,6 @@ class ModelAdapter(BlockFieldReplacementAdapter):
         elif len(self.edit_handler.children) > 4:
             attrs[VARIABLES.FORM_SIZE_VAR] = "large"
         return attrs
-        
-    def get_header_title(self):
-        instance_string = get_model_string(self.object)
-        return _("Edit model %(instance_string)s") % {
-            "instance_string": instance_string,
-        }
-    
-    def get_help_text(self):
-        return None
-          
-    def get_element_id(self) -> str:
-        m = self.model
-        return f"model-{m._meta.app_label}-{m._meta.model_name}-{self.object.pk}"
     
     def get_form_context(self, **kwargs):
         context = super().get_form_context(**kwargs)
@@ -76,6 +72,19 @@ class ModelAdapter(BlockFieldReplacementAdapter):
             form = self.form_class(for_user=self.request.user, instance=self.object)
         return form
 
+    def get_header_title(self):
+        instance_string = get_model_string(self.object)
+        return _("Edit model %(instance_string)s") % {
+            "instance_string": instance_string,
+        }
+    
+    def get_help_text(self):
+        return None
+          
+    def get_element_id(self) -> str:
+        m = self.model
+        return f"model-{m._meta.app_label}-{m._meta.model_name}-{self.object.pk}"
+
     def form_valid(self, form):
         self.object = form.save()
 
@@ -83,12 +92,43 @@ class ModelAdapter(BlockFieldReplacementAdapter):
         if hasattr(parent_context, "flatten"):
             parent_context = parent_context.flatten()
 
-        if not hasattr(self.object, "render_as_content"):
-            raise AdapterError(
-                f"Object {self.object} does not have a render_as_content method"
+        methods = []
+        if self.kwargs.get("render_method"):
+            methods.append(
+                self.kwargs["render_method"],
             )
-        
-        return self.object.render_as_content(
-            request=self.request,
-            context=parent_context,
+
+        methods.append(
+            "render_as_content",
         )
+        
+        return render_as_content(
+            self.object,
+            self.request,
+            parent_context,
+            methods,
+        )
+        
+
+def render_as_content(object, request, context, method_names: list[str]):
+    """
+    Render the object as content.
+    This will render the object using the given method names.
+    """
+    for method_name in method_names:
+        if not hasattr(object, method_name):
+            continue
+
+        method = getattr(
+            object,
+            method_name
+        )
+
+        return method(
+            request=request,
+            context=context,
+        )
+
+    raise AdapterError(
+        "The object does not have any of the following rendering methods: %s" % ", ".join(method_names)
+    )
