@@ -71,15 +71,19 @@ def Base85_json_loads(data):
 
 class Keyword:
     def __init__(self, name: str, optional: bool = False, absolute: bool = False, default=None, help_text: str = None, type_hint: Type[Any] = None):
+
+        if default and absolute or default and not optional:
+            raise AdapterError("Keywords cannot be absolute or required and have a default value")
+
+        if optional and absolute:
+            raise AdapterError("Keywords cannot be optional and absolute")
+        
         self.name = name
         self.optional = optional
         self.absolute = absolute
         self.default = default
         self.help_text = help_text
         self.type_hint = type_hint
-
-        if self.default and self.absolute or self.default and not self.optional:
-            raise AdapterError("Keywords cannot be absolute or required and have a default value")
 
     def __str__(self):
         return self.name
