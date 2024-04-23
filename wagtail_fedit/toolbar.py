@@ -2,6 +2,8 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from typing import TYPE_CHECKING
 
+from wagtail_fedit.adapters import BaseAdapter
+
 if TYPE_CHECKING:
     from .adapters import BaseAdapter
 
@@ -52,6 +54,7 @@ class FeditAdapterEditButton(FeditAdapterComponent):
         "wagtailadmin.access_admin",
     ]
 
+
 class FeditAdapterAdminLinkButton(FeditAdapterComponent):
     """
         Required button class for the edit modal to function.
@@ -62,7 +65,14 @@ class FeditAdapterAdminLinkButton(FeditAdapterComponent):
         "wagtailadmin.access_admin",
     ]
 
+    def __init__(self, request, adapter: BaseAdapter):
+        super().__init__(request, adapter)
+        self.url = adapter.get_admin_url()
+
+    def is_shown(self):
+        return super().is_shown() and bool(self.url)
+
     def get_context_data(self):
         return super().get_context_data() | {
-            "admin_url": self.adapter.get_admin_url(),
+            "admin_url": self.url,
         }

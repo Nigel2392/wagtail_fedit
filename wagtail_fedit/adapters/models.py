@@ -20,6 +20,13 @@ from ..forms import (
 from ..utils import (
     get_model_string,
 )
+from wagtail.admin.admin_url_finder import (
+    AdminURLFinder,
+)
+from ..toolbar import (
+    FeditAdapterComponent,
+    FeditAdapterAdminLinkButton,
+)
 
 
 class ModelAdapter(BlockFieldReplacementAdapter):
@@ -47,6 +54,21 @@ class ModelAdapter(BlockFieldReplacementAdapter):
             self.edit_handler = page_utils._get_page_edit_handler(self.object.__class__)
         else:
             self.edit_handler = model_utils.get_edit_handler(self.object.__class__)
+
+    def get_admin_url(self) -> str:
+        finder = AdminURLFinder(self.request.user)
+        return finder.get_edit_url(self.object)
+
+    def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
+        buttons = super().get_toolbar_buttons()
+        if not self.kwargs.get("admin", False):
+            return buttons
+        
+        buttons.append(FeditAdapterAdminLinkButton(
+            self.request, self,
+        ))
+        return buttons
+
 
     def get_form_attrs(self) -> dict:
         attrs = super().get_form_attrs()
