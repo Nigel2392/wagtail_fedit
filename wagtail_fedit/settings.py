@@ -34,3 +34,9 @@ If this is false, there is no guarantee that the language of a saved field/model
 will be the same as it initially was, generally it will be - however this might mess up with Wagtail's `Page.locale` and
 the page not being available in the context afterwards.
 """
+
+TIPPY_ENABLED = getattr(settings, "WAGTAIL_FEDIT_TIPPY_ENABLED", True)
+"""
+Enable Tippy.js tooltips for toolbar buttons.
+"""
+

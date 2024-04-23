@@ -101,6 +101,10 @@ class Tooltip {
     }
 
     init() {
+        if (!window.tippy) {
+            console.debug("Tippy tooltips disabled");
+            return;
+        }
         tippy(this.element, this.tooltipConfig);
     }
 

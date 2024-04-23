@@ -18,6 +18,9 @@ from wagtail.images import (
 from wagtail.images.widgets import AdminImageChooser
 from wagtail.documents import get_document_model
 from wagtail.documents.widgets import AdminDocumentChooser
+from ..settings import (
+    TIPPY_ENABLED,
+)
 from ..hooks import (
     EXCLUDE_FROM_RELATED_FORMS,
     REGISTER_FIELD_RENDERER,
@@ -75,17 +78,22 @@ def register_css(request):
 
 @hooks.register(REGISTER_JS, order=-1)
 def register_js(request):
-    return [
-        format_html(
-            '<script src="{0}"></script>',
-            static('wagtail_fedit/vendor/tippy/popper.min.js')
-        ),
-        format_html(
-            '<script src="{0}"></script>',
-            static('wagtail_fedit/vendor/tippy/tippy-bundle.min.js')
-        ),
+    scripts = []
+    if TIPPY_ENABLED:
+        scripts.extend([
+            format_html(
+                '<script src="{0}"></script>',
+                static('wagtail_fedit/vendor/tippy/popper.min.js')
+            ),
+            format_html(
+                '<script src="{0}"></script>',
+                static('wagtail_fedit/vendor/tippy/tippy-bundle.min.js')
+            ),
+        ])
+    scripts.extend([
         format_html(
             '<script src="{0}"></script>',
             static('wagtail_fedit/js/frontend.js')
         ),
-    ]
+    ])
+    return scripts
