@@ -2,8 +2,6 @@ from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from typing import TYPE_CHECKING
 
-from wagtail_fedit.adapters import BaseAdapter
-
 if TYPE_CHECKING:
     from .adapters import BaseAdapter
 
@@ -65,7 +63,7 @@ class FeditAdapterAdminLinkButton(FeditAdapterComponent):
         "wagtailadmin.access_admin",
     ]
 
-    def __init__(self, request, adapter: BaseAdapter):
+    def __init__(self, request, adapter: "BaseAdapter"):
         super().__init__(request, adapter)
         self.url = adapter.get_admin_url()
 
