@@ -128,10 +128,7 @@ def access_userbar_model(request: HttpRequest) -> models.Model:
     """
     Retrieve the model set for the userbar in the request.
     """
-    if not hasattr(request, USERBAR_MODEL_VAR):
-        return None
-    
-    return getattr(request, USERBAR_MODEL_VAR)
+    return getattr(request, USERBAR_MODEL_VAR, None)
 
 def with_userbar_model(request: HttpRequest, model: models.Model) -> HttpRequest:
     """

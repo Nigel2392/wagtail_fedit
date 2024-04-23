@@ -204,6 +204,12 @@ def render_adapter(context: Context, adapter: BaseAdapter) -> str:
         parent_context = context["parent_context"]
         del context["parent_context"]
 
+    if hasattr(context, "flatten"):
+        context = context.flatten()
+
+    if hasattr(parent_context, "flatten"):
+        parent_context = parent_context.flatten()
+
     context.update(parent_context)
 
     context["wagtail_fedit_field"]    = adapter.field_name
