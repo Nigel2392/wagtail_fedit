@@ -16,6 +16,10 @@ from django.urls import reverse
 from django.core import signing
 
 from wagtail import hooks
+from wagtail.models import (
+    Page,
+    PAGE_TEMPLATE_VAR,
+)
 
 import warnings
 
@@ -27,6 +31,7 @@ from ..adapters import (
 )
 from ..utils import (
     wrap_adapter,
+    with_userbar_model,
     _can_edit,
     FEDIT_PREVIEW_VAR,
     TEMPLATE_TAG_NAME,
@@ -266,6 +271,13 @@ def tooltip(content, wrapping: str = None, **kwargs) -> str:
     
     return mark_safe(f"<span {attrs}>{wrapping}</span>")
 
+@register.simple_tag(takes_context=True, name="fedit_userbar")
+def do_with_userbar_model(context, model: Any) -> str:
+    if "request" in context:
+        context["request"] = with_userbar_model(context["request"], model)
+    if PAGE_TEMPLATE_VAR in context and context[PAGE_TEMPLATE_VAR] != model:
+        context[PAGE_TEMPLATE_VAR] = model
+    return ""
 
 def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None, optional_tokens: dict[str, Any] = None) -> dict:
     had_kwargs = False
