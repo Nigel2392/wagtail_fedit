@@ -72,7 +72,7 @@ def Base85_json_loads(data):
 class Keyword:
     def __init__(self, name: str, optional: bool = False, absolute: bool = False, default=None, help_text: str = None, type_hint: Type[Any] = None):
 
-        if default and absolute or default and not optional:
+        if (default and absolute) or (default and not optional):
             raise AdapterError("Keywords cannot be absolute or required and have a default value")
 
         if optional and absolute:
@@ -139,8 +139,8 @@ class AdapterMeta(type):
 
         cls = super().__new__(cls, name, bases, attrs)
 
-        cls.required_kwargs: tuple[str]     = set(required_kwargs)
-        cls.absolute_tokens: tuple[str]     = set(absolute_tokens)
+        cls.required_kwargs: tuple[str]     = tuple(required_kwargs)
+        cls.absolute_tokens: tuple[str]     = tuple(absolute_tokens)
         cls.optional_kwargs: dict[str, Any] = optional_kwargs
         cls.keywords:        tuple[Keyword] = tuple(
             _sort_keywords(keywords)

@@ -83,13 +83,13 @@ def get_adapter_id() -> str:
 class TestBaseAdapter(BaseFEditTest):
 
     def test_required_kwargs(self):
-        self.assertEqual(TestAdapter.required_kwargs, set(["test"]))
+        self.assertEqual(TestAdapter.required_kwargs, tuple(["test"]))
 
     def test_absolute_tokens(self):
-        self.assertEqual(TestAbsoluteTokensAdapter.absolute_tokens, set(["absolute"]))
+        self.assertEqual(TestAbsoluteTokensAdapter.absolute_tokens, tuple(["absolute"]))
 
     def test_required_kwargs_ok(self):
-        self.assertEqual(TestAdapter.required_kwargs, set(["test"]))
+        self.assertEqual(TestAdapter.required_kwargs, tuple(["test"]))
         id = get_adapter_id()
 
         template_ok = Template(
@@ -236,6 +236,39 @@ class TestBaseAdapter(BaseFEditTest):
             str(True),
         )
 
+    def test_positional_kwargs(self):
+        id = get_adapter_id()
+        tpl = Template(
+            "{% load fedit %}"
+            f"{{% fedit test_absolute_tokens object.title 'test' absolute id='{id}' %}}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+            })
+        )
+
+        adapter = adapters[id]
+
+        self.assertEqual(
+            adapter.kwargs["test"],
+            "test",
+        )
+
+        self.assertEqual(
+            adapter.kwargs["absolute"],
+            True,
+        )
+
     def test_adapter_absolute_tokens_fail(self):
         id = get_adapter_id()
         tpl = Template(
@@ -281,7 +314,7 @@ class TestBaseAdapter(BaseFEditTest):
 
     def test_adapter_editable(self):
         id = get_adapter_id()
-        self.assertEqual(TestAdapter.required_kwargs, set(["test"]))
+        self.assertEqual(TestAdapter.required_kwargs, tuple(["test"]))
 
         tpl = Template(
             "{% load fedit %}"
@@ -315,7 +348,7 @@ class TestBaseAdapter(BaseFEditTest):
 
     def test_adapter_editable_as_var(self):
         id = get_adapter_id()
-        self.assertEqual(TestAdapter.required_kwargs, set(["test"]))
+        self.assertEqual(TestAdapter.required_kwargs, tuple(["test"]))
 
         tpl = Template(
             "{% load fedit %}"

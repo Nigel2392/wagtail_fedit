@@ -14,6 +14,9 @@ from .base import (
     BlockFieldReplacementAdapter,
     AdapterError,
 )
+from ..forms import (
+    PossibleRevisionFormMixin,
+)
 from ..utils import (
     get_model_string,
 )
@@ -63,13 +66,19 @@ class ModelAdapter(BlockFieldReplacementAdapter):
 
     @property
     def form_class(self):
-        return self.edit_handler.get_form_class()
+        cls = self.edit_handler.get_form_class()
+        class RevisionModelForm(PossibleRevisionFormMixin, cls):
+            pass
+        return RevisionModelForm
+
+    def form_valid(self, form):
+        self.object = form.save()
 
     def get_form(self):
         if self.request.method == "POST":
-            form = self.form_class(self.request.POST, for_user=self.request.user, instance=self.object)
+            form = self.form_class(self.request.POST, for_user=self.request.user, instance=self.object, request=self.request)
         else:
-            form = self.form_class(for_user=self.request.user, instance=self.object)
+            form = self.form_class(for_user=self.request.user, instance=self.object, request=self.request)
         return form
 
     def get_header_title(self):
@@ -101,7 +110,7 @@ class ModelAdapter(BlockFieldReplacementAdapter):
         methods.append(
             "render_as_content",
         )
-        
+
         return render_as_content(
             self.object,
             self.request,
@@ -130,5 +139,10 @@ def render_as_content(object, request, context, method_names: list[str]):
         )
 
     raise AdapterError(
-        "The object does not have any of the following rendering methods: %s" % ", ".join(method_names)
+        "Object '%s' does not have any of the following rendering methods: %s" % (
+            object.__class__.__name__,
+            ", ".join(
+                method_names,
+            )
+        )
     )

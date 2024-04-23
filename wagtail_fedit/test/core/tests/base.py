@@ -203,7 +203,6 @@ class BaseFEditTest(TestCase):
             self.revision_model,
             self.preview_model,
             self.basic_model,
-            self.lock_model,
         ]
 
     def get_editable_url(self, object_id, app_label, model_name):
@@ -234,6 +233,18 @@ class BaseFEditTest(TestCase):
             kwargs={
                 "adapter_id": "field",
                 "field_name": field_name,
+                "app_label": app_label,
+                "model_name": model_name,
+                "model_id": model_id
+            }
+        )
+    
+    def get_model_url(self, app_label, model_name, model_id):
+        url_name = "edit"
+        return reverse(
+            f"wagtail_fedit:{url_name}",
+            kwargs={
+                "adapter_id": "model",
                 "app_label": app_label,
                 "model_name": model_name,
                 "model_id": model_id

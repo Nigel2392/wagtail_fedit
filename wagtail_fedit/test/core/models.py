@@ -90,7 +90,10 @@ class BaseEditableMixin:
     
     def serve(self, request, *args, **kwargs):
         return HttpResponse(self.body)
-        
+
+    def render_as_content(self, request, context=None):
+        return f"<h1>{self.title}</h1><p>{self.body}</p>"
+
 @register_snippet
 class BasicModel(models.Model):
     title = models.CharField(max_length=255)
@@ -101,8 +104,14 @@ class BasicModel(models.Model):
     ], use_json_field=True)
     related_field = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True)
 
+    panels = [
+        FieldPanel("title"),
+        FieldPanel("body"),
+    ]
+
     def render_as_content(self, request, context=None):
         return f"<h1>{self.title}</h1><p>{self.body}</p>"
+
 
 @register_snippet
 class EditableFullModel(BaseEditableMixin, FEditableMixin):
@@ -152,6 +161,10 @@ class EditableLockModel(BaseEditableMixin, WorkflowMixin, DraftStateMixin, Revis
         ("flat_menu_component", FlatMenuComponent())
     ], use_json_field=True)
 
+    panels = [
+        FieldPanel("title"),
+        FieldPanel("body"),
+    ]
     
     def get_permissions_policy(self):
         return ModelPermissionPolicy(self.__class__)
@@ -172,5 +185,11 @@ class EditablePageModel(Page):
     ], use_json_field=True)
 
     content_panels = Page.content_panels + [
-        FieldPanel("content")
+        FieldPanel("body")
     ]
+
+    promote_panels = []
+    settings_panels = []
+
+    def render_as_content(self, request, context=None):
+        return f"<h1>{self.title}</h1><p>{self.body}</p>"

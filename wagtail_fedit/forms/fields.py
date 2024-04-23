@@ -19,8 +19,11 @@ from ..hooks import (
 
 from wagtail import hooks
 
+
+
 _looked_for_widgets = False
 _widgets = {}
+
 
 def _look_for_widgets():
     global _looked_for_widgets
@@ -28,6 +31,7 @@ def _look_for_widgets():
         _looked_for_widgets = True
         for fn in hooks.get_hooks(REGISTER_FIELD_WIDGETS):
             _widgets.update(fn(_widgets))
+
 
 def get_widget_for_field(field: models.Field) -> Type[forms.Widget]:
     """
@@ -48,21 +52,6 @@ def get_widget_for_field(field: models.Field) -> Type[forms.Widget]:
     return widget
 
 
-class PossibleRevisionForm(WagtailAdminModelForm):
-    """
-    A form that can save a revision if the model is a RevisionMixin.
-    Otherwise resorts to the default save method; this saves the (live) instance.
-    """
-    def __init__(self, *args, request = None, **kwargs):
-        self.request = request
-        super().__init__(*args, **kwargs)
-
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance = save_possible_revision(instance, self.request)
-        return instance
-
 def save_possible_revision(instance: models.Model, request: HttpRequest, **kwargs) -> models.Model:
     """
     Save an instance as a revision if the model supports it.
@@ -78,7 +67,8 @@ def save_possible_revision(instance: models.Model, request: HttpRequest, **kwarg
 
     return instance
 
-def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) -> Type[PossibleRevisionForm]:
+
+def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) -> Type["PossibleRevisionForm"]:
     """
     Return a form class for a model with specific fields.
     This is similar to django's modelform_factory, but with the added benefit of using the custom widgets.
@@ -105,3 +95,26 @@ def get_form_class_for_fields(form_model: models.Model, form_fields: list[str]) 
             widgets = form_widgets
 
     return RevisionForm
+
+
+class PossibleRevisionFormMixin:
+    """
+    A form that can save a revision if the model is a RevisionMixin.
+    Otherwise resorts to the default save method; this saves the (live) instance.
+    """
+    def __init__(self, *args, request = None, **kwargs):
+        self.request = request
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        self.instance = super().save(commit=False)
+        if commit:
+            self.instance = save_possible_revision(
+                self.instance,
+                self.request,
+            )
+        return self.instance
+
+
+class PossibleRevisionForm(PossibleRevisionFormMixin, WagtailAdminModelForm):
+    pass

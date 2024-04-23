@@ -246,10 +246,10 @@ def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, 
     kwargs = {}
 
     if not kwarg_list:
-        kwarg_list = set()
+        kwarg_list = tuple()
 
     if not absolute_tokens:
-        absolute_tokens = set()
+        absolute_tokens = tuple()
 
     if not optional_tokens:
         optional_tokens = {}
