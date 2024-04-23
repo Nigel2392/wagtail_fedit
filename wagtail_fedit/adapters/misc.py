@@ -36,6 +36,20 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
             help_text="The CSS variable name to apply the background-image to. element.style.setProperty(css_variable_name, url);",
             type_hint="str",
         ),
+        Keyword(
+            "filter_spec",
+            optional=True,
+            default="original",
+            help_text="The filter spec to apply to the image.",
+            type_hint="str",
+        ),
+        Keyword(
+            "preserve_svg",
+            optional=True,
+            default=False,
+            help_text="Preserve SVG images by converting them to a safe format.",
+            type_hint="bool",
+        ),
     )
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
     js_function = "wagtail_fedit.funcs.backgroundImageFunc"
@@ -49,14 +63,11 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
         if not image:
             return data
 
-        filter_spec = self.kwargs.get("filter_spec", None)
-        if not filter_spec:
-            filter_spec = "original"
-
+        filter_spec = self.kwargs["filter_spec"]
         if not isinstance(filter_spec, str):
             filter_spec = "|".join(filter_spec)
 
-        if image.is_svg() or self.kwargs.get("preserve_svg", False):
+        if image.is_svg() or self.kwargs["preserve_svg"]:
             filter = Filter(to_svg_safe_spec(filter_spec.split("|")))
         else:
             filter = Filter(spec=filter_spec)
