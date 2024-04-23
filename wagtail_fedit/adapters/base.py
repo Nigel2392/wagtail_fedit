@@ -130,7 +130,7 @@ class AdapterMeta(type):
             if keyword.absolute:
                 absolute_tokens.append(keyword.name)
             elif keyword.optional:
-                if keyword.default:
+                if keyword.default is not None:
                     optional_kwargs[keyword.name] = keyword.default
                 else:
                     optional_kwargs[keyword.name] = None
@@ -182,6 +182,10 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
         self.request          = request
         self.kwargs           = kwargs
 
+        for k, v in self.optional_kwargs.items():
+            if k not in self.kwargs and v is not None:
+                self.kwargs[k] = v
+
         if hasattr(request, "LANGUAGE_CODE") and TRACK_LOCALES:
             if "LANGUAGE_CODE" not in self.kwargs:
                 self.kwargs["LANGUAGE_CODE"] = request.LANGUAGE_CODE
@@ -219,7 +223,7 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
                 else:
                     k.append(f": {keyword.type_hint.__name__}")
                     
-            if keyword.default and not keyword.absolute:
+            if keyword.default is not None and not keyword.absolute:
                 k.append(f"={keyword.default}")
 
             s.append("".join(k))
