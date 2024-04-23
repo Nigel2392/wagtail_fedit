@@ -16,6 +16,10 @@ from django.urls import reverse
 from django.core import signing
 
 from wagtail import hooks
+from wagtail.models import (
+    Page,
+    PAGE_TEMPLATE_VAR,
+)
 
 import warnings
 
@@ -133,6 +137,10 @@ class AdapterNode(Node):
         if not adapter.check_permissions()\
           or not _can_edit(request, obj):
             context.update(adapter.kwargs)
+
+            if isinstance(obj, Page):
+                context[PAGE_TEMPLATE_VAR] = obj
+
             return as_var(self.as_var, context, adapter.render_content(context))
 
         return as_var(self.as_var, context, wrap_adapter(request, adapter, context))
@@ -209,8 +217,11 @@ def render_adapter(context: Context, adapter: BaseAdapter) -> str:
     context["wagtail_fedit_field"]    = adapter.field_name
     context["wagtail_fedit_instance"] = adapter.object
     context["request"]                = adapter.request
-    
+
     context.update(adapter.kwargs)
+
+    if isinstance(adapter.object, Page):
+        context[PAGE_TEMPLATE_VAR] = adapter.object
 
     return adapter.render_content(context)
 

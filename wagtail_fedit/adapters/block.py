@@ -183,7 +183,5 @@ class BlockAdapter(BlockFieldReplacementAdapter):
         if hasattr(parent_context, "flatten"):
             parent_context = parent_context.flatten()
 
-        parent_context.update(self.kwargs)
-
         return self.block.render(parent_context)
         

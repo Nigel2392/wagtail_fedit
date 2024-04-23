@@ -159,6 +159,11 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
                 ),
             )
 
+        if isinstance(self.instance, Page):
+            # Add the page template variable to the context.
+            # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
+            extra[PAGE_TEMPLATE_VAR] = self.instance
+
         return super().get_context_data(**kwargs) | {
             "verbose_name": verbose_name,
             "locked_for_user": self.locked_for_user,
@@ -171,17 +176,13 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
 class AdapterRefetchView(BaseAdapterView):
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         context = self.get_context_data()
-        if isinstance(self.instance, Page):
-            # Add the page template variable to the context.
-            # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
-            context[PAGE_TEMPLATE_VAR] = self.instance
 
         return JsonResponse({
             "success": True,
             "refetch": True,
             **self.adapter\
               .get_response_data(
-                  self.get_context_data(),
+                  context,
               ),
         })
 
@@ -221,18 +222,6 @@ class EditAdapterView(BaseAdapterView):
         self.adapter.form_valid(form)
 
         context = self.get_context_data()
-        if isinstance(self.instance, Page):
-            # Add the page template variable to the context.
-            # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
-            context[PAGE_TEMPLATE_VAR] = self.instance
-
-        ## Render the frame HTML
-        #html = wrap_adapter(
-        #    request=self.request,
-        #    adapter=self.adapter,
-        #    context=context,
-        #    run_context_processors=True,
-        #)
 
         return JsonResponse({
             "success": True,
