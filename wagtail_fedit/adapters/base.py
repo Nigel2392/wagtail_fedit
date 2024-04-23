@@ -86,7 +86,29 @@ class Keyword:
         self.type_hint = type_hint
 
     def __str__(self):
-        return self.name
+        k = []
+
+        if self.optional:
+            k.append("?")
+        if self.absolute:
+            k.append("!")
+
+        k.append(self.name)
+
+        if self.type_hint and not self.absolute:
+            if isinstance(self.type_hint, str):
+                k.append(f": {self.type_hint}")
+            else:
+                k.append(f": {self.type_hint.__name__}")
+                
+        if self.default is not None and not self.absolute:
+            default = self.default
+            if isinstance(default, str):
+                default = f"'{default}'"
+            k.append(f"={default}")
+
+        return "".join(k)
+
 
     def __repr__(self):
         s = ["Keyword", self.name]
@@ -207,26 +229,7 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
         """
         s = []
         for keyword in cls.keywords:
-
-            k = []
-
-            if keyword.optional:
-                k.append("?")
-            if keyword.absolute:
-                k.append("!")
-
-            k.append(keyword.name)
-
-            if keyword.type_hint and not keyword.absolute:
-                if isinstance(keyword.type_hint, str):
-                    k.append(f": {keyword.type_hint}")
-                else:
-                    k.append(f": {keyword.type_hint.__name__}")
-                    
-            if keyword.default is not None and not keyword.absolute:
-                k.append(f"={keyword.default}")
-
-            s.append("".join(k))
+            s.append(str(keyword))
                 
         return " ".join(s)
     
