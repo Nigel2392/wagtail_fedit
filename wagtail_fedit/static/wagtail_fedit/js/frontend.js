@@ -172,6 +172,10 @@ class WagtailFeditorAPI {
         }
     }
 
+    refetch() {
+        this.#editor.refetch();
+    }
+
     execRelated(func) {
         for (const wrapper of this.#editor.relatedWrappers) {
             func(wrapper.editorAPI);
@@ -206,17 +210,50 @@ class BaseWagtailFeditEditor {
 
     get relatedWrappers() {
         const wrapperId = this.wrapperElement.dataset.wrapperId;
-        return document.querySelectorAll(`[data-wrapper-id="${wrapperId}"]`);
+        const filterFn = (el) => el !== this.wrapperElement
+        const elements = document.querySelectorAll(`[data-wrapper-id="${wrapperId}"]`)
+        return Array.from(elements).filter(filterFn);
     }
 
     focus() {
         this.wrapperElement.focus();
     }
 
+    get editUrl() {
+        return this.wrapperElement.dataset.editUrl;
+    }
+
+    get refetchUrl() {
+        return this.wrapperElement.dataset.refetchUrl;
+    }
+
+    refetch() {
+        fetch(this.getRefetchUrl()).then((response) => {
+            response = response.json();
+            return response;
+        }).then((response) => {
+            if (!response.success) {
+                console.error("Errors rendering response", response);
+                return;
+            }
+            this.onResponse(response);
+        });
+    }
+
     getEditUrl() {
         // build the edit url from relative edit url
         const url = new URL(window.location.href);
         url.pathname = this.editUrl;
+        if (this.sharedContext) {
+            url.searchParams.set("shared_context", this.sharedContext);
+        }
+        return url.toString();
+    }
+
+    getRefetchUrl() {
+        // build the edit url from relative edit url
+        const url = new URL(window.location.href);
+        url.pathname = this.refetchUrl;
         if (this.sharedContext) {
             url.searchParams.set("shared_context", this.sharedContext);
         }
@@ -339,10 +376,6 @@ class BaseWagtailFeditEditor {
         return wrapper;
     }
 
-    get editUrl() {
-        return this.wrapperElement.dataset.editUrl;
-    }
-
     init() {
         this.sharedContext = this.wrapperElement.dataset.sharedContext;
         this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
@@ -423,36 +456,39 @@ class WagtailFeditFuncEditor extends BaseFuncEditor {
 
 class BlockFieldEditor extends BaseWagtailFeditEditor {
     onResponse(response) {
-        const html = response.html;
-        for (const wrapper of this.relatedWrappers) {
-            wrapper.editorAPI.updateHtml((update) => {
-                // Fade out the old block
-                const anim = wrapper.animate([
-                   {opacity: 1},
-                   {opacity: 0},
-                ], {
-                   duration: 350,
-                   easing: "ease-in-out",
-                });
-            
-                anim.onfinish = () => {
-
-                   const blockWrapper = update(html);
-                
-                   // Fade in the new block
-                   const anim = blockWrapper.animate([
-                       {opacity: 0},
-                       {opacity: 1},
-                   ], {
-                       duration: 350,
-                       easing: "ease-in-out",
-                   });
-                   anim.onfinish = () => {
-                       blockWrapper.style.opacity = 1;
-                   };
-                }
+        this.api.updateHtml((update) => {
+            // Fade out the old block
+            const anim = this.wrapperElement.animate([
+               {opacity: 1},
+               {opacity: 0},
+            ], {
+               duration: 350,
+               easing: "ease-in-out",
             });
-        }
+        
+            anim.onfinish = () => {
+
+                const blockWrapper = update(response.html);
+                
+                if (!response.refetch) {
+                    for (const wrapper of this.relatedWrappers) {
+                        wrapper.editorAPI.refetch();
+                    }
+                }
+    
+                // Fade in the new block
+                const anim = blockWrapper.animate([
+                    {opacity: 0},
+                    {opacity: 1},
+                ], {
+                    duration: 350,
+                    easing: "ease-in-out",
+                });
+                anim.onfinish = () => {
+                    blockWrapper.style.opacity = 1;
+                };
+            }
+        });
     }
 }
 

@@ -7,6 +7,7 @@ from django.http import HttpRequest
 
 from wagtail.log_actions import log
 from wagtail.models import RevisionMixin
+from wagtail.fields import StreamField
 from wagtail import hooks
 
 from .base import (
@@ -165,6 +166,13 @@ class FieldAdapter(BlockFieldReplacementAdapter):
             extra_log_kwargs["revision"] = self.original_object.latest_revision
 
         with translation.override(None):
+            old_new = {}
+            if not isinstance(self.meta_field, StreamField):
+                old_new = {
+                    "old": str(self.initial_field_value),
+                    "new": str(getattr(self.object, self.field_name)),
+                }
+
             data = {
                 "verbose_field_name": str(self.meta_field.verbose_name),
                 "field_name": self.field_name,
@@ -173,11 +181,7 @@ class FieldAdapter(BlockFieldReplacementAdapter):
                 "app_label": self.object._meta.app_label,
                 "model_verbose": str(self.model._meta.verbose_name),
                 "model_string": str(get_model_string(self.original_object)),
-                "old": str(self.initial_field_value),
-                "new": str(getattr(
-                    self.original_object,
-                    self.field_name
-                )),
+                "old_new": old_new,
             }
 
             uid = uuid.uuid4()

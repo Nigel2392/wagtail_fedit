@@ -167,6 +167,23 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             "locked": self.lock is not None,
             **extra,
         }
+    
+class AdapterRefetchView(BaseAdapterView):
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        context = self.get_context_data()
+        if isinstance(self.instance, Page):
+            # Add the page template variable to the context.
+            # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
+            context[PAGE_TEMPLATE_VAR] = self.instance
+
+        return JsonResponse({
+            "success": True,
+            "refetch": True,
+            **self.adapter\
+              .get_response_data(
+                  self.get_context_data(),
+              ),
+        })
 
 class EditAdapterView(BaseAdapterView):
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:

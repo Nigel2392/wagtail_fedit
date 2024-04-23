@@ -505,6 +505,10 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
                 "wagtail_fedit:edit",
                 kwargs=reverse_kwargs,
             ),
+            "refetch_url": reverse(
+                "wagtail_fedit:refetch",
+                kwargs=reverse_kwargs,
+            ),
         },
         request=request if run_context_processors else None,
     )
