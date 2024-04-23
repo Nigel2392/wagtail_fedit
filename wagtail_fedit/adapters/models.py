@@ -45,7 +45,6 @@ class ModelAdapter(BlockFieldReplacementAdapter):
             optional=True,
             default="render_as_content",
             help_text="The method to call on the object to render it as content. Default is 'render_as_content'.",
-            type_hint="str",
         ),
     )
 
@@ -125,7 +124,7 @@ class ModelAdapter(BlockFieldReplacementAdapter):
             parent_context = parent_context.flatten()
 
         method_name = self.kwargs["render_method"]
-        if not hasattr(object, method_name):
+        if not hasattr(self.object, method_name):
             raise AdapterError(
                 "Object '%s' does not have any method named '%s'" % (
                     self.object.__class__.__name__,
@@ -133,7 +132,7 @@ class ModelAdapter(BlockFieldReplacementAdapter):
                 )
             )
         method = getattr(
-            object,
+            self.object,
             method_name
         )
         return method(

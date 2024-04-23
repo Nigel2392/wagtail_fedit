@@ -41,14 +41,12 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
             optional=True,
             default="original",
             help_text="The filter spec to apply to the image.",
-            type_hint="str",
         ),
         Keyword(
             "preserve_svg",
             optional=True,
             default=False,
             help_text="Preserve SVG images by converting them to a safe format.",
-            type_hint="bool",
         ),
     )
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"

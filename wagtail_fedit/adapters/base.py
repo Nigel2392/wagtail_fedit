@@ -78,6 +78,9 @@ class Keyword:
         if optional and absolute:
             raise AdapterError("Keywords cannot be optional and absolute")
         
+        if default is not None and not type_hint:
+            type_hint = type(default)
+        
         self.name = name
         self.optional = optional
         self.absolute = absolute
@@ -108,7 +111,6 @@ class Keyword:
             k.append(f"={default}")
 
         return "".join(k)
-
 
     def __repr__(self):
         s = ["Keyword", self.name]
