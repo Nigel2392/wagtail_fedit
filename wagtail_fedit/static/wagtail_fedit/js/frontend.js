@@ -93,6 +93,30 @@ class iFrame {
 }
 
 
+class Tooltip {
+    constructor(element) {
+        this.element = element;
+        this.tooltipConfig = this.makeConfig();
+        this.init();
+    }
+
+    init() {
+        tippy(this.element, this.tooltipConfig);
+    }
+
+    makeConfig() {
+        const cfg = {}
+        for (const attr of this.element.attributes) {
+            if (attr.name.startsWith("data-tooltip-")) {
+                const key = attr.name.replace("data-tooltip-", "");
+                cfg[key] = attr.value;
+            }
+        }
+        this.tooltipConfig = cfg;
+        return cfg;
+    }
+}
+
 const modalHtml = `
 <div class="wagtail-fedit-modal-wrapper">
     <div class="wagtail-fedit-modal" id="wagtail-fedit-modal-__ID__-modal">
@@ -330,21 +354,31 @@ class BaseWagtailFeditEditor {
     }
 
     initNewEditors() {
-        const wagtailFeditBlockEditors = this.wrapperElement.querySelectorAll(".wagtail-fedit-adapter-wrapper");
-        for (const editor of wagtailFeditBlockEditors) {
-            if (!editor.classList.contains("wagtail-fedit-initialized")) {
-                editor.classList.add("wagtail-fedit-initialized");
-                const editorClass = getEditorClass(editor);
-                if (editorClass) {
-                    new editorClass({element: editor});
-                } else {
-                    console.error("No editor class found for element", editor);
-                }
-            }
-        }
+        initNewEditors(this.wrapperElement);
     }
 }
 
+function initNewEditors(wrapper = document) {
+    const wagtailFeditBlockEditors = wrapper.querySelectorAll(".wagtail-fedit-adapter-wrapper");
+    for (const editor of wagtailFeditBlockEditors) {
+        if (!editor.classList.contains("wagtail-fedit-initialized")) {
+            editor.classList.add("wagtail-fedit-initialized");
+            const editorClass = getEditorClass(editor);
+            if (editorClass) {
+                new editorClass({element: editor});
+            } else {
+                console.error("No editor class found for element", editor);
+            }
+        }
+    }
+    const editButtons = wrapper.querySelectorAll("[data-tooltip='true']");
+    for (const button of editButtons) {
+        if (button.dataset.tooltip == "true") {
+            new Tooltip(button);
+            delete button.dataset.tooltip;
+        }
+    }
+}
 
 class BaseFuncEditor extends BaseWagtailFeditEditor {
     static get funcMap() {
@@ -487,18 +521,7 @@ function getEditorClass(element) {
 
 
 function initFEditors() {
-    const editors = document.querySelectorAll(".wagtail-fedit-adapter-wrapper");
-    for (const editor of editors) {
-        if (!editor.classList.contains("wagtail-fedit-initialized")) {
-            editor.classList.add("wagtail-fedit-initialized");
-            const editorClass = getEditorClass(editor);
-            if (editorClass) {
-                new editorClass({element: editor});
-            } else {
-                console.error("No editor class found for element", editor);
-            }
-        }
-    }
+    initNewEditors()
     const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
@@ -510,6 +533,13 @@ function initFEditors() {
                             new editorClass({element: node});
                         } else {
                             console.error("No editor class found for element", node);
+                        }
+                    }
+                    const editButtons = node.querySelectorAll("[data-tooltip='true']");
+                    for (const button of editButtons) {
+                        if (button.dataset.tooltip == "true") {
+                            new Tooltip(button);
+                            delete button.dataset.tooltip;
                         }
                     }
                 }

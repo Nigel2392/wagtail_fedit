@@ -105,7 +105,7 @@ class ModelAdapter(BlockFieldReplacementAdapter):
 
     def get_header_title(self):
         instance_string = get_model_string(self.object)
-        return _("Edit model %(instance_string)s") % {
+        return _("Edit model '%(instance_string)s'") % {
             "instance_string": instance_string,
         }
     

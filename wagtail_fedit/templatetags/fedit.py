@@ -10,6 +10,8 @@ from django.template.base import (
     FilterExpression,
 )
 from django.http import HttpRequest
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from django.urls import reverse
 from django.core import signing
 
@@ -239,6 +241,21 @@ def static_hook_output(context, css_or_js) -> dict:
     return {
         "hook_output": files,
     }
+
+@register.simple_tag(takes_context=False, name="tooltip")
+def tooltip(content, wrapping: str = None, **kwargs) -> str:
+    kwargs["content"] = content
+    s = [
+        "data-tooltip='true'"
+    ]
+    for key, value in kwargs.items():
+        s.append(f"data-tooltip-{key}='{escape(value)}'")
+    attrs = " ".join(s)
+
+    if not wrapping:
+        return mark_safe(attrs)
+    
+    return mark_safe(f"<span {attrs}>{wrapping}</span>")
 
 
 def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None, optional_tokens: dict[str, Any] = None) -> dict:

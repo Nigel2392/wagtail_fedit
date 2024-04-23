@@ -14,6 +14,7 @@ html, body {
 .wagtail-fedit-field_bg_image {
     display: inline-flex;
 }
+.wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons a:hover)::after,
 .wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons button:hover)::after {
     content: '';
     display: block;
@@ -54,23 +55,29 @@ html, body {
     right: unset;
 }
 
+.wagtail-fedit-adapter-wrapper .wagtail-fedit-adapter-wrapper > .wagtail-fedit-buttons {
+    flex-direction: column-reverse;
+}
+
 /* .wagtail-fedit-field-wrapper > .wagtail-fedit-buttons { */
     /* position: relative; */
 /* } */
 .wagtail-fedit-adapter-wrapper > .wagtail-fedit-buttons .wagtail-fedit-toolbar-button,
 .wagtail-fedit-adapter-wrapper > .wagtail-fedit-buttons button {
-    display: inline-block;
     vertical-align: middle;
 }
 .wagtail-fedit-buttons .wagtail-fedit-toolbar-button,
 .wagtail-fedit-buttons button {
     border: none;
-    background-color: white;
+    background-color: rgba(0, 0, 0, 0.85);
     padding: 0.1em;
     border-radius: 0.25em;
     width: 24px;
     height: 24px;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .wagtail-fedit-buttons button,
 .wagtail-fedit-buttons button svg,
@@ -80,11 +87,11 @@ html, body {
 .wagtail-fedit-buttons > a:visited,
 .wagtail-fedit-buttons > a:hover,
 .wagtail-fedit-buttons > a:active{
-    color: rgb(14, 49, 100) !important;
+    color: white !important;
 }
 .wagtail-fedit-buttons svg {
     vertical-align: middle;
-    color: rgb(14, 49, 100);
+    color: white;
 }
 body:has(.wagtail-fedit-modal) {
     overflow: hidden;

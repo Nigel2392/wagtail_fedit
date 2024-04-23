@@ -68,13 +68,13 @@ class FieldAdapter(BlockFieldReplacementAdapter):
         model_string = get_model_string(self.original_object)
         if self.original_object != self.object:
             instance_string = get_model_string(self.object)
-            return _("Edit model %(instance_string)s for %(model_name)s %(model_string)s") % {
+            return _("Edit model '%(instance_string)s' for %(model_name)s '%(model_string)s'") % {
                 "instance_string": instance_string,
                 "model_name": self.model._meta.verbose_name,
                 "model_string": model_string,
             }
 
-        return _("Edit field %(field_name)s for %(model_name)s %(model_string)s") % {
+        return _("Edit field '%(field_name)s' for %(model_name)s '%(model_string)s'") % {
             "field_name": meta_field.verbose_name,
             "model_name": self.model._meta.verbose_name,
             "model_string": model_string,

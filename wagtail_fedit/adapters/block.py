@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from django.utils.functional import cached_property
 from django.http import HttpRequest
 
 from wagtail.log_actions import log
@@ -78,6 +79,10 @@ class BlockAdapter(BlockFieldReplacementAdapter):
             
             self.block, _ = result
 
+    @cached_property
+    def tooltip(self) -> str:
+        return self.get_header_title()
+
     def get_admin_url(self) -> str:
         finder = AdminURLFinder(self.request.user)
         url = finder.get_edit_url(self.object)
@@ -102,7 +107,7 @@ class BlockAdapter(BlockFieldReplacementAdapter):
         else:
             model_string = getattr(self.object, "title", str(self.object))
 
-        return _("Edit block %(block_label)s for %(model_name)s %(model_string)s") % {
+        return _("Edit block %(block_label)s for %(model_name)s '%(model_string)s'") % {
             "block_label": self.block.block.label,
             "model_name": self.model._meta.verbose_name,
             "model_string": model_string,

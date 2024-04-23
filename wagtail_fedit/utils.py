@@ -84,6 +84,13 @@ class FeditIFrameMixin:
     
     def get_error_title(self) -> str:
         return self.ERROR_TITLE
+    
+        
+    def get_header_title(self) -> str:
+        return _("Edit %(type)s '%(model)s'") % {
+            "type": self.object._meta.verbose_name,
+            "model": get_model_string(getattr(self, "absolute_instance", self.object), request=self.request),
+        }
 
     def get_help_text(self) -> str:
         # No relations. Maybe draft support.

@@ -78,6 +78,14 @@ def register_js(request):
     return [
         format_html(
             '<script src="{0}"></script>',
+            static('wagtail_fedit/vendor/tippy/popper.min.js')
+        ),
+        format_html(
+            '<script src="{0}"></script>',
+            static('wagtail_fedit/vendor/tippy/tippy-bundle.min.js')
+        ),
+        format_html(
+            '<script src="{0}"></script>',
             static('wagtail_fedit/js/frontend.js')
         ),
     ]

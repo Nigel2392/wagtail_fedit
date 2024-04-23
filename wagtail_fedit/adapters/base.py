@@ -5,6 +5,7 @@ from django import forms
 from django.db import models
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from django.utils.functional import cached_property
 from django.utils.text import (
     slugify,
 )
@@ -275,12 +276,19 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
         """
         return getattr(self.object, self.field_name)
     
-    @property
+    @cached_property
     def model(self):
         """
         Return the model class of the object.
         """
         return self.object.__class__
+    
+    @cached_property
+    def tooltip(self):
+        """
+        Return the tooltip for the adapter.
+        """
+        return self.get_header_title()
     
     def check_permissions(self):
         """
