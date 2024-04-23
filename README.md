@@ -278,7 +278,7 @@ Adapter instances also have access to the following variables:
 * `self.object` - The model instance.
 * `self.field_name` - The field name.
 * `self.meta_field` - The models.Field instance.
-* `self.field_value` - The field value (Retrieved with `self.meta_field.value_from_object(self.object)`)
+* `self.field_value` - The field value (Retrieved with `getattr(self.object, self.field_name)`).
 * `self.request` - The django HTTP request object.
 * `self.kwargs` - Any shared context / keyword arguments for this adapter.
 
@@ -291,30 +291,27 @@ from wagtail_fedit.adapters import (
 )
 
 class ColorizerAdapter(BaseFieldFuncAdapter):
-    # Required keyword arguments for the template tag are defined by the superclass.
-    # required_kwargs = [
-    #   "target",
-    #   "name", # the function name, override in __init__ method.
-    # ]
-
-    # Optional kwargs are used to inform inside of the adapter_help command.
-    # They are only for developer convenience.
-    # optional_kwargs = []
+    # Keywords for the adapter can easily be defined.
+    # These will be used to inform the templatetag on what is nescessary, required and counts as a flag.
+    keywords = (
+        Keyword(
+            "target",
+            help_text="The target element to apply the background-image to - this should be a css selector.",
+            type_hint="str",  # Type hint for the `adapter_help` command.
+            # optional=False, # Required is the default.
+            # absolute=False, # Counts as a keyword argument key=value instead of a boolean flag.
+            # default=None,   # Default value if not provided, only for optional keyword arguments.
+        ),
+    )
 
     # How the adapter will be adressed inside of the template tag.
     identifier = "colorizer"
 
+    # The function to call in javascript.
+    js_function = "myColorizerJavascriptFunction"
+
     # A simple description of what this adapter does.
     usage_description = "Change the color of the text for the given target element."
-
-    # Optional explanation of keyword arguments
-    help_text_dict = {
-        "target": "The target element to apply the color to.",
-    }
-
-    def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
-        kwargs["name"] = "myColorizerJavascriptFunction"
-        super().__init__(object, field_name, request, **kwargs)
 
     def render_content(self, parent_context=None):
         # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
