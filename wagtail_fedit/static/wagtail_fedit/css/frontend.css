@@ -7,7 +7,7 @@ html, body {
     display: flex;
 }
 
-.wagtail-fedit-adapter-wrapper {
+.wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons:only-child) {
     position: relative;
     min-height: 24px;
 }

@@ -125,6 +125,11 @@ class BlockAdapter(BlockFieldReplacementAdapter):
             }
         
         return {}
+    
+    def check_permissions(self):
+        return super().check_permissions() and getattr(
+            self.block.block.meta, "feditable", True
+        )
 
     def get_form(self):
 
