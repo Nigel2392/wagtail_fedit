@@ -181,7 +181,7 @@ class FieldAdapter(BlockFieldReplacementAdapter):
                 "app_label": self.object._meta.app_label,
                 "model_verbose": str(self.model._meta.verbose_name),
                 "model_string": str(get_model_string(self.original_object)),
-                "old_new": old_new,
+                **old_new,
             }
 
             uid = uuid.uuid4()
