@@ -15,8 +15,7 @@ html, body {
 .wagtail-fedit-field_bg_image {
     display: inline-flex;
 }
-.wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons a:hover)::after,
-.wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons button:hover)::after {
+.wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons > *:hover)::after {
     content: '';
     display: block;
     position: absolute;
