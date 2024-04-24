@@ -7,7 +7,7 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 
 <details>
 
-<summary>TOC</summary>
+<summary><h1>Table of Contents</h1></summary>
 
 # Table of Contents
 
