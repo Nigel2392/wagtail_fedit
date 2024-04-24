@@ -1,5 +1,4 @@
 
-
 class iFrame {
     constructor(options) {
         const {
@@ -143,33 +142,48 @@ class WagtailFeditorAPI {
         this.#editor.closeModal();
     }
 
+    dispatchEvent(name, detail = null) {
+        this.#editor.dispatchEvent(name, detail);
+    }
+
+    addEventListener(name, callback) {
+        this.#editor.addEventListener(name, callback);
+    }
+
+    removeEventListener(name, callback, options=null) {
+        this.#editor.removeEventListener(name, callback, options);
+    }
+
     updateHtml(html) {
+        return new Promise((resolve, reject) => {
+            const update = (innerHtml) => {
+                const blockWrapper = this.#editor.wrapperElement;
+                const element = document.createElement("div");
+                element.innerHTML = innerHtml;
+                const newBlockWrapper = element.firstElementChild;
+                newBlockWrapper.classList.add("wagtail-fedit-initialized");
+                blockWrapper.parentNode.insertBefore(newBlockWrapper, blockWrapper);
+                blockWrapper.parentNode.removeChild(blockWrapper);
+                this.#editor.wrapperElement = newBlockWrapper;
+                this.#editor.initNewEditors();
+                this.#editor.init();
 
-        const update = (innerHtml) => {
-            const blockWrapper = this.#editor.wrapperElement;
-            const element = document.createElement("div");
-            element.innerHTML = innerHtml;
-            const newBlockWrapper = element.firstElementChild;
-            newBlockWrapper.classList.add("wagtail-fedit-initialized");
-            blockWrapper.parentNode.insertBefore(newBlockWrapper, blockWrapper);
-            blockWrapper.parentNode.removeChild(blockWrapper);
-            this.#editor.wrapperElement = newBlockWrapper;
-            this.#editor.initNewEditors();
-            this.#editor.init();
+                resolve(newBlockWrapper);
 
-            return blockWrapper;
-        }
+                return blockWrapper;
+            }
 
-        if (typeof html === "string") {
-            update(html);
-            return;
-        }
+            if (typeof html === "string") {
+                update(html);
+                return;
+            }
 
-        if (typeof html === "function") {
-            this.#editor.wrapperElement.editorAPI = this;
-            html(update);
-            return;
-        }
+            if (typeof html === "function") {
+                this.#editor.wrapperElement.editorAPI = this;
+                html(update);
+                return;
+            }
+        });
     }
 
     refetch() {
@@ -184,8 +198,10 @@ class WagtailFeditorAPI {
 }
 
 
-class BaseWagtailFeditEditor {
+class BaseWagtailFeditEditor extends EventTarget {
     constructor(options) {
+        super();
+
         const {
             element = null,
         } = options;
@@ -208,17 +224,6 @@ class BaseWagtailFeditEditor {
         }
     }
 
-    get relatedWrappers() {
-        const wrapperId = this.wrapperElement.dataset.wrapperId;
-        const filterFn = (el) => el !== this.wrapperElement
-        const elements = document.querySelectorAll(`[data-wrapper-id="${wrapperId}"]`)
-        return Array.from(elements).filter(filterFn);
-    }
-
-    focus() {
-        this.wrapperElement.focus();
-    }
-
     get editUrl() {
         return this.wrapperElement.dataset.editUrl;
     }
@@ -227,13 +232,55 @@ class BaseWagtailFeditEditor {
         return this.wrapperElement.dataset.refetchUrl;
     }
 
+    get relatedWrappers() {
+        const wrapperId = this.wrapperElement.dataset.wrapperId;
+        const filterFn = (el) => el !== this.wrapperElement
+        const elements = document.querySelectorAll(`[data-wrapper-id="${wrapperId}"]`)
+        return Array.from(elements).filter(filterFn);
+    }
+
+    get modalWrapper() {
+        const modalWrapper = document.querySelector("#wagtail-fedit-modal-wrapper");
+        if (modalWrapper) {
+            return modalWrapper;
+        }
+        const wrapper = document.createElement("div");
+        wrapper.id = "wagtail-fedit-modal-wrapper";
+        wrapper.classList.add("wagtail-fedit-modal-wrapper");
+        wrapper.editorAPI = this.api;
+        document.body.appendChild(wrapper);
+        return wrapper;
+    }
+
+    init() {
+        this.sharedContext = this.wrapperElement.dataset.sharedContext;
+        this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
+        this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
+
+        this.wrapperElement.editorAPI = this.api;
+
+        this.editBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await this.makeModal();
+        });
+    }
+
+    initNewEditors() {
+        initNewEditors(this.wrapperElement);
+    }
+
+    focus() {
+        this.wrapperElement.focus();
+    }
+
     refetch() {
         fetch(this.getRefetchUrl()).then((response) => {
             response = response.json();
             return response;
         }).then((response) => {
             if (!response.success) {
-                console.error("Errors rendering response", response);
+                console.error("Errors rendering response, failed to refetch", response);
                 return;
             }
             this.onResponse(response);
@@ -272,6 +319,12 @@ class BaseWagtailFeditEditor {
                 const onSubmit = (e) => {
                     e.preventDefault();
                     const formData = new FormData(this.iframe.formElement);
+
+                    this.dispatchEvent(window.wagtailFedit.EVENTS.SUBMIT, {
+                        element: this.wrapperElement,
+                        formData: formData,
+                    });
+
                     fetch(this.getEditUrl(), {
                         method: "POST",
                         body: formData,
@@ -293,24 +346,31 @@ class BaseWagtailFeditEditor {
 
                             const cancelButton = this.iframe.document.querySelector(".wagtail-fedit-cancel-button");
                             cancelButton.addEventListener("click", this.closeModal.bind(this));
+                            this.iframe.onCancel = this.closeModal.bind(this);
+                            this.dispatchEvent(window.wagtailFedit.EVENTS.SUBMIT_ERROR, {
+                                element: this.wrapperElement,
+                                response: response,
+                            });
                             return;
                         }
-                        this.onResponse(response);
-                        this.closeModal();
-
-                        const event = new CustomEvent("wagtail-fedit:change", {
-                            detail: {
+                        const ret = this.onResponse(response);
+                        const success = () => {
+                            this.closeModal();
+                            this.dispatchEvent(window.wagtailFedit.EVENTS.CHANGE, {
                                 element: this.wrapperElement,
-                            }
-                        });
-                        document.dispatchEvent(event);
+                            });
+                        }
+                        if (ret instanceof Promise) {
+                            ret.then(success);
+                        } else {
+                            success();
+                        }
                     });
                 };
                 this.iframe.formElement.onsubmit = onSubmit;
                 this.iframe.onCancel = this.closeModal.bind(this);
                 
                 // Check if we need to apply the fedit-full class to the modal
-                const formHeight = this.iframe.formElement.getBoundingClientRect().height;
                 const formWrapper = this.iframe.formWrapper;
                 const options = ["large", "full"]
 
@@ -324,19 +384,14 @@ class BaseWagtailFeditEditor {
                     }
                 }
 
-                if (
-                    (formWrapper && (
-                        formWrapper.classList.contains("fedit-large") ||
-                        (this.iframe.formElement.dataset.fullEditor || "").toLowerCase() === "true"
-                    )) ||
-                    (formHeight > window.innerHeight)
-                ) {
-                    this.modal.classList.add("fedit-large");
-                }
-
                 const url = window.location.href.split("#")[0];
                 window.history.pushState(null, this.iframe.document.title, url + `#${this.wrapperElement.id}`);
                 document.title = this.iframe.document.title;
+
+                this.dispatchEvent(window.wagtailFedit.EVENTS.MODAL_LOAD, {
+                    iframe: this.iframe,
+                    modal: this.modal,
+                });
             },
             onError: () => {
                 this.closeModal();
@@ -353,50 +408,52 @@ class BaseWagtailFeditEditor {
         closeBtn.classList.add("wagtail-fedit-close-button");
         closeBtn.addEventListener("click", this.closeModal.bind(this));
         this.modal.appendChild(closeBtn);
+        this.dispatchEvent(window.wagtailFedit.EVENTS.MODAL_OPEN, {
+            iframe: this.iframe,
+            modal: this.modal,
+        });
     }
 
     closeModal() {
         this.modalWrapper.remove();
         window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
         document.title = this.initialTitle;
-        if ("onModalClose" in this) {
-            this.onModalClose();
-        }
+        this.dispatchEvent(window.wagtailFedit.EVENTS.MODAL_CLOSE);
     }
 
-    get modalWrapper() {
-        const modalWrapper = document.querySelector("#wagtail-fedit-modal-wrapper");
-        if (modalWrapper) {
-            return modalWrapper;
+    dispatchEvent(name, detail = null) {
+        if (!detail) {
+            detail = {
+                element: this.wrapperElement,
+            };
         }
-        const wrapper = document.createElement("div");
-        wrapper.id = "wagtail-fedit-modal-wrapper";
-        wrapper.classList.add("wagtail-fedit-modal-wrapper");
-        document.body.appendChild(wrapper);
-        return wrapper;
-    }
-
-    init() {
-        this.sharedContext = this.wrapperElement.dataset.sharedContext;
-        this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
-        this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
-
-        this.wrapperElement.editorAPI = this.api;
-
-        this.editBtn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            await this.makeModal();
+       
+        detail.editor = this;
+        detail.api = this.api;
+        let eventStr = name.toLowerCase();
+        if (!name.startsWith(`${window.wagtailFedit.NAMESPACE}:`)) {
+            eventStr = `${window.wagtailFedit.NAMESPACE}:${name}`;
+        }
+        const event = new CustomEvent(eventStr, {
+            detail: detail,
         });
-    }
-
-    initNewEditors() {
-        initNewEditors(this.wrapperElement);
+        super.dispatchEvent(event);
+        this.wrapperElement.dispatchEvent(event);
+        document.dispatchEvent(event);
     }
 }
 
 function initNewEditors(wrapper = document) {
-    const wagtailFeditBlockEditors = wrapper.querySelectorAll(".wagtail-fedit-adapter-wrapper");
+    let wagtailFeditBlockEditors;
+    if (
+        wrapper != document
+        && wrapper.classList.contains("wagtail-fedit-adapter-wrapper")
+        && !wrapper.classList.contains("wagtail-fedit-initialized")
+    ) {
+        wagtailFeditBlockEditors = [wrapper];
+    } else {
+        wagtailFeditBlockEditors = wrapper.querySelectorAll(".wagtail-fedit-adapter-wrapper");
+    }
     for (const editor of wagtailFeditBlockEditors) {
         if (!editor.classList.contains("wagtail-fedit-initialized")) {
             editor.classList.add("wagtail-fedit-initialized");
@@ -407,12 +464,13 @@ function initNewEditors(wrapper = document) {
                 console.error("No editor class found for element", editor);
             }
         }
-    }
-    const editButtons = wrapper.querySelectorAll("[data-tooltip='true']");
-    for (const button of editButtons) {
-        if (button.dataset.tooltip == "true") {
-            new Tooltip(button);
-            delete button.dataset.tooltip;
+
+        const editButtons = wrapper.querySelectorAll("[data-tooltip='true']");
+        for (const button of editButtons) {
+            if (button.dataset.tooltip == "true") {
+                new Tooltip(button);
+                delete button.dataset.tooltip;
+            }
         }
     }
 }
@@ -442,7 +500,7 @@ class BaseFuncEditor extends BaseWagtailFeditEditor {
             return;
         }
 
-        func(targetElement, response);
+        return func(targetElement, response);
     }
 }
 
@@ -456,7 +514,7 @@ class WagtailFeditFuncEditor extends BaseFuncEditor {
 
 class BlockFieldEditor extends BaseWagtailFeditEditor {
     onResponse(response) {
-        this.api.updateHtml((update) => {
+        return this.api.updateHtml((update) => {
             // Fade out the old block
             const anim = this.wrapperElement.animate([
                {opacity: 1},
@@ -471,9 +529,12 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
                 const blockWrapper = update(response.html);
                 
                 if (!response.refetch) {
-                    for (const wrapper of this.relatedWrappers) {
-                        wrapper.editorAPI.refetch();
-                    }
+                    this.api.execRelated((api) => {
+                        api.refetch();
+                    });
+                    // for (const wrapper of this.relatedWrappers) {
+                    //     wrapper.editorAPI.refetch();
+                    // }
                 }
     
                 // Fade in the new block
@@ -507,7 +568,7 @@ class WagtailFeditPublishMenu {
         }
 
         if (initialIsHidden) {
-            document.addEventListener("wagtail-fedit:change", (e) => {
+            document.addEventListener(window.wagtailFedit.EVENTS.CHANGE, () => {
                 for (const button of buttons) {
                     if (button.classList.contains("initially-hidden")) {
                         button.classList.remove("initially-hidden");
@@ -566,22 +627,7 @@ function initFEditors() {
         for (const mutation of mutations) {
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === 1) {
-                    if (node.classList.contains("wagtail-fedit-adapter-wrapper") && !node.classList.contains("wagtail-fedit-initialized")) {
-                        node.classList.add("wagtail-fedit-initialized");
-                        const editorClass = getEditorClass(node);
-                        if (editorClass) {
-                            new editorClass({element: node});
-                        } else {
-                            console.error("No editor class found for element", node);
-                        }
-                    }
-                    const editButtons = node.querySelectorAll("[data-tooltip='true']");
-                    for (const button of editButtons) {
-                        if (button.dataset.tooltip == "true") {
-                            new Tooltip(button);
-                            delete button.dataset.tooltip;
-                        }
-                    }
+                    initNewEditors(node);
                 }
             }
         }
@@ -661,6 +707,15 @@ document.addEventListener("DOMContentLoaded", initFEditors);
 
 
 window.wagtailFedit = {
+    NAMESPACE: "wagtail-fedit",
+    EVENTS: {
+        SUBMIT: "wagtail-fedit:submit",
+        CHANGE: "wagtail-fedit:change",
+        MODAL_OPEN: "wagtail-fedit:modalOpen",
+        MODAL_LOAD: "wagtail-fedit:modalLoad",
+        MODAL_CLOSE: "wagtail-fedit:modalClose",
+        SUBMIT_ERROR: "wagtail-fedit:submitError",
+    },
     initFEditors,
     BaseWagtailFeditEditor,
     BaseFuncEditor,

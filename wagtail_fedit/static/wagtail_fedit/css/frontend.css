@@ -2,13 +2,14 @@ html, body {
     margin: 0;
     padding: 0;
 }
-
+.wagtail-fedit-adapter-wrapper {
+    position: relative;
+}
 .wagtail-fedit-buttons {
     display: flex;
 }
 
 .wagtail-fedit-adapter-wrapper:has(> .wagtail-fedit-buttons:only-child) {
-    position: relative;
     min-height: 24px;
 }
 .wagtail-fedit-field_bg_image {
