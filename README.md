@@ -5,6 +5,10 @@ wagtail_fedit
 
 Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.
 
+<details>
+
+<summary>TOC</summary>
+
 # Table of Contents
 
 - [Getting Started](#getting-started)
@@ -35,6 +39,8 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 - [How your content is rendered](#how-your-content-is-rendered)
   - [Rendered output HTML](#rendered-editable-output-html)
 - [Implemented](#implemented)
+
+</details>
 
 Getting Started
 ---------------
