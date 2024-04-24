@@ -588,7 +588,7 @@ Your block and field are wrapped in a `div`, any CSS for your templates should k
 ### Rendered editable output HTML
 
 ```html
-{% load fedit %}<div id="{{ adapter.get_element_id }}" class="wagtail-fedit-adapter-wrapper{% if shared_context.inline or adapter.inline %} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}" data-fedit-constructor="{{ js_constructor }}" {% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}">
+{% load fedit %}<div id="{{ unique_id }}" data-wrapper-id="{{ unique_id }}" class="wagtail-fedit-adapter-wrapper{% if shared_context.inline or adapter.inline %} wagtail-fedit-inline{%endif%} wagtail-fedit-{{ identifier }}" data-fedit-constructor="{{ js_constructor }}" {% if shared %} data-shared-context="{{ shared }}"{%endif%} data-edit-url="{{ edit_url }}" data-refetch-url="{{ refetch_url }}">
     <div class="wagtail-fedit-buttons">
         {% for button in buttons %}
             {{ button }}
