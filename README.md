@@ -9,8 +9,6 @@ Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be 
 
 <summary><h1>Table of Contents</h1></summary>
 
-# Table of Contents
-
 - [Getting Started](#getting-started)
 - [Getting Editing!](#getting-editing)
 - [Permissions](#permissions)
