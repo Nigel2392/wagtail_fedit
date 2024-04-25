@@ -476,9 +476,9 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
 
     reverse_kwargs = {
         "adapter_id": adapter.identifier,
-        "app_label": adapter.object._meta.app_label,
+        "app_label":  adapter.object._meta.app_label,
         "model_name": adapter.object._meta.model_name,
-        "model_id": adapter.object.pk,
+        "model_id":   adapter.object.pk,
     }
 
     if adapter.field_name is not None:

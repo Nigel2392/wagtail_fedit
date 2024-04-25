@@ -1,10 +1,13 @@
 from typing import Any
-from django.shortcuts import render
+from django.apps import apps
 from django.utils.translation import gettext as _
 from django.utils.decorators import method_decorator
 from django.template.loader import render_to_string
-from django.views.decorators.clickjacking import xframe_options_sameorigin
+from django.views.decorators.clickjacking import (
+    xframe_options_sameorigin,
+)
 from django.views.generic import View
+from django.shortcuts import render
 from django.http import (
     HttpRequest,
     HttpResponseBadRequest,
@@ -12,13 +15,14 @@ from django.http import (
     JsonResponse,
     HttpResponse,
 )
-from django.apps import apps
 from wagtail.models import (
     RevisionMixin,
     PAGE_TEMPLATE_VAR,
     Page,
 )
-from wagtail.admin.views.generic import WagtailAdminTemplateMixin
+from wagtail.admin.views.generic import (
+    WagtailAdminTemplateMixin,
+)
 
 from ..adapters import (
     adapter_registry,
@@ -30,6 +34,11 @@ from ..utils import (
     FeditIFrameMixin,
     FEDIT_PREVIEW_VAR,
     lock_info,
+)
+from ..errors import (
+    NO_PERMISSION_ACTION,
+    INVALID,
+    REQUIRED,
 )
 from .mixins import (
     LocaleMixin,
@@ -52,15 +61,27 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         try:
             self.adapter_class: BaseAdapter = adapter_registry[adapter_id]
         except RegistryLookUpError:
-            return HttpResponseBadRequest("Invalid adapter ID")
+            return HttpResponseBadRequest(
+                INVALID.format(
+                    _("Adapter ID")
+                )
+            )
 
         # Retrieve the model class
         try:
             self.model = apps.get_model(app_label, model_name)
-            if not self.has_perms(request, self.model):
-                return HttpResponseForbidden("You do not have permission to view this page")
         except LookupError:
-            return HttpResponseBadRequest("Invalid model")
+            return HttpResponseBadRequest(
+                INVALID.format(
+                    _("Model")
+                )
+            )
+        
+        # Check if the user has permissions to view the page
+        if not self.has_perms(request, self.model):
+            return HttpResponseForbidden(NO_PERMISSION_ACTION.format(
+                _("view this page")
+            ))
 
         # Only fetch latest reivision if it exists
         # If not; it will be automatically created by the form.
@@ -70,13 +91,25 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         else:
             self.instance = model_instance
 
-        LocaleMixin.setup_locale(self.instance)
+        LocaleMixin.setup_locale(
+            self.instance,
+        )
 
         if not field_name and self.adapter_class.field_required:
-            return HttpResponseBadRequest("Field name is required for object")
+            return HttpResponseBadRequest(
+                REQUIRED.format(
+                    _("Field name"),
+                    self.instance,
+                )
+            )
 
         if field_name and not hasattr(self.instance, field_name) and self.adapter_class.field_required:
-            return HttpResponseBadRequest("Invalid field name for object")
+            return HttpResponseBadRequest(
+                INVALID.format(
+                    _("field name"),
+                    self.instance,
+                )
+            )
 
         shared_context = request.GET.get("shared_context")
         if shared_context:
@@ -95,6 +128,13 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             field_name=field_name,
             **self.shared_context,
         )
+
+        if not self.adapter.check_permissions():
+            return HttpResponseForbidden(
+                NO_PERMISSION_ACTION.format(
+                    _("edit this field")
+                )
+            )
 
         self.lock, self.locked_for_user = lock_info(
             self.adapter.object, request.user,

@@ -1,5 +1,44 @@
+/**
+ * @callback EditorAPIFunc
+ * @param {WagtailFeditorAPI} api
+ * @returns {void}
+ * 
+ * @callback StringFunc
+ * @param {string} html
+ * @returns {HTMLElement}
+ * 
+ * @callback UpdateFunc
+ * @param {StringFunc} html
+ * 
+ * @typedef {Object} ResponseObject
+ * @property {boolean} success
+ * @property {string|null} html
+ * 
+ * @typedef {Object} FuncResponseObject
+ * @property {boolean} success
+ * @property {string|null} html
+ * @property {Object} func
+ * @property {string} func.name
+ * @property {string} func.target
+ * 
+ * @typedef {Function} EditorCallback
+ * @param {HTMLElement} element
+ * @param {ResponseObject} response
+ * @returns {Promise<any>|void}
+*/
+
 
 class iFrame {
+    /**
+     * @param {Object} options
+     * @param {string} options.id
+     * @param {string} options.className
+     * @param {string} [options.srcdoc=null]
+     * @param {string} [options.url=null]
+     * @param {Function} [options.onLoad=() => {}]
+     * @param {Function} [options.onError=() => {}]
+     * @param {Function} [options.onCancel=() => {}]
+     */
     constructor(options) {
         const {
             id,
@@ -23,6 +62,9 @@ class iFrame {
         this.render();
     }
 
+    /**
+     * @returns {HTMLIFrameElement}
+     */
     get element() {
         if (!this.iframe) {
             this.iframe = this._renderFrame(this.url, this.srcdoc, this.onLoad);
@@ -93,6 +135,9 @@ class iFrame {
 
 
 class Tooltip {
+    /**
+     * @param {HTMLElement} element
+     **/
     constructor(element) {
         this.element = element;
         this.tooltipConfig = this.makeConfig();
@@ -154,6 +199,10 @@ class WagtailFeditorAPI {
         this.#editor.removeEventListener(name, callback, options);
     }
 
+    /**
+     * @param {string|UpdateFunc} html
+     * @returns {Promise<HTMLElement>}
+     **/
     updateHtml(html) {
         return new Promise((resolve, reject) => {
             const update = (innerHtml) => {
@@ -186,10 +235,17 @@ class WagtailFeditorAPI {
         });
     }
 
+    /**
+     * @returns {Promise<any>}
+     **/
     refetch() {
-        this.#editor.refetch();
+        return this.#editor.refetch();
     }
 
+    /**
+     * @param {EditorAPIFunc} func
+     * @returns {void}
+     **/
     execRelated(func) {
         for (const wrapper of this.#editor.relatedWrappers) {
             func(wrapper.editorAPI);
@@ -199,22 +255,32 @@ class WagtailFeditorAPI {
 
 
 class BaseWagtailFeditEditor extends EventTarget {
-    constructor(options) {
+    /**
+     * @param {HTMLElement} element
+     */
+    constructor(element) {
         super();
 
-        const {
-            element = null,
-        } = options;
-
+        /**@type {string} */
         this.initialTitle = document.title;
         
         /**@type {HTMLElement} */
         this.wrapperElement = element;
+
+        /**@type {WagtailFeditorAPI} */
         this.api = new WagtailFeditorAPI(this);
+
+        /**@type {string} */
         this.sharedContext = null;
+
+        /**@type {string} */
         this.modalHtml = null;
+
+        /**@type {HTMLElement} */
         this.editBtn = null;
         this.init();
+
+        /**@type {iFrame} */
         this.iframe = null;
 
 
@@ -274,17 +340,34 @@ class BaseWagtailFeditEditor extends EventTarget {
         this.wrapperElement.focus();
     }
 
+    /**
+     * @returns {Promise<ResponseObject>}
+     */
     refetch() {
-        fetch(this.getRefetchUrl()).then((response) => {
-            response = response.json();
-            return response;
-        }).then((response) => {
-            if (!response.success) {
-                console.error("Errors rendering response, failed to refetch", response);
-                return;
-            }
-            this.onResponse(response);
-        });
+        return new Promise((resolve, reject) => {
+            fetch(this.getRefetchUrl()).then((response) => {
+                response = response.json();
+                return response;
+            }).then((response) => {
+                if (!response.success) {
+                    console.error("Errors rendering response, failed to refetch", response);
+                    return;
+                }
+                this.onResponse(response);
+                resolve(response);
+            }).catch((e) => {
+                console.error("Failed to refetch", e);
+                reject(e);
+            });
+        })
+    }
+
+    /**
+     * @param {ResponseObject} response
+     * @returns {Promise<any>|void}
+     */
+    onResponse(response) {
+    
     }
 
     getEditUrl() {
@@ -459,7 +542,7 @@ function initNewEditors(wrapper = document) {
             editor.classList.add("wagtail-fedit-initialized");
             const editorClass = getEditorClass(editor);
             if (editorClass) {
-                new editorClass({element: editor});
+                new editorClass(editor);
             } else {
                 console.error("No editor class found for element", editor);
             }
@@ -480,6 +563,11 @@ class BaseFuncEditor extends BaseWagtailFeditEditor {
         return window
     }
 
+    /**
+     * @param {FuncResponseObject} response
+     * @returns {Promise<any>|void}
+     * @override
+     **/
     onResponse(response) {
         const name = response.func.name;
         const targetElementSelector = response.func.target;
@@ -513,6 +601,11 @@ class WagtailFeditFuncEditor extends BaseFuncEditor {
 
 
 class BlockFieldEditor extends BaseWagtailFeditEditor {
+    /**
+     * @param {ResponseObject} response
+     * @returns {Promise<any>|void}
+     * @override
+     **/
     onResponse(response) {
         return this.api.updateHtml((update) => {
             // Fade out the old block
@@ -529,12 +622,9 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
                 const blockWrapper = update(response.html);
                 
                 if (!response.refetch) {
-                    this.api.execRelated((api) => {
-                        api.refetch();
+                    this.api.execRelated((relatedAPI) => {
+                        relatedAPI.refetch();
                     });
-                    // for (const wrapper of this.relatedWrappers) {
-                    //     wrapper.editorAPI.refetch();
-                    // }
                 }
     
                 // Fade in the new block
@@ -556,8 +646,11 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
 
 class WagtailFeditPublishMenu {
     constructor(publishButton) {
+        /**@type {HTMLElement} */
         this.publishButton = publishButton;
+        /**@type {HTMLElement} */
         this.publishButtonsWrapper = publishButton.parentElement.querySelector(".wagtail-fedit-form-buttons");
+        /**@type {NodeList} */
         const buttons = this.publishButtonsWrapper.querySelectorAll(".wagtail-fedit-userbar-button");
         let initialIsHidden = false;
         for (const button of buttons) {
@@ -682,12 +775,16 @@ function initFEditors() {
 
 
         if (publishMenu) {
-            const publisher = new WagtailFeditPublishMenu(publishMenu);
+            new WagtailFeditPublishMenu(publishMenu);
         }
     }
 }
 
-
+/**
+ * @param {HTMLElement} element
+ * @param {ResponseObject} response
+ * @returns {void}
+ */
 function wagtailFeditBackgroundImageAdapter(element, response) {
     const url = response.url;
     const cssVar = response.css_variable_name;
@@ -704,7 +801,6 @@ function wagtailFeditBackgroundImageAdapter(element, response) {
 
 
 document.addEventListener("DOMContentLoaded", initFEditors);
-
 
 window.wagtailFedit = {
     NAMESPACE: "wagtail-fedit",
@@ -723,17 +819,33 @@ window.wagtailFedit = {
     WagtailFeditPublishMenu,
     WagtailFeditorAPI,
     iFrame,
+    Tooltip,
+    /**
+     * @type {Object<string, BaseWagtailFeditEditor>}
+     **/
     editors: {
         "wagtail_fedit.editors.BaseFuncEditor":   BaseFuncEditor,
         "wagtail_fedit.editors.BlockFieldEditor": BlockFieldEditor,
         "wagtail_fedit.editors.WagtailFeditFuncEditor": WagtailFeditFuncEditor,
     },
+    /**
+     * @type {Object<string, EditorCallback>}
+     */
     funcs: {
         "wagtail_fedit.funcs.backgroundImageFunc": wagtailFeditBackgroundImageAdapter,
     },
+    /**
+     * @param {string} name
+     * @param {BaseWagtailFeditEditor} editor
+     */
     register: function (name, editor) {
         this.editors[name] = editor;
     },
+
+    /**
+     * @param {string} name
+     * @param {EditorAPIFunc} func
+     */
     registerFunc: function (name, func) {
         this.funcs[name] = func;
     },

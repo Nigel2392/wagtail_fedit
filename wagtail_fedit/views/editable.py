@@ -32,7 +32,6 @@ from wagtail.models import (
     ModelLogEntry,
     Page,
 )
-from .. import forms as block_forms
 from ..utils import (
     FEDIT_PREVIEW_VAR,
     USERBAR_MODEL_VAR,
@@ -44,7 +43,17 @@ from ..utils import (
     # user_can_submit_for_moderation,
     # lock_info,
 )
-
+from ..errors import (
+    NO_PERMISSION_VIEW,
+    NO_PERMISSION_ACTION,
+    NO_WORKFLOW_STATE,
+    OBJECT_LOCKED,
+    OBJECT_NOT_LIVE,
+    ACTION_MISSING,
+    INVALID_ACTION,
+    MISSING_REQUIRED_SUPERCLASSES,
+    NO_UNPUBLISHED_CHANGES,
+)
 from .mixins import (
     ObjectViewMixin,
     LockViewMixin,
@@ -67,13 +76,14 @@ def get_publish_action(object):
     return PublishRevisionAction
 
 
+
 class BaseFeditView(LocaleMixin, ObjectViewMixin, FeditPermissionCheck, TemplateView):
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
         if self.error_response:
             return self.error_response
 
         if not self.has_perms(request, self.object):
-            return HttpResponseForbidden("You do not have permission to view this page")
+            return HttpResponseForbidden(NO_PERMISSION_VIEW)
 
         if issubclass(self.model, RevisionMixin) and self.object.latest_revision_id:
             instance: RevisionMixin  = self.object
@@ -105,7 +115,7 @@ class FEditableView(BaseFeditView):
     def checks(self, request: HttpRequest, object: Any) -> None:
         super().checks(request, object)
         if not isinstance(self.object, PreviewableMixin):
-            raise ValueError("Model {} does not inherit from PreviewableMixin, cannot edit.".format(self.model))
+            raise ValueError(MISSING_REQUIRED_SUPERCLASSES.format(self.model))
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         # # Check if lock applies to this user
@@ -152,8 +162,10 @@ class BaseActionView(LockViewMixin, BaseFeditView):
 
         if not isinstance(self.object, tuple(self.required_superclasses)):
             self.error_response = HttpResponseBadRequest(
-                "Model {} does not inherit from {}".format(
-                    self.model.__name__, ", ".join([cls.__name__ for cls in self.required_superclasses])
+                MISSING_REQUIRED_SUPERCLASSES.format(
+                    self.model.__name__, ", ".join(
+                        [cls.__name__ for cls in self.required_superclasses],
+                    )
                 )
             )
 
@@ -219,16 +231,16 @@ class BaseActionView(LockViewMixin, BaseFeditView):
 
         # Check if lock applies to this user
         if self.locked_for_user:
-            messages.error(request, _("This object is locked. It cannot be acted upon."))
+            messages.error(request, OBJECT_LOCKED)
             return self.redirect_to_failsafe_url(request)
         
         if "action" not in request.POST:
-            messages.error(request, _("No action specified"))
-            return self.get(request, *args, **kwargs)
+            messages.error(request, ACTION_MISSING)
+            return redirect(request.path)
         
         if request.POST["action"] != self.get_action_value():
-            messages.error(request, _("Invalid action specified: {}").format(request.POST["action"]))
-            return self.get(request, *args, **kwargs)
+            messages.error(request, INVALID_ACTION.format(request.POST["action"]))
+            return redirect(request.path)
         
         return self.action(request)
 
@@ -321,13 +333,15 @@ class PublishView(BaseActionView):
 
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not policy.can_publish():
-            raise ValueError("User does not have permission to publish")
+            raise ValueError(str(NO_PERMISSION_ACTION.format(
+                _("publish")
+            )))
         
         if self.locked_for_user:
-            raise ValueError("Object is locked")
+            raise ValueError(str(OBJECT_LOCKED))
         
         if not self.object.has_unpublished_changes:
-            raise ValueError("Object has no unpublished changes")
+            raise ValueError(str(NO_UNPUBLISHED_CHANGES))
 
     def action(self, request: HttpRequest) -> HttpResponse:
         latest_revision = self.object.latest_revision
@@ -366,17 +380,19 @@ class UnpublishView(BaseActionView):
     
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not policy.can_unpublish():
-            raise ValueError("User does not have permission to unpublish")
+            raise ValueError(str(NO_PERMISSION_ACTION.format(
+                _("unpublish")
+            )))
         
         if self.locked_for_user:
-            raise ValueError("Object is locked")
+            raise ValueError(str(OBJECT_LOCKED))
         
         if not self.object.live:
-            raise ValueError("Object is not live")
+            raise ValueError(str(OBJECT_NOT_LIVE))
  
     def action(self, request: HttpRequest) -> HttpResponse:
         if not self.object.live:
-            messages.error(request, _("This object is not live"))
+            messages.error(request, OBJECT_NOT_LIVE)
             return self.get(request)
         
         action = get_unpublish_action(self.object)(
@@ -405,10 +421,12 @@ class SubmitView(BaseActionView):
 
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not policy.can_submit_for_moderation():
-            raise ValueError("User does not have permission to submit for moderation")
+            raise ValueError(str(NO_PERMISSION_ACTION.format(
+                _("submit for moderation")
+            )))
         
         if not self.object.has_unpublished_changes:
-            raise ValueError("Object has no unpublished changes")
+            raise ValueError(str(NO_UNPUBLISHED_CHANGES))
    
     def action(self, request: HttpRequest) -> HttpResponse:
         
@@ -448,10 +466,12 @@ class CancelView(BaseActionView):
 
     def check_policy(self, request: HttpRequest, policy: FeditPermissionCheck) -> None:
         if not self.workflow_state:
-            raise ValueError("No workflow state found")
+            raise ValueError(str(NO_WORKFLOW_STATE))
         
         if not self.workflow_state.user_can_cancel(request.user):
-            raise ValueError("User does not have permission to cancel this workflow")
+            raise ValueError(str(NO_PERMISSION_ACTION.format(
+                _("cancel the workflow")
+            )))
 
     def action(self, request: HttpRequest) -> HttpResponse:
         if self.workflow_state:

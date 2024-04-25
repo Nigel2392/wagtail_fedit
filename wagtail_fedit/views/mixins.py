@@ -1,5 +1,6 @@
 from typing import Any
 from django.utils import translation
+from django.utils.translation import gettext_lazy as _
 from django.apps import apps
 from django.http import (
     HttpRequest,
@@ -9,7 +10,10 @@ from django.http import (
 from ..utils import (
     lock_info,
 )
-
+from ..errors import (
+    INVALID,
+    MODEL_NOT_FOUND,
+)
 
 
 
@@ -21,9 +25,17 @@ class ObjectViewMixin:
             self.object = self.model._default_manager.get(pk=object_id)
             self.error_response = None
         except (LookupError):
-            self.error_response = HttpResponseBadRequest("Invalid model provided")
+            self.error_response = HttpResponseBadRequest(
+                INVALID.format(_("model provided"))
+            )
+            self.object = None
+            self.model = None
         except (self.model.DoesNotExist):
-            self.error_response = HttpResponseBadRequest("Model not found")
+            self.error_response = HttpResponseBadRequest(
+                MODEL_NOT_FOUND
+            )
+            self.object = None
+            self.model = None
 
 
     def dispatch(self, request: HttpRequest, object_id: Any, app_label: str, model_name: str) -> HttpResponse:
