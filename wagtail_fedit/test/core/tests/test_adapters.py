@@ -391,6 +391,26 @@ class TestBaseAdapter(BaseFEditTest):
             })
         )
 
+        adapter = adapters[id]
+
+        self.assertEqual(
+            adapter.kwargs["test"],
+            "test",
+        )
+
+        self.assertEqual(
+            adapter.kwargs["id"],
+            id,
+        )
+
+        self.assertHTMLEqual(
+            tpl,
+            wrap_adapter(request, adapters[id], base_adapter_context(
+                adapter=adapter,
+                context={},
+            ))
+        )
+
         url = self.get_refetch_url(
             "test",
             self.basic_model._meta.app_label,
@@ -424,6 +444,104 @@ class TestBaseAdapter(BaseFEditTest):
         self.assertHTMLEqual(
             tpl,
             json_data["html"],
+        )
+
+
+    def test_adapter_shared_context(self):
+        uid = get_adapter_id()
+        self.assertEqual(TestAdapter.required_kwargs, tuple(["test"]))
+
+        tpl = Template(
+            "{% load fedit %}"
+            f"{{% fedit test object.title test='test' id='{uid}' %}}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+            })
+        )
+
+        adapter = adapters[uid]
+
+        self.assertEqual(
+            adapter.kwargs["test"],
+            "test",
+        )
+
+        self.assertEqual(
+            adapter.kwargs["id"],
+            uid,
+        )
+
+        new_id = get_adapter_id()
+        adapter.kwargs["id"] = new_id
+        context = adapter.encode_shared_context()
+        adapter.kwargs["id"] = uid
+
+        url = self.get_refetch_url(
+            "test",
+            self.basic_model._meta.app_label,
+            self.basic_model._meta.model_name,
+            self.basic_model.pk,
+            "title",
+        )
+
+        self.client.force_login(self.admin_user)
+
+        self.assertFalse(
+            new_id in adapters,
+        )
+
+        response = self.client.get(url, {
+            "shared_context": context,
+        })
+
+        # Load if lazy
+        response.content.decode("utf-8")
+
+        self.assertTrue(
+            new_id in adapters,
+        )
+
+        self.assertFalse(
+            id(adapter) == id(adapters[new_id]),
+        )
+
+        new_adapter = adapters[new_id]
+
+        self.assertEqual(
+            new_adapter.kwargs["test"],
+            "test",
+        )
+
+        self.assertEqual(
+            adapter.kwargs["test"],
+            new_adapter.kwargs["test"],
+        )
+
+        self.assertEqual(
+            new_adapter.kwargs["id"],
+            new_id,
+        )
+
+        self.assertNotEqual(
+            adapter.kwargs["id"],
+            new_adapter.kwargs["id"],
         )
 
     def test_adapter_editable_as_var(self):

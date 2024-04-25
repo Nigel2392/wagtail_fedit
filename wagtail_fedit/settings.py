@@ -32,7 +32,7 @@ Track the locales of the users across the views.
 **This sets the initial request.LANGUAGE_CODE (if available) in the shared context.**
 If this is false, there is no guarantee that the language of a saved field/model
 will be the same as it initially was, generally it will be - however this might mess up with Wagtail's `Page.locale` and
-the page not being available in the context afterwards.
+the page not being available in the context afterwards. If that is the case, set this to `True`.
 """
 
 TIPPY_ENABLED = getattr(settings, "WAGTAIL_FEDIT_TIPPY_ENABLED", True)
