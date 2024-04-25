@@ -602,6 +602,12 @@ If this is false, there is no guarantee that the language of a saved field/model
 will be the same as it initially was, generally it will be - however this might mess up with Wagtail's `Page.locale` and
 the page not being available in the context afterwards.
 
+### `WAGTAIL_FEDIT_TIPPY_ENABLED`
+
+Default: `True`
+
+Enable Tippy.js tooltips for toolbar buttons.
+
 ## How your content is rendered
 
 (**Maintainer's note:** In my experience this doesn't mess the CSS up too much, or even at all for most content - **if** you don't get hyperspecific with your CSS selectors and structure your templates well.)
