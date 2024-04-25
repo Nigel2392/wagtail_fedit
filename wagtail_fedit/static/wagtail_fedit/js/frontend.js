@@ -781,6 +781,7 @@ function initFEditors() {
 }
 
 /**
+ * @satisfies {EditorCallback}
  * @param {HTMLElement} element
  * @param {ResponseObject} response
  * @returns {void}
@@ -812,14 +813,16 @@ window.wagtailFedit = {
         MODAL_CLOSE: "wagtail-fedit:modalClose",
         SUBMIT_ERROR: "wagtail-fedit:submitError",
     },
-    initFEditors,
-    BaseWagtailFeditEditor,
-    BaseFuncEditor,
-    BlockFieldEditor,
-    WagtailFeditPublishMenu,
-    WagtailFeditorAPI,
-    iFrame,
-    Tooltip,
+    exports: {
+        initFEditors,
+        BaseWagtailFeditEditor,
+        BaseFuncEditor,
+        BlockFieldEditor,
+        WagtailFeditPublishMenu,
+        WagtailFeditorAPI,
+        iFrame,
+        Tooltip,
+    },
     /**
      * @type {Object<string, BaseWagtailFeditEditor>}
      **/
@@ -844,7 +847,7 @@ window.wagtailFedit = {
 
     /**
      * @param {string} name
-     * @param {EditorAPIFunc} func
+     * @param {EditorCallback} func
      */
     registerFunc: function (name, func) {
         this.funcs[name] = func;
