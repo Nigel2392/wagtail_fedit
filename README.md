@@ -65,7 +65,6 @@ Getting Started
    **Any model can be edited**; you just can't access the specific frontend editing interface URL for that model if it does not inherit from `PreviewableMixin`.
 
    I.E: If a random model which does not inherit from `PreviewableMixin` appears on an editable page; **you will be able to edit it.**
-
 2. Define a template for your model.
 
    Example:
@@ -199,6 +198,8 @@ This however does mean that a possibly large amount of data will be stored in yo
 
 ## Caveats
 
+### ID Attribute
+
 Wagtail does not always make it's `id` attribute available.
 
 This is only available to instances of `StreamChild` and `ListChild`.
@@ -222,6 +223,28 @@ Our new loop would then be:
     {# Field name and model are the same arguments as in the first example! #}
     {% fedit block my_model_instance_var.content_field block=item block_id=item.id %}
 {% endfor %}
+```
+
+### Wrong Model- links in Wagtail Userbar
+
+Sometimes without thinking about it you might override the default template variable for pages.
+
+This might create issues where the userbar links are not linking to the correct edit- view.
+
+To solve this we have created a quickfix by including a template-tag at the end of your html template.
+
+Example:
+
+```html
+<DOCTYPE ...>
+<html>
+    ...
+    <body>
+    ...
+
+    {% fedit_userbar my_model_instance %}
+    </body>
+</html>
 ```
 
 ## Adapters
