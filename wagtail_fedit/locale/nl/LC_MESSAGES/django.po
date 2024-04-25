@@ -381,7 +381,7 @@ msgstr ""
 
 #: .\tester\wagtail_fedit\views\editable.py:465
 msgid "Cancelling workflow for {} \"{}\""
-msgstr ""
+msgstr "Workflow annuleren voor {} \"{}\""
 
 #: .\tester\wagtail_fedit\views\editable.py:473
 msgid "cancel the workflow"
