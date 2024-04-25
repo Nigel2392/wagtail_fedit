@@ -1,4 +1,6 @@
-from typing import Any, TYPE_CHECKING
+from typing import (
+    Any, TYPE_CHECKING, Union,
+)
 from collections import namedtuple
 from urllib.parse import urlencode
 from django.db import models
@@ -6,6 +8,7 @@ from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.template.loader import render_to_string
+from django.template import Context
 from django.conf import settings
 from django.urls import reverse
 
@@ -40,9 +43,21 @@ if TYPE_CHECKING:
     from .adapters.base import BaseAdapter
 
 
+# Name of the template tag
+# Example: `{% fedit adapter_identifier instance.field %}
 TEMPLATE_TAG_NAME = "fedit"
+
+# Context variables
+FIELD_TEMPLATE_VAR = "wagtail_fedit_field"
+INSTANCE_TEMPLATE_VAR = "wagtail_fedit_instance"
+ADAPTER_TEMPLATE_VAR = "wagtail_fedit_adapter"
+
+# Request variables
 FEDIT_PREVIEW_VAR = "_wagtail_fedit_preview"
 USERBAR_MODEL_VAR = "_wagtail_fedit_userbar_model"
+
+# Include log actions in the userbar
+# Breaks in Wagtail 6.1.0
 LOG_ACTION_TEMPLATES_AVAILABLE = WAGTAIL_VERSION < (6, 1, 0)
 
 
@@ -238,8 +253,7 @@ def get_field_content(request, instance, meta_field: models.Field, context, cont
     if isinstance(meta_field, str):
         meta_field = instance._meta.get_field(meta_field)
 
-    if hasattr(context, "flatten"):
-        context = context.flatten()
+    context = _flatten_context(context)
 
     if not content:
         # Check for a rendering method if it exists
@@ -458,6 +472,27 @@ def lock_info(object, user) -> _lock_info:
 
     return _lock_info(lock, locked_for_user)
 
+def _flatten_context(context: dict) -> dict:
+    if hasattr(context, "flatten"):
+        return context.flatten()
+    return context
+
+def base_adapter_context(adapter: "BaseAdapter", context: Union[Context, dict]) -> dict:
+    """
+    Return the base context for an adapter.
+    """
+
+    if not context:
+        context = {}
+
+    context.update(adapter.kwargs)
+
+    context[FIELD_TEMPLATE_VAR]    = adapter.field_name
+    context[INSTANCE_TEMPLATE_VAR] = adapter.object
+    context[ADAPTER_TEMPLATE_VAR]  = adapter
+
+    return context
+
 
 def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, run_context_processors: bool = False) -> str:
     if not context:
@@ -497,7 +532,7 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
             "unique_id": adapter.get_element_id(),
             "js_constructor": js_constructor,
             "shared_context": adapter.kwargs,
-            "parent_context": context,
+            "adapter_context": context,
             "edit_url": reverse(
                 "wagtail_fedit:edit",
                 kwargs=reverse_kwargs,

@@ -9,10 +9,8 @@ from django.template.base import (
     Parser, Token,
     FilterExpression,
 )
-from django.http import HttpRequest
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from django.urls import reverse
 from django.core import signing
 
 from wagtail import hooks
@@ -32,9 +30,14 @@ from ..adapters import (
 from ..utils import (
     wrap_adapter,
     with_userbar_model,
+    base_adapter_context,
+    _flatten_context,
     _can_edit,
     FEDIT_PREVIEW_VAR,
     TEMPLATE_TAG_NAME,
+
+    FIELD_TEMPLATE_VAR,
+    INSTANCE_TEMPLATE_VAR,
 )
 from ..hooks import (
     REGISTER_CSS,
@@ -84,15 +87,17 @@ class AdapterNode(Node):
             context, model, **self.kwargs,
         )
 
-        if "wagtail_fedit_field" in context\
-            and "wagtail_fedit_instance" in context\
+        if FIELD_TEMPLATE_VAR in context\
+            and INSTANCE_TEMPLATE_VAR in context\
             and not model and self.adapter.field_required:
 
-            field_name = context["wagtail_fedit_field"]
-            obj = context["wagtail_fedit_instance"]
+            field_name = context[FIELD_TEMPLATE_VAR]
+            obj = context[INSTANCE_TEMPLATE_VAR]
 
-        elif not model and "wagtail_fedit_instance" in context and not self.adapter.field_required:
-            obj = context["wagtail_fedit_instance"]
+        elif not model\
+                and INSTANCE_TEMPLATE_VAR in context\
+                and not self.adapter.field_required:
+            obj = context[INSTANCE_TEMPLATE_VAR]
             field_name = None
             
         else:
@@ -124,7 +129,7 @@ class AdapterNode(Node):
                     try:
                         obj = getattr(obj, getter)
                     except AttributeError:
-                        raise AttributeError(f"Object {model.__class__.__name__} does not have attribute {getter}")
+                        raise TemplateSyntaxError(f"Object {model.__class__.__name__} does not have attribute {getter}")
                     
 
         request = context.get("request")
@@ -133,6 +138,11 @@ class AdapterNode(Node):
             field_name=field_name,
             request=request,
             **kwargs,
+        )
+
+        context = base_adapter_context(
+            adapter,
+            context,
         )
 
         content = None
@@ -146,7 +156,7 @@ class AdapterNode(Node):
             )
 
         else:
-            context.update(adapter.kwargs)
+            _flatten_context(context)
             content = adapter.render_content(
                 context,
             )
@@ -215,30 +225,26 @@ def do_render_fedit(parser: Parser, token: Token):
     )
 
 
-
 @register.simple_tag(takes_context=True)
 def render_adapter(context: Context, adapter: BaseAdapter) -> str:
-    parent_context = {}
+    adapter_context = {}
     
-    if "parent_context" in context:
-        parent_context = context["parent_context"]
-        del context["parent_context"]
+    if "adapter_context" in context:
+        adapter_context = context["adapter_context"]
+        del context["adapter_context"]
 
-    if hasattr(context, "flatten"):
-        context = context.flatten()
+    context = _flatten_context(
+        context,
+    )
+    adapter_context = _flatten_context(
+        adapter_context,
+    )
 
-    if hasattr(parent_context, "flatten"):
-        parent_context = parent_context.flatten()
+    context.update(adapter_context)
 
-    context.update(parent_context)
-
-    context["wagtail_fedit_field"]    = adapter.field_name
-    context["wagtail_fedit_instance"] = adapter.object
-    context["request"]                = adapter.request
-
-    context.update(adapter.kwargs)
-
-    return adapter.render_content(context)
+    return adapter.render_content(
+        context,
+    )
 
 
 @register.inclusion_tag("wagtail_fedit/_hook_output.html", name="fedit_scripts", takes_context=True)

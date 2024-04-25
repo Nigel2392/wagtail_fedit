@@ -33,6 +33,7 @@ from ..utils import (
     FeditPermissionCheck,
     FeditIFrameMixin,
     FEDIT_PREVIEW_VAR,
+    base_adapter_context,
     lock_info,
 )
 from ..errors import (
@@ -192,26 +193,33 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             verbose_name = self.adapter.meta_field.verbose_name
 
         extra = {}
-        if "form" in kwargs:
-            extra.update(
-                self.adapter.get_form_context(
-                    **kwargs,
-                ),
-            )
 
         if isinstance(self.instance, Page):
             # Add the page template variable to the context.
             # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
             extra[PAGE_TEMPLATE_VAR] = self.instance
 
-        return super().get_context_data(**kwargs) | {
-            "verbose_name": verbose_name,
-            "locked_for_user": self.locked_for_user,
-            "shared_context": shared_context,
-            "form_attrs": self.adapter.get_form_attrs(),
-            "locked": self.lock is not None,
-            **extra,
-        }
+        # Form context; used for rendering the modal.
+        if "form" in kwargs:
+            extra.update({
+                "verbose_name": verbose_name,
+                "locked_for_user": self.locked_for_user,
+                "shared_context": shared_context,
+                "form_attrs": self.adapter.get_form_attrs(),
+                "locked": self.lock is not None,
+                **self.adapter.get_form_context(
+                    **kwargs,
+                ),
+            })
+        # Add adapter context instead of form context
+        else:
+            extra = base_adapter_context(
+                self.adapter,
+                extra,
+            )
+
+        return super().get_context_data(**kwargs)\
+            | extra
     
 class AdapterRefetchView(BaseAdapterView):
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
