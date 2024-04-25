@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-23 17:49+0200\n"
+"POT-Creation-Date: 2024-04-25 12:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,18 +19,22 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\tester\wagtail_fedit\adapters\block.py:110
+#, python-format
 msgid "Edit block %(block_label)s for %(model_name)s '%(model_string)s'"
 msgstr "Bewerk blok %(block_label)s voor %(model_name)s '%(model_string)s'"
 
-#: .\tester\wagtail_fedit\adapters\field.py:71
+#: .\tester\wagtail_fedit\adapters\field.py:72
+#, python-format
 msgid "Edit model '%(instance_string)s' for %(model_name)s '%(model_string)s'"
-msgstr "Bewerk model %(instance_string)s voor %(model_name)s '%(model_string)s'"
+msgstr ""
+"Bewerk model %(instance_string)s voor %(model_name)s '%(model_string)s'"
 
-#: .\tester\wagtail_fedit\adapters\field.py:77
+#: .\tester\wagtail_fedit\adapters\field.py:78
+#, python-format
 msgid "Edit field '%(field_name)s' for %(model_name)s '%(model_string)s'"
 msgstr "Bewerk veld %(field_name)s voor %(model_name)s' %(model_string)s'"
 
-#: .\tester\wagtail_fedit\adapters\field.py:91
+#: .\tester\wagtail_fedit\adapters\field.py:92
 #, python-format
 msgid ""
 "You must publish %(model)s and the related object of type "
@@ -40,16 +44,16 @@ msgstr ""
 "%(related_verbose_name)s (%(related_model)s) publiceren om wijzigingen "
 "zichtbaar te maken."
 
-#: .\tester\wagtail_fedit\adapters\field.py:115
+#: .\tester\wagtail_fedit\adapters\field.py:116
 msgid "Publishing related object required."
 msgstr "Publicatie van gerelateerd object vereist."
 
-#: .\tester\wagtail_fedit\adapters\field.py:116
+#: .\tester\wagtail_fedit\adapters\field.py:117
 #: .\tester\wagtail_fedit\utils.py:71
 msgid "The object you are editing supports drafts."
 msgstr "Het object dat u bewerkt ondersteunt concepten."
 
-#: .\tester\wagtail_fedit\adapters\field.py:117
+#: .\tester\wagtail_fedit\adapters\field.py:118
 #, python-format
 msgid ""
 "You must publish the related object of type %(type)s (%(model)s) to make any "
@@ -60,11 +64,63 @@ msgstr ""
 
 #: .\tester\wagtail_fedit\adapters\models.py:41
 msgid "This adapter is used for directly editing a model instance."
-msgstr ""
+msgstr "Deze adapter wordt gebruikt voor het direct bewerken van een model."
 
 #: .\tester\wagtail_fedit\adapters\models.py:108
-msgid "Edit model '%(instance_string)s'"
-msgstr "Bewerk model '%(instance_string)s'"
+msgid "Edit model %(type)s '%(instance_string)s'"
+msgstr "Bewerk model %(type)s '%(instance_string)s'"
+
+#: .\tester\wagtail_fedit\errors.py:22
+msgid "You do not have permission to view this page."
+msgstr "U heeft geen toestemming om deze pagina te bekijken."
+
+#: .\tester\wagtail_fedit\errors.py:23
+msgid "User does not have permission to {}"
+msgstr "Gebruiker heeft geen toestemming om {}"
+
+#: .\tester\wagtail_fedit\errors.py:24
+msgid "No workflow state found"
+msgstr "Geen workflowstatus gevonden"
+
+#: .\tester\wagtail_fedit\errors.py:25
+msgid "This object is locked - it cannot be acted upon."
+msgstr "Dit object is vergrendeld - het kan niet worden bewerkt."
+
+#: .\tester\wagtail_fedit\errors.py:26
+msgid "This object is not live"
+msgstr "Dit object is niet live"
+
+#: .\tester\wagtail_fedit\errors.py:27
+msgid "No action specified"
+msgstr "Geen actie opgegeven"
+
+#: .\tester\wagtail_fedit\errors.py:28
+msgid "Invalid action specified: {}"
+msgstr "Ongeldige actie opgegeven: {}"
+
+#: .\tester\wagtail_fedit\errors.py:29
+msgid "Model {} does not inherit from {}"
+msgstr "Model {} erft niet van {}"
+
+#: .\tester\wagtail_fedit\errors.py:30
+msgid "Object has no unpublished changes"
+msgstr "Object heeft geen ongepubliceerde wijzigingen"
+
+#: .\tester\wagtail_fedit\errors.py:31
+msgid "Model not found"
+msgstr "Model niet gevonden"
+
+#: .\tester\wagtail_fedit\errors.py:33
+msgid "Invalid {}"
+msgstr "Ongeldige {}"
+
+#: .\tester\wagtail_fedit\errors.py:34 .\tester\wagtail_fedit\errors.py:38
+msgid "for object {}"
+msgstr "voor object {}"
+
+#: .\tester\wagtail_fedit\errors.py:37
+msgid "{} is required"
+msgstr "{} is vereist"
 
 #: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\admin_link.html:1
 msgid "View in Wagtail admin"
@@ -154,7 +210,7 @@ msgid "Revision Management"
 msgstr "Revisiebeheer"
 
 #: .\tester\wagtail_fedit\utils.py:68
-#: .\tester\wagtail_fedit\views\adapters.py:40
+#: .\tester\wagtail_fedit\views\adapters.py:49
 msgid "Validation Errors"
 msgstr "Validatiefouten"
 
@@ -186,90 +242,106 @@ msgstr ""
 msgid "Edit %(type)s '%(model)s'"
 msgstr "Bewerk %(type)s '%(model)s'"
 
-#: .\tester\wagtail_fedit\views\editable.py:222
-msgid "This object is locked. It cannot be acted upon."
-msgstr "Dit object is vergrendeld. Er kan niet op worden gereageerd."
+#: .\tester\wagtail_fedit\views\adapters.py:66
+msgid "Adapter ID"
+msgstr "Adapter-ID"
 
-#: .\tester\wagtail_fedit\views\editable.py:226
-msgid "No action specified"
-msgstr "Geen actie opgegeven"
+#: .\tester\wagtail_fedit\views\adapters.py:76
+msgid "Model"
+msgstr "Model"
 
-#: .\tester\wagtail_fedit\views\editable.py:230
-msgid "Invalid action specified: {}"
-msgstr "Ongeldige actie opgegeven: {}"
+#: .\tester\wagtail_fedit\views\adapters.py:83
+msgid "view this page"
+msgstr "Bekijk deze pagina"
 
-#: .\tester\wagtail_fedit\views\editable.py:239
+#: .\tester\wagtail_fedit\views\adapters.py:101
+msgid "Field name"
+msgstr "Veldnaam"
+
+#: .\tester\wagtail_fedit\views\adapters.py:109
+msgid "field name"
+msgstr "veldnaam"
+
+#: .\tester\wagtail_fedit\views\adapters.py:135
+msgid "edit this field"
+msgstr "bewerken van dit veld"
+
+#: .\tester\wagtail_fedit\views\editable.py:251
 #: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:53
 msgid "Publish"
 msgstr "Publiceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:243
+#: .\tester\wagtail_fedit\views\editable.py:255
 msgid "Publishing {} \"{}\""
 msgstr "Publiceren van {} \"{}\""
 
-#: .\tester\wagtail_fedit\views\editable.py:246
+#: .\tester\wagtail_fedit\views\editable.py:258
 msgid "About publishing"
 msgstr "Over publiceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:250
+#: .\tester\wagtail_fedit\views\editable.py:262
 msgid "Publishing this object will make it visible to users on the site."
 msgstr ""
 "Publicatie van dit object maakt het zichtbaar voor gebruikers op de site."
 
-#: .\tester\wagtail_fedit\views\editable.py:251
+#: .\tester\wagtail_fedit\views\editable.py:263
 msgid ""
 "That means that any changes you make will be immediately visible to everyone."
 msgstr ""
 "Dit betekent dat alle wijzigingen die u aanbrengt, onmiddellijk zichtbaar "
 "zijnvoor iedereen."
 
-#: .\tester\wagtail_fedit\views\editable.py:255
+#: .\tester\wagtail_fedit\views\editable.py:267
 msgid "You can always choose to unpublish it."
 msgstr "U kunt er altijd voor kiezen om het te depubliceren."
 
-#: .\tester\wagtail_fedit\views\editable.py:356
+#: .\tester\wagtail_fedit\views\editable.py:337
+msgid "publish"
+msgstr "publiceren"
+
+#: .\tester\wagtail_fedit\views\editable.py:370
 #: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:65
 msgid "Unpublish"
 msgstr "Depubliceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:357
+#: .\tester\wagtail_fedit\views\editable.py:371
 msgid "About unpublishing"
 msgstr "Over depubliceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:359
+#: .\tester\wagtail_fedit\views\editable.py:373
 msgid "Unpublishing this object will make it invisible to users on the site."
 msgstr ""
 "Depublicatie van dit object maakt het onzichtbaar voor gebruikers op de site."
 
-#: .\tester\wagtail_fedit\views\editable.py:360
-#: .\tester\wagtail_fedit\views\editable.py:399
-#: .\tester\wagtail_fedit\views\editable.py:442
+#: .\tester\wagtail_fedit\views\editable.py:374
+#: .\tester\wagtail_fedit\views\editable.py:415
+#: .\tester\wagtail_fedit\views\editable.py:460
 msgid "That means that it will no longer be visible to anyone."
 msgstr "Dat betekent dat het niet langer zichtbaar is voor iedereen."
 
-#: .\tester\wagtail_fedit\views\editable.py:361
-#: .\tester\wagtail_fedit\views\editable.py:400
+#: .\tester\wagtail_fedit\views\editable.py:375
+#: .\tester\wagtail_fedit\views\editable.py:416
 msgid "You can always choose to publish it again."
 msgstr "U kunt er altijd voor kiezen om het opnieuw te publiceren."
 
-#: .\tester\wagtail_fedit\views\editable.py:365
+#: .\tester\wagtail_fedit\views\editable.py:379
 msgid "Unpublishing {} \"{}\""
 msgstr "Depubliceren van {} \"{}\""
 
-#: .\tester\wagtail_fedit\views\editable.py:379
-msgid "This object is not live"
-msgstr "Dit object is niet live"
+#: .\tester\wagtail_fedit\views\editable.py:384
+msgid "unpublish"
+msgstr "depubliceren"
 
-#: .\tester\wagtail_fedit\views\editable.py:395
+#: .\tester\wagtail_fedit\views\editable.py:411
 #: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:76
 msgid "Submit for moderation"
 msgstr "Indienen voor moderatie"
 
-#: .\tester\wagtail_fedit\views\editable.py:396
+#: .\tester\wagtail_fedit\views\editable.py:412
 msgid "About submitting for moderation"
 msgstr "Over indienen voor moderatie"
 
-#: .\tester\wagtail_fedit\views\editable.py:398
+#: .\tester\wagtail_fedit\views\editable.py:414
 msgid ""
 "Submitting this object for moderation will make it invisible to users on the "
 "site."
@@ -277,20 +349,24 @@ msgstr ""
 "Het indienen van dit object voor moderatie maakt het onzichtbaar voor "
 "gebruikers op de site."
 
-#: .\tester\wagtail_fedit\views\editable.py:404
+#: .\tester\wagtail_fedit\views\editable.py:420
 msgid "Submitting {} \"{}\" for moderation"
 msgstr "Indienen van {} \"{}\" voor moderatie"
 
-#: .\tester\wagtail_fedit\views\editable.py:438
+#: .\tester\wagtail_fedit\views\editable.py:425
+msgid "submit for moderation"
+msgstr "indienen voor moderatie"
+
+#: .\tester\wagtail_fedit\views\editable.py:456
 #: .\tester\wagtail_fedit\wagtail_hooks\userbar.py:88
 msgid "Cancel Workflow"
 msgstr "Workflow annuleren"
 
-#: .\tester\wagtail_fedit\views\editable.py:439
+#: .\tester\wagtail_fedit\views\editable.py:457
 msgid "About cancelling workflows"
 msgstr "Over het annuleren van workflows"
 
-#: .\tester\wagtail_fedit\views\editable.py:441
+#: .\tester\wagtail_fedit\views\editable.py:459
 msgid ""
 "Cancelling the workflow for this object will remove it from the moderation "
 "process."
@@ -298,14 +374,22 @@ msgstr ""
 "Het annuleren van de workflow voor dit object verwijdert het uit het "
 "moderatieproces."
 
-#: .\tester\wagtail_fedit\views\editable.py:443
+#: .\tester\wagtail_fedit\views\editable.py:461
 msgid "You can always choose to submit it for moderation again."
 msgstr ""
 "Je kunt er altijd voor kiezen om het opnieuw in te dienen voor moderatie."
 
-#: .\tester\wagtail_fedit\views\editable.py:447
+#: .\tester\wagtail_fedit\views\editable.py:465
 msgid "Cancelling workflow for {} \"{}\""
 msgstr ""
+
+#: .\tester\wagtail_fedit\views\editable.py:473
+msgid "cancel the workflow"
+msgstr "workflow te annuleren"
+
+#: .\tester\wagtail_fedit\views\mixins.py:29
+msgid "model provided"
+msgstr "model verstrekt"
 
 #: .\tester\wagtail_fedit\wagtail_hooks\action_menu.py:14
 msgid "Frontend Edit"
