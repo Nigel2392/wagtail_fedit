@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.core.management.color import color_style, supports_color
 from wagtail_fedit.adapters import adapter_registry
 from wagtail_fedit.utils import TEMPLATE_TAG_NAME
+from wagtail_fedit.settings import SHARE_WITH_SESSIONS
 
 
 class Command(BaseCommand):
@@ -15,12 +16,24 @@ class Command(BaseCommand):
             "====================",
             " * The first argument is the identifier of the adapter.",
             " * The second argument is the model and/or field to edit. instance.modelfield or instance",
-            " * Arguments prefixed with a exclamation mark are required absolute. These act like flags.",
+            " * Arguments prefixed with a exclamation mark are absolute. These act like flags.",
             " * Arguments prefixed with a question mark are optional.",
-            " * Extra keyword arguments are optional; must be serializable to JSON and should not be too complex.",
-            "   This is due to limits in URL-size when sharing context between views.",
-            " * You can specify 'as varname' as the last arguments to the templatetag to store the adapter HTML in a context variable.",
         ]
+
+        if SHARE_WITH_SESSIONS:
+            s.extend([
+                " * Context is shared with Django sessions. This is useful if you are running into limits with the URL length.",
+                "   This will store the session key as a URL parameter and the shared context in the session.",
+            ])
+        else:
+            s.extend([
+                " * Extra keyword arguments are optional; must be serializable to JSON and should not be too complex.",
+                "   This is due to limits in URL-size when sharing context between views.",
+            ])
+
+        s.append(
+            " * You can specify 'as varname' as the last arguments to the templatetag to store the adapter HTML in a context variable.",
+        )
 
         for identifier, adapter_class in adapter_registry.adapters.items():
 
