@@ -135,12 +135,27 @@ class AdapterNode(Node):
             **kwargs,
         )
 
-        if not adapter.check_permissions()\
-          or not _can_edit(request, obj):
-            context.update(adapter.kwargs)
-            return as_var(self.as_var, context, adapter.render_content(context))
+        content = None
+        if adapter.check_permissions()\
+          and _can_edit(request, obj):
+            content = wrap_adapter(
+                request=request,
+                adapter=adapter,
+                context=context,
+                run_context_processors=False,
+            )
 
-        return as_var(self.as_var, context, wrap_adapter(request, adapter, context))
+        else:
+            context.update(adapter.kwargs)
+            content = adapter.render_content(
+                context,
+            )
+
+        return as_var(
+            self.as_var,
+            context,
+            content,
+        )
 
 
 @register.tag(name=TEMPLATE_TAG_NAME)
