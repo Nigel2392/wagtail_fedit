@@ -231,7 +231,7 @@ Sometimes without thinking about it you might override the default template vari
 
 This might create issues where the userbar links are not linking to the correct edit- view.
 
-To solve this we have created a quickfix by including a template-tag at the end of your html template.
+For this we have created a simple solution by including a template-tag at the end of your html template.
 
 Example:
 
