@@ -33,6 +33,7 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
         Keyword(
             "css_variable_name",
             optional=True,
+            default="background-image",
             help_text="The CSS variable name to apply the background-image to. element.style.setProperty(css_variable_name, url);",
             type_hint="str",
         ),
@@ -44,9 +45,8 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
         ),
         Keyword(
             "preserve_svg",
-            optional=True,
-            default=False,
-            help_text="Preserve SVG images by converting them to a safe format.",
+            absolute=True,
+            help_text="Remove any directives that would require an SVG to be rasterised", # From wagtail.images.utils.to_svg_safe_spec
         ),
     )
     js_constructor = "wagtail_fedit.editors.WagtailFeditFuncEditor"
@@ -77,6 +77,5 @@ class BackgroundImageFieldAdapter(BaseFieldFuncAdapter):
 
         return data | {
             "url": rendition.url,
-            "css_variable_name":\
-                self.kwargs.get("css_variable_name", None) or "background-image",
+            "css_variable_name": self.kwargs["css_variable_name"],
         }

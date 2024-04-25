@@ -41,6 +41,11 @@ class ModelAdapter(BlockFieldReplacementAdapter):
     usage_description = _("This adapter is used for directly editing a model instance.")
     keywords = BlockFieldReplacementAdapter.keywords + (
         Keyword(
+            "admin",
+            absolute=True,
+            help_text="If passed; the adapter will add a quick-link to the Wagtail Admin for this model.",
+        ),
+        Keyword(
             "render_method",
             optional=True,
             default="render_as_content",
@@ -51,9 +56,13 @@ class ModelAdapter(BlockFieldReplacementAdapter):
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
         if isinstance(self.object, Page):
-            self.edit_handler = page_utils._get_page_edit_handler(self.object.__class__)
+            self.edit_handler = page_utils._get_page_edit_handler(
+                self.object.__class__,
+            )
         else:
-            self.edit_handler = model_utils.get_edit_handler(self.object.__class__)
+            self.edit_handler = model_utils.get_edit_handler(
+                self.object.__class__,
+            )
 
     def get_admin_url(self) -> str:
         finder = AdminURLFinder(self.request.user)
@@ -61,7 +70,7 @@ class ModelAdapter(BlockFieldReplacementAdapter):
 
     def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
         buttons = super().get_toolbar_buttons()
-        if not self.kwargs.get("admin", False):
+        if not self.kwargs["admin"]:
             return buttons
         
         buttons.append(FeditAdapterAdminLinkButton(

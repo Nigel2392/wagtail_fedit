@@ -31,9 +31,9 @@ class Command(BaseCommand):
                 "   This is due to limits in URL-size when sharing context between views.",
             ])
 
-        s.append(
+        s.extend([
             " * You can specify 'as varname' as the last arguments to the templatetag to store the adapter HTML in a context variable.",
-        )
+        ])
 
         for identifier, adapter_class in adapter_registry.adapters.items():
 

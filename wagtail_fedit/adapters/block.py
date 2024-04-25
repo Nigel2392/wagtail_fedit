@@ -40,7 +40,7 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     """
     identifier = "block"
     usage_description = "This adapter is used to edit a block of a streamfield."
-    keywords = (
+    keywords = BlockFieldReplacementAdapter.keywords + (
         Keyword("block",
             help_text="the block instance to edit. This can be a regular block instance or a BoundBlock.",
             type_hint="blocks.Block"
@@ -48,11 +48,11 @@ class BlockAdapter(BlockFieldReplacementAdapter):
         Keyword("block_id",
             optional=True,
             help_text="the ID of the block to edit, required if block is not a BoundBlock.",
-            type_hint="int"
+            type_hint="str"
         ),
         Keyword("admin",
             absolute=True,
-            help_text="if passed; the adapter will a quick- link to the Wagtail Admin for this block."
+            help_text="if passed; the adapter will add a quick- link to the Wagtail Admin for this block."
         ),
     )
 
@@ -61,14 +61,14 @@ class BlockAdapter(BlockFieldReplacementAdapter):
 
         self.block = self.kwargs.pop("block", None)
         if self.block:
-            if not hasattr(self.block, "id") and not "block_id" in self.kwargs:
+            if not hasattr(self.block, "id") and not self.kwargs["block_id"]:
                 raise AdapterError("Invalid block type, block must have an `id` attribute or provide a `block_id`")
             
             if hasattr(self.block, "id"):
                 self.kwargs["block_id"] = self.block.id
 
         else:
-            block_id = self.kwargs.get("block_id", None)
+            block_id = self.kwargs["block_id"]
             if block_id is None:
                 raise AdapterError("Block ID is required")
             
@@ -91,7 +91,7 @@ class BlockAdapter(BlockFieldReplacementAdapter):
 
     def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
         buttons = super().get_toolbar_buttons()
-        if not self.kwargs.get("admin", False):
+        if not self.kwargs["admin"]:
             return buttons
         
         buttons.append(FeditAdapterAdminLinkButton(

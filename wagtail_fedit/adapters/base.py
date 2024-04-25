@@ -26,12 +26,13 @@ from ..utils import (
     wrap_adapter,
 )
 
-import uuid
-
 if TYPE_CHECKING:
     from ..toolbar import (
         FeditToolbarComponent,
     )
+
+import json, base64, uuid
+
 
 class AdapterError(Exception):
     pass
@@ -40,33 +41,34 @@ class AdapterError(Exception):
 def content_id_from_parts(*parts: Any) -> str:
     return "-".join(map(slugify, map(str, parts)))
 
+def Base85_json_dumps(obj):
+    return base64.b85encode(json.dumps(obj).encode("utf-8")).decode("utf-8")
 
-import pickle, json, base64
+def Base85_json_loads(data):
+    return json.loads(base64.b85decode(data).decode("utf-8"))
+
+def _get_keywords(bases, attrs):
+    if "keywords" in attrs:
+        return list(attrs["keywords"])
+    
+    for base in bases:
+        if hasattr(base, "keywords"):
+            return list(base.keywords)
+        
+    return list()
+
+def _sort_keywords(keywords):
+    _s = sorted(
+        list(set(keywords)),
+        key=lambda x: (not x.absolute, x.optional, x.default is not None, x.name)
+    )
+    return _s
 
 
 
 class VARIABLES:
     PY_SIZE_VAR = "editor_size"
     FORM_SIZE_VAR = "data-editor-size"
-
-
-class PickleBlockSerializer:
-    """
-    Simple wrapper around pickle to be used in signing.dumps and
-    signing.loads.
-    """
-
-    def dumps(self, obj):
-        return pickle.dumps(obj, protocol=pickle.HIGHEST_PROTOCOL)
-
-    def loads(self, data):
-        return pickle.loads(data)
-
-def Base85_json_dumps(obj):
-    return base64.b85encode(json.dumps(obj).encode("utf-8")).decode("utf-8")
-
-def Base85_json_loads(data):
-    return json.loads(base64.b85decode(data).decode("utf-8"))
 
 
 
@@ -88,6 +90,16 @@ class Keyword:
         self.default = default
         self.help_text = help_text
         self.type_hint = type_hint
+
+    def __hash__(self):
+        return hash(self.name)
+    
+    def __eq__(self, other):
+        if isinstance(other, Keyword):
+            return self.name == other.name
+        elif isinstance(other, str):
+            return self.name == other
+        return False
 
     def __str__(self):
         k = []
@@ -130,35 +142,20 @@ class Keyword:
         s = " ".join(s)
         return f"<{s}>"
 
-def _get_keywords(bases, attrs):
-    if "keywords" in attrs:
-        return list(attrs["keywords"])
-    
-    for base in bases:
-        if hasattr(base, "keywords"):
-            return list(base.keywords)
-        
-    return list()
-
-def _sort_keywords(keywords):
-    _s = sorted(keywords, key=lambda x: (not x.absolute, x.optional))
-    return _s
-
 class AdapterMeta(type):
     def __new__(cls, name, bases, attrs):
         keywords: list[Keyword] = _get_keywords(bases, attrs)
+        
         required_kwargs = []
         absolute_tokens = []
-        optional_kwargs = {}
+        _defaults       = {}
 
         for keyword in keywords:
             if keyword.absolute:
                 absolute_tokens.append(keyword.name)
+                _defaults[keyword.name] = False
             elif keyword.optional:
-                if keyword.default is not None:
-                    optional_kwargs[keyword.name] = keyword.default
-                else:
-                    optional_kwargs[keyword.name] = None
+                _defaults[keyword.name] = keyword.default
             else:
                 required_kwargs.append(keyword.name)
 
@@ -166,7 +163,7 @@ class AdapterMeta(type):
 
         cls.required_kwargs: tuple[str]     = tuple(required_kwargs)
         cls.absolute_tokens: tuple[str]     = tuple(absolute_tokens)
-        cls.optional_kwargs: dict[str, Any] = optional_kwargs
+        cls._defaults:       dict[str, Any] = _defaults
         cls.keywords:        tuple[Keyword] = tuple(
             _sort_keywords(keywords)
         )
@@ -175,6 +172,11 @@ class AdapterMeta(type):
 
 
 class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
+    # Type hints for keyword arguments set by metaclass.
+    required_kwargs: tuple[str]
+    absolute_tokens: tuple[str]
+    _defaults:       dict[str, Any]
+
     # How the adapter is identified on inside of the templatetag.
     identifier              = None
 
@@ -205,11 +207,7 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
         self.object           = object
         self.request          = request
-        self.kwargs           = kwargs
-
-        for k, v in self.optional_kwargs.items():
-            if k not in self.kwargs and v is not None:
-                self.kwargs[k] = v
+        self.kwargs           = self._defaults.copy() | kwargs
 
         if hasattr(request, "LANGUAGE_CODE") and TRACK_LOCALES:
             if "LANGUAGE_CODE" not in self.kwargs:
@@ -425,7 +423,13 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
             return id
         
         if SIGN_SHARED_CONTEXT:
-            return self.signer.sign_object(self.kwargs, compress=True)
+            return self.signer.sign_object(
+                self.kwargs,
+                compress=True,
+                # serializer=SharedContextSerializer(
+                #     self,
+                # ),
+            )
         
         return Base85_json_dumps(self.kwargs)
 

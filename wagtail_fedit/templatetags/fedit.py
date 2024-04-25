@@ -213,7 +213,6 @@ def do_render_fedit(parser: Parser, token: Token):
         tokens,
         adapter.required_kwargs,
         adapter.absolute_tokens,
-        adapter.optional_kwargs,
     )
 
     return AdapterNode(
@@ -300,7 +299,7 @@ def do_with_userbar_model(context, model: Any) -> str:
         context[PAGE_TEMPLATE_VAR] = model
     return ""
 
-def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None, optional_tokens: dict[str, Any] = None) -> dict:
+def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, absolute_tokens: list[str] = None) -> dict:
     had_kwargs = False
     kwargs = {}
 
@@ -309,9 +308,6 @@ def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, 
 
     if not absolute_tokens:
         absolute_tokens = tuple()
-
-    if not optional_tokens:
-        optional_tokens = {}
 
     for i, token in enumerate(tokens):
         split = token.split("=")
@@ -337,18 +333,19 @@ def get_kwargs(parser: Parser, tokens: list[str], kwarg_list: list[str] = None, 
             # if key not in kwargs_names:
             #     raise ValueError(f"Unexpected keyword argument {key}")
             if key in absolute_tokens:
-                raise ValueError(f"Keyword argument {key} cannot be resolved; it will not be parsed as a variable.")
+                raise TemplateSyntaxError(
+                    f"Keyword argument {key} cannot be resolved;"
+                    " it can only be used as an absolute argument."
+                )
             
             kwargs[key] = parser.compile_filter(split[1])
             had_kwargs = True
 
-    for kwarg in kwarg_list:
-        if kwarg not in kwargs:
-            raise TemplateSyntaxError(f"Missing required keyword argument {kwarg}")
-        
-    for key, value in optional_tokens.items():
+    for key in kwarg_list:
         if key not in kwargs:
-            kwargs[key] = value
+            raise TemplateSyntaxError(
+                f"Missing required keyword argument {key}"
+            )
 
     return kwargs
 
