@@ -225,6 +225,23 @@ class BaseFEditTest(TestCase):
                 "model_name": model_name,
             }
         )
+    
+    def get_refetch_url(self, adapter_id, app_label, model_name, model_id, field_name = None):
+        url_name = "refetch"
+        kwgs = {
+            "adapter_id": adapter_id,
+            "app_label": app_label,
+            "model_name": model_name,
+            "model_id": model_id,
+        }
+
+        if field_name:
+            kwgs["field_name"] = field_name
+
+        return reverse(
+            f"wagtail_fedit:{url_name}",
+            kwargs=kwgs
+        )
 
     def get_field_url(self, field_name, app_label, model_name, model_id):
         url_name = "edit"

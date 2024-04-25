@@ -12,8 +12,14 @@ from wagtail_fedit.adapters import (
     FieldAdapter,
     ModelAdapter,
 )
+from wagtail_fedit.adapters.base import (
+    BlockFieldReplacementAdapter,
+)
 from wagtail_fedit.utils import (
     FEDIT_PREVIEW_VAR,
+    FIELD_TEMPLATE_VAR,
+    INSTANCE_TEMPLATE_VAR,
+    base_adapter_context,
     find_block,
 )
 from wagtail_fedit.templatetags.fedit import (
@@ -23,9 +29,11 @@ from .base import (
     BaseFEditTest,
 )
 
+import json
+
 adapters = {}
 
-class TestAdapter(BaseAdapter):
+class TestAdapter(BlockFieldReplacementAdapter):
     identifier = "test"
     keywords = (
         Keyword("test", help_text="A test keyword argument", type_hint="str"),
@@ -40,7 +48,9 @@ class TestAdapter(BaseAdapter):
         return f"test-{self.kwargs['id']}"
 
     def render_content(self, parent_context: dict = None) -> str:
-        return f"TestAdapter: {self.field_value}"
+        if "test" not in parent_context:
+            return f"TestAdapter: {self.field_value} ({parent_context['id']})"
+        return f"TestAdapter: {self.field_value} ({parent_context['test']}) ({parent_context['id']})"
 
 class TestContextAdapter(TestAdapter):
     identifier = "test_context"
@@ -113,7 +123,7 @@ class TestBaseAdapter(BaseFEditTest):
 
         self.assertHTMLEqual(
             template_ok,
-            f'TestAdapter: {self.basic_model.title}'
+            f"TestAdapter: {self.basic_model.title} (test) ({id})"
         )
 
         self.assertDictEqual(
@@ -308,8 +318,11 @@ class TestBaseAdapter(BaseFEditTest):
         )
 
         self.assertEqual(
-            adapter.render_content(),
-            f"TestAdapter: {self.basic_model.title}"
+            adapter.render_content(base_adapter_context(
+                adapter=adapter,
+                context={},
+            )),
+            f"TestAdapter: {self.basic_model.title} (3)"
         )
 
     def test_adapter_editable(self):
@@ -343,7 +356,74 @@ class TestBaseAdapter(BaseFEditTest):
 
         self.assertHTMLEqual(
             tpl,
-            wrap_adapter(request, adapters[id], {})
+            wrap_adapter(request, adapters[id], base_adapter_context(
+                adapter=adapters[id],
+                context={},
+            ))
+        )
+
+    def test_adapter_editable_equals_refetch(self):
+        id = get_adapter_id()
+        self.assertEqual(TestAdapter.required_kwargs, tuple(["test"]))
+
+        tpl = Template(
+            "{% load fedit %}"
+            f"{{% fedit test object.title test='test' id='{id}' %}}"
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        request.user = self.admin_user
+
+        setattr(
+            request,
+            FEDIT_PREVIEW_VAR,
+            True,
+        )
+
+        tpl = tpl.render(
+            Context({
+                "request": request,
+                "object": self.basic_model,
+            })
+        )
+
+        url = self.get_refetch_url(
+            "test",
+            self.basic_model._meta.app_label,
+            self.basic_model._meta.model_name,
+            self.basic_model.pk,
+            "title",
+        )
+
+        self.client.force_login(self.admin_user)
+
+        response = self.client.get(url, {
+            "shared_context":\
+                adapters[id].encode_shared_context(),
+        })
+
+        json_data = json.loads(
+            response.content.decode("utf-8"),
+        )
+
+        if "html" not in json_data:
+            self.fail(f"Expected 'html' in response, got {json_data}")
+
+        if "success" not in json_data\
+            or "success" in json_data and not json_data["success"]:
+            self.fail(f"Expected 'success' in response, got {json_data}")
+
+        if "refetch" not in json_data\
+            or "refetch" in json_data and not json_data["refetch"]:
+            self.fail(f"Expected 'refetch' in response, got {json_data}")
+
+        self.assertHTMLEqual(
+            tpl,
+            json_data["html"],
         )
 
     def test_adapter_editable_as_var(self):
@@ -378,7 +458,10 @@ class TestBaseAdapter(BaseFEditTest):
 
         self.assertHTMLEqual(
             tpl,
-            wrap_adapter(request, adapters[id], {})
+            wrap_adapter(request, adapters[id], base_adapter_context(
+                adapter=adapters[id],
+                context={},
+            ))
         )
 
     def test_context_processors_run(self):
@@ -412,7 +495,10 @@ class TestBaseAdapter(BaseFEditTest):
 
         self.assertHTMLEqual(
             tpl,
-            wrap_adapter(request, adapters[id], {}, run_context_processors=True)
+            wrap_adapter(request, adapters[id], base_adapter_context(
+                adapter=adapters[id],
+                context={},
+            ), run_context_processors=True)
         )
 
 
@@ -517,8 +603,8 @@ class TestBlockAdapter(BaseFEditTest):
             "request": request,
             "block": block_value,
             "block_id": self.BLOCK_ID,
-            "wagtail_fedit_field": "content",
-            "wagtail_fedit_instance": self.basic_model,
+            FIELD_TEMPLATE_VAR: "content",
+            INSTANCE_TEMPLATE_VAR: self.basic_model,
         }
 
         tpl = template.render(Context(context))
@@ -738,7 +824,7 @@ class TestModelAdapter(BaseFEditTest):
             context = {
                 "object": self.basic_model,
                 "request": request,
-                "wagtail_fedit_instance": self.basic_model,
+                INSTANCE_TEMPLATE_VAR: self.basic_model,
             }
     
             tpl = template.render(Context(context))
