@@ -134,6 +134,9 @@
             z-index: 1000;
             top: 0;
         }
+        .main-content-lint > * {
+            width: 25%;
+        }
         .object-information {
             max-width: 250px;
             margin-right: 10px;
@@ -149,6 +152,7 @@
             justify-content: space-evenly;
             align-items: center;
             flex: 1;
+            width: 50%;
             gap: 10px;
         }
         .pagination__link {
@@ -162,13 +166,11 @@
             flex: 1;
             text-align: center;
         }
-
         @media screen and (max-width: 768px) {
             .pagination {
                 order: 3;
             }
         }
-
         .main-content {
             padding-top: 10px;
             padding-bottom: 10px;
