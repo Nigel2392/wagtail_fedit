@@ -78,3 +78,4 @@ from myapp.adapters import ColorizerAdapter
 
 adapter_registry.register(ColorizerAdapter)
 ```
+View the custom Javascript adapter in the [Adapters Javascript]({{ index .Tree.adapters.adapters_js.URL }}) page.

@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>permissions.md (v1.0.0) </title>
+    <title>make_editable.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -232,7 +232,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: permissions.md</span>
+                <span class="object-information__title">Template: make_editable.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -243,34 +243,83 @@
             </div>
         </div>
         <div class="main-content">
-            <h2 id="permissions">Permissions</h2>
-<p><strong>Note: This is not required for pages.</strong></p>
-<p><strong>The <code>Page</code> model already provides this interface.</strong></p>
-<p>We have the following basic permission requirements:</p>
-<ul>
-<li>You must have <code>wagtailadmin.access_admin</code> to edit a block/field.</li>
-<li>You must have the appropriate <code>app_label.change_*</code> permission for the model.</li>
-</ul>
-<p>This however only applies to editing.</p>
-<p>We use separate permissions for publishing and submitting workflows, etc.</p>
-<p>Models which you want to allow the publish view for should also implement a <code>PermissionTester</code>- like object.</p>
-<p>Example of how you should implement the <code>Tester</code> object and all required permissions. (More details in <code>models.py</code>)</p>
-<pre><code class="language-python">
-class MyModel(...):
-    def permissions_for_user(self, user):
-        return MyModelPermissionTester(self, user)
+            <h2 id="getting-editing">Getting Editing!</h2>
+<ol>
+<li>
+<p>If you want to get into the frontend-editing interface for a model it must inherit from <code>PreviewableMixin</code>.</p>
+<p><strong>This is a requirement.</strong></p>
+<p>It is however not always required for your model to inherit from <code>PreviewableMixin</code>.</p>
+<p><strong>Any model can be edited</strong>; you just can't access the specific frontend editing interface URL for that model if it does not inherit from <code>PreviewableMixin</code>.</p>
+<p>I.E: If a random model which does not inherit from <code>PreviewableMixin</code> appears on an editable page; <strong>you will be able to edit it.</strong></p>
+</li>
+<li>
+<p>Define a template for your model.</p>
+<p>Example:</p>
+<pre><code class="language-django-html">{% load fedit static wagtailuserbar %} {# Load the required template tag libraries #}
+&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+    {# Load all registered CSS required for the adapters. Only included inside edit view! #}
+    {% fedit_scripts &quot;css&quot; %}
+&lt;/head&gt;
+&lt;body&gt;
+    {# Adress the model.field or model.my.related.field you wish to edit. #}
+    {# For help on arguments for the adapters please run the adapter_help command. #}
+    {# Example: `python3 ./manage.py adapter_help` #}
+    &lt;h1&gt;{% fedit field self.title inline %}&lt;/h1&gt;
 
-class MyModelPermissionTester(...):
-    def can_unpublish(self):
-        &quot;&quot;&quot; Can the user unpublish this object? (Required for un-publishing&quot;&quot;&quot;
-  
-    def can_publish(self):
-        &quot;&quot;&quot; Can the user publish this object? (Required for publishing)&quot;&quot;&quot;  
-  
-    def can_submit_for_moderation(self):
-        &quot;&quot;&quot; Can the user submit this object for moderation? (Optional) &quot;&quot;&quot;
+    &lt;main class=&quot;my-streamfield-content&quot;&gt;
+        {% fedit field self.content %}
+    &lt;/main&gt;
 
+    {% wagtailuserbar %}
+
+    {# Load all registered Javascript required for the adapters. Only included inside edit view! #}
+    {% fedit_scripts &quot;js&quot; %}
+&lt;/body&gt;
+&lt;/html&gt;
 </code></pre>
+</li>
+<li>
+<p>If your needs some special form of rendering; we allow your model to define a custom render method.<br />
+The format of the method name should be <code>render_fedit_{fieldname}</code>.<br />
+Say we want all sub-blocks of our streamfield to automatically be made editable. This wouldn't be possible in the above configuration.<br />
+To fix this; we should first create a custom template to render our content.</p>
+<p>Example:</p>
+<pre><code class="language-django-html">{# myapp/render_my_field.html #}
+{% load fedit %}
+{% for block in self.content %}
+    {# Sub-Blocks wrapped by {# fedit block #} do not require the field_name or model argument. #}
+    {# This can (and probably should be) replaced with the `from_context` argument. #}
+    {# The variables are then taken from the parent {% fedit %} tag. The model and field name are shared through context. #}
+    {# This keeps everything extensible; but in this case it does not matter since what we are doing is instance- specific. #}
+    {% fedit block self.content block=block block_id=block.id %}
+{% endfor %}
+</code></pre>
+<pre><code class="language-python">from django.template.loader import render_to_string
+...
+
+class MyPage(...): # Can be any type of model.
+    content = StreamField(...)
+
+    def render_fedit_content(self, request, context):
+        return render_to_string(&quot;myapp/render_my_field.html&quot;, self.get_context(request) | context)
+</code></pre>
+<p>Your content will then automatically be rendered with that method when need be by using<br />
+<code>{% fedit field self.content %} </code></p>
+</li>
+<li>
+<p><strong>But wait?! I go to my template and I do not see a way to edit!</strong> That is true! We try to protect any styling on your actual page; we do not want to interfere.Instead; we serve the editing interface on a different URL, accessible by clicking <code>Frontend Editing</code> in the Wagtail userbar. Keep an eye on that userbar! It is also used for publishing if your model inherits from <code>DraftStateMixin</code>.</p>
+</li>
+</ol>
+<p><strong>Note:</strong> If the parent block is wrapped with <code>{% fedit block %}</code> or <code>{% fedit field %}</code> passing in the instance variable and field name should be omitted and replaced with <code>from_context</code>.<br />
+Example: <code>{% fedit block from_context block=item block_id=item.id %}</code><br />
+The parent- blocktag will share these variables through context.<br />
+This makes it possibly to easily use editable sub-blocks across multiple different model types.<br />
+If your model <strong>ISN'T</strong> capable of editing; or these variables aren't shared - your block will be rendered as normal.</p>
 
         </div>
     </main>

@@ -31,3 +31,4 @@ def register_js(request):
         ),
     ]
 ```
+View the custom Python adapter in the [Adapters Python]({{ index .Tree.adapters.adapters_python.URL }}) page.

@@ -42,6 +42,10 @@ class MyPage(Page):
 <div class="my-colorized-div" style="color: {{ "{{ page.color }}" }}">
     <h1>Colorized Text!</h1>
 </div>
-
 ...
 ```
+
+View the custom Python adapter in the [Adapters Python]({{ index .Tree.adapters.adapters_python.URL }}) page.
+
+View the custom Javascript adapter in the [Adapters Javascript]({{ index .Tree.adapters.adapters_js.URL }}) page.
+
