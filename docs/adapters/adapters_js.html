@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -269,30 +269,28 @@
             <h3 id="adapters-javascript">Adapters Javascript</h3>
 <p>We now need to create the javascript function to actually apply the color to the styles of the element.<br />
 This function will be called <code>myColorizerJavascriptFunction</code>, as defined in the adapter's <code>__init__</code> method.</p>
-<pre><code class="language-javascript">// myapp/static/myapp/js/custom.js
-function myColorizerJavascriptFunction(element, response) {
-    element.style.color = response.color;
-}
-</code></pre>
-<p>We must then register this javascript file to be included in the frontend editing interface.</p>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e">// myapp/static/myapp/js/custom.js
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">myColorizerJavascriptFunction</span>(<span style="color:#a6e22e">element</span>, <span style="color:#a6e22e">response</span>) {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#a6e22e">element</span>.<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">color</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">color</span>;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>}
+</span></span></code></pre><p>We must then register this javascript file to be included in the frontend editing interface.</p>
 <p>This should be done in a <code>wagtail_hooks.py</code> file.</p>
-<pre><code class="language-python"># myapp/wagtail_hooks.py
-
-from django.utils.html import format_html
-from django.templatetags.static import static
-from wagtail_fedit.hooks import REGISTER_JS
-from wagtail import hooks
-
-@hooks.register(REGISTER_JS)
-def register_js(request):
-    return [
-        format_html(
-            '&lt;script src=&quot;{0}&quot;&gt;&lt;/script&gt;',
-            static('myapp/js/custom.js')
-        ),
-    ]
-</code></pre>
-<p>View the custom Python adapter in the <a href="/wagtail_fedit/adapters/adapters_python.html">Adapters Python</a> page.</p>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#75715e"># myapp/wagtail_hooks.py</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span><span style="color:#f92672">from</span> django.utils.html <span style="color:#f92672">import</span> format_html
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span><span style="color:#f92672">from</span> django.templatetags.static <span style="color:#f92672">import</span> static
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span><span style="color:#f92672">from</span> wagtail_fedit.hooks <span style="color:#f92672">import</span> REGISTER_JS
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span><span style="color:#f92672">from</span> wagtail <span style="color:#f92672">import</span> hooks
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span><span style="color:#a6e22e">@hooks.register</span>(REGISTER_JS)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_js</span>(request):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>    <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>        format_html(
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>            <span style="color:#e6db74">&#39;&lt;script src=&#34;</span><span style="color:#e6db74">{0}</span><span style="color:#e6db74">&#34;&gt;&lt;/script&gt;&#39;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>            static(<span style="color:#e6db74">&#39;myapp/js/custom.js&#39;</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>        ),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>    ]
+</span></span></code></pre><p>View the custom Python adapter in the <a href="/wagtail_fedit/adapters/adapters_python.html">Adapters Python</a> page.</p>
 
         </div>
     </main>

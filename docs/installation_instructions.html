@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -270,12 +270,11 @@
 <ol>
 <li>
 <p>Add 'wagtail_fedit' to your INSTALLED_APPS setting like this:</p>
-<pre><code>INSTALLED_APPS = [
-...,
-'wagtail_fedit',
-]
-</code></pre>
-</li>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>INSTALLED_APPS <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    <span style="color:#f92672">...</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#e6db74">&#39;wagtail_fedit&#39;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>]
+</span></span></code></pre></li>
 <li>
 <p>Run <code>py ./manage.py collectstatic</code>.</p>
 </li>
@@ -283,6 +282,7 @@
 <p>Run <code>py ./manage.py adapter_help</code> to see all your options and their requirements.</p>
 </li>
 </ol>
+<p>Click <a href="/wagtail_fedit/make_editable.html">here</a> to get more information on how to make your models editable.</p>
 
         </div>
     </main>

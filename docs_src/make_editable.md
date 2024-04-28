@@ -1,3 +1,5 @@
+{{ Set "Title" "Making your models editable" }}
+
 ## Getting Editing!
 1. If you want to get into the frontend-editing interface for a model it must inherit from `PreviewableMixin`.
 
@@ -12,7 +14,7 @@
 
    Example:
 
-   ```django-html
+   ```html
    {% load fedit static wagtailuserbar %} {# Load the required template tag libraries #}
    <!DOCTYPE html>
    <html lang="en">
@@ -48,7 +50,7 @@
 
    Example:
 
-   ```django-html
+   ```html
    {# myapp/render_my_field.html #}
    {% load fedit %}
    {% for block in self.content %}

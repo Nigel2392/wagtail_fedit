@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -276,26 +276,25 @@ This will save you the most amount of work.</p>
 <ol>
 <li>Our model is defined as follows:</li>
 </ol>
-<pre><code class="language-python">from wagtail.models import Page
-from wagtail.admin.panels import FieldPanel
-from django.db import models
-
-class MyPage(Page):
-    COLOR_CHOICES = [
-        (&quot;#000000&quot;, &quot;Black&quot;),
-        (&quot;#FFFFFF&quot;, &quot;White&quot;),
-        (&quot;#FF0000&quot;, &quot;Red&quot;),
-        (&quot;#00FF00&quot;, &quot;Green&quot;),
-        (&quot;#0000FF&quot;, &quot;Blue&quot;),
-    ]
-
-    color = models.CharField(max_length=7, default=&quot;#000000&quot;, choices=COLOR_CHOICES)
-
-    content_panels = Page.content_panels + [
-        FieldPanel(&quot;color&quot;),
-    ]
-</code></pre>
-<ol start="2">
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#f92672">from</span> wagtail.models <span style="color:#f92672">import</span> Page
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span><span style="color:#f92672">from</span> wagtail.admin.panels <span style="color:#f92672">import</span> FieldPanel
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span><span style="color:#f92672">from</span> django.db <span style="color:#f92672">import</span> models
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyPage</span>(Page):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    COLOR_CHOICES <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>        (<span style="color:#e6db74">&#34;#000000&#34;</span>, <span style="color:#e6db74">&#34;Black&#34;</span>),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>        (<span style="color:#e6db74">&#34;#FFFFFF&#34;</span>, <span style="color:#e6db74">&#34;White&#34;</span>),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>        (<span style="color:#e6db74">&#34;#FF0000&#34;</span>, <span style="color:#e6db74">&#34;Red&#34;</span>),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>        (<span style="color:#e6db74">&#34;#00FF00&#34;</span>, <span style="color:#e6db74">&#34;Green&#34;</span>),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>        (<span style="color:#e6db74">&#34;#0000FF&#34;</span>, <span style="color:#e6db74">&#34;Blue&#34;</span>),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    ]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>    color <span style="color:#f92672">=</span> models<span style="color:#f92672">.</span>CharField(max_length<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>, default<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;#000000&#34;</span>, choices<span style="color:#f92672">=</span>COLOR_CHOICES)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>    content_panels <span style="color:#f92672">=</span> Page<span style="color:#f92672">.</span>content_panels <span style="color:#f92672">+</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>        FieldPanel(<span style="color:#e6db74">&#34;color&#34;</span>),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>    ]
+</span></span></code></pre><ol start="2">
 <li>We have the following HTML template:</li>
 </ol>
 <pre><code class="language-django-html">...

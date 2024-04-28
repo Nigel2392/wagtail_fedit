@@ -1,3 +1,5 @@
+{{ Set "Title" "Supported Features" }}
+
 ## Revisions
 
 Revision support is included out of the box.

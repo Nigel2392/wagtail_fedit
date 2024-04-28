@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -271,105 +271,96 @@
 <p>Construct the toolbar for the given adapter.<br />
 This is used to display the edit icon for the given adapter.</p>
 <p>How it is called:</p>
-<pre><code class="language-python">items = [
-    FeditAdapterEditButton(),
-]
-for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
-    hook(items=items, adapter=adapter)
-</code></pre>
-<h3 id="wagtail-feditregister-type-renderer">wagtail_fedit.register_type_renderer</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>items <span style="color:#f92672">=</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    FeditAdapterEditButton(),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>]
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#66d9ef">for</span> hook <span style="color:#f92672">in</span> hooks<span style="color:#f92672">.</span>get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    hook(items<span style="color:#f92672">=</span>items, adapter<span style="color:#f92672">=</span>adapter)
+</span></span></code></pre><h3 id="wagtail-feditregister-type-renderer">wagtail_fedit.register_type_renderer</h3>
 <p>Register a custom renderer for a type.</p>
 <p>Example of how this type of renderer can be used:</p>
-<pre><code class="language-python">@hooks.register(REGISTER_TYPE_RENDERER)
-def register_renderers(renderer_map):
-
-    # This is a custom renderer for the Page model.
-    # It will render the Page model as a simple h2 tag.
-    renderer_map[Page] = lambda request, context, instance, value: format_html(
-        '&lt;h2&gt;{0}&lt;/h2&gt;',
-        value.title
-    )
-</code></pre>
-<h3 id="wagtail-feditregister-css">wagtail_fedit.register_css</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#a6e22e">@hooks.register</span>(REGISTER_TYPE_RENDERER)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_renderers</span>(renderer_map):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#75715e"># This is a custom renderer for the Page model.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    <span style="color:#75715e"># It will render the Page model as a simple h2 tag.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>    renderer_map[Page] <span style="color:#f92672">=</span> <span style="color:#66d9ef">lambda</span> request, context, instance, value: format_html(
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>        <span style="color:#e6db74">&#39;&lt;h2&gt;</span><span style="color:#e6db74">{0}</span><span style="color:#e6db74">&lt;/h2&gt;&#39;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span>        value<span style="color:#f92672">.</span>title
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9</span><span>    )
+</span></span></code></pre><h3 id="wagtail-feditregister-css">wagtail_fedit.register_css</h3>
 <p>Register a custom CSS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.</p>
 <p>Example of how this hook is used in wagtail_hooks.py:</p>
-<pre><code class="language-python">@hooks.register(REGISTER_CSS)
-def register_css(request):
-    return [
-        format_html(
-            '&lt;link rel=&quot;stylesheet&quot; href=&quot;{0}&quot;&gt;',
-            static('css/custom.css')
-        ),
-    ]
-</code></pre>
-<h3 id="wagtail-feditfield-editor-size">wagtail_fedit.field_editor_size</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#a6e22e">@hooks.register</span>(REGISTER_CSS)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_css</span>(request):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>        format_html(
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>            <span style="color:#e6db74">&#39;&lt;link rel=&#34;stylesheet&#34; href=&#34;</span><span style="color:#e6db74">{0}</span><span style="color:#e6db74">&#34;&gt;&#39;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>            static(<span style="color:#e6db74">&#39;css/custom.css&#39;</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>        ),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span>    ]
+</span></span></code></pre><h3 id="wagtail-feditfield-editor-size">wagtail_fedit.field_editor_size</h3>
 <p>Control the size of the editor for the given model-field type.</p>
 <p>Example of how this hook is called:</p>
-<pre><code class="language-python">for hook in hooks.get_hooks(FEDIT_FIELD_EDITOR_SIZE):
-    size = hook(model_instance, model_field)
-    if size:
-        return size
-</code></pre>
-<h3 id="wagtail-feditregister-js">wagtail_fedit.register_js</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#66d9ef">for</span> hook <span style="color:#f92672">in</span> hooks<span style="color:#f92672">.</span>get_hooks(FEDIT_FIELD_EDITOR_SIZE):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    size <span style="color:#f92672">=</span> hook(model_instance, model_field)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">if</span> size:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>        <span style="color:#66d9ef">return</span> size
+</span></span></code></pre><h3 id="wagtail-feditregister-js">wagtail_fedit.register_js</h3>
 <p>Register a custom JS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.</p>
 <p>This can be used to register custom adapter JS.</p>
 <p>Example of how this hook is used in wagtail_hooks.py:</p>
-<pre><code class="language-python">@hooks.register(REGISTER_JS)
-def register_js(request):
-    return [
-        format_html(
-            '&lt;script src=&quot;{0}&quot;&gt;&lt;/script&gt;',
-            static('js/custom.js')
-        ),
-    ]
-</code></pre>
-<h3 id="wagtail-feditregister-field-renderer">wagtail_fedit.register_field_renderer</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#a6e22e">@hooks.register</span>(REGISTER_JS)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_js</span>(request):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">return</span> [
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>        format_html(
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>            <span style="color:#e6db74">&#39;&lt;script src=&#34;</span><span style="color:#e6db74">{0}</span><span style="color:#e6db74">&#34;&gt;&lt;/script&gt;&#39;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>            static(<span style="color:#e6db74">&#39;js/custom.js&#39;</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>        ),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span>    ]
+</span></span></code></pre><h3 id="wagtail-feditregister-field-renderer">wagtail_fedit.register_field_renderer</h3>
 <p>Register a custom renderer for a field.</p>
 <p>Example of how this type of renderer is used in wagtail_hooks/renderers.py:</p>
-<pre><code class="language-python">@hooks.register(REGISTER_FIELD_RENDERER)
-def register_renderers(renderer_map):
-
-    # This is a custom renderer for RichText fields.
-    # It will render the RichText field as a RichText block.
-    renderer_map[RichTextField] =\
-        lambda request, context, instance, value: richtext(value)
-</code></pre>
-<h3 id="wagtail-feditregister-field-widgets">wagtail_fedit.register_field_widgets</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#a6e22e">@hooks.register</span>(REGISTER_FIELD_RENDERER)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_renderers</span>(renderer_map):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#75715e"># This is a custom renderer for RichText fields.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    <span style="color:#75715e"># It will render the RichText field as a RichText block.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>    renderer_map[RichTextField] <span style="color:#f92672">=</span>\
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>        <span style="color:#66d9ef">lambda</span> request, context, instance, value: richtext(value)
+</span></span></code></pre><h3 id="wagtail-feditregister-field-widgets">wagtail_fedit.register_field_widgets</h3>
 <p>Register a custom widget for a field.</p>
 <p>Example of how this hook is used in wagtail_hooks.py:</p>
-<pre><code class="language-python">@hooks.register(REGISTER_FIELD_WIDGETS)
-def register_field_widgets(widgets):
-    widgets[RichTextField] = AdminRichTextField
-    return widgets
-</code></pre>
-<h3 id="wagtail-feditexclude-related-forms">wagtail_fedit.exclude_related_forms</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#a6e22e">@hooks.register</span>(REGISTER_FIELD_WIDGETS)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">register_field_widgets</span>(widgets):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    widgets[RichTextField] <span style="color:#f92672">=</span> AdminRichTextField
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    <span style="color:#66d9ef">return</span> widgets
+</span></span></code></pre><h3 id="wagtail-feditexclude-related-forms">wagtail_fedit.exclude_related_forms</h3>
 <p>Exclude the given model type from the related forms.<br />
 This is used internally to exclude the Page, Image, and Document models from the related forms.<br />
 This way; the user will have the actual widget for the field instead of the related form.</p>
 <p>Example of how this hook is called and how it is used internally:</p>
-<pre><code class="language-python">def use_related_form(field: models.Field) -&gt; bool:
-    for hook in hooks.get_hooks(EXCLUDE_FROM_RELATED_FORMS):
-        if hook(field):
-            return False
-    return True
-
-  
-@hooks.register(EXCLUDE_FROM_RELATED_FORMS)
-def exclude_related_forms(field):
-    if field.related_model in [Page, Image, Document]:
-        return True
-    return False
-</code></pre>
-<h3 id="wagtail-feditaction-menu-item-is-shown">wagtail_fedit.action_menu_item_is_shown</h3>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">use_related_form</span>(field: models<span style="color:#f92672">.</span>Field) <span style="color:#f92672">-&gt;</span> bool:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>    <span style="color:#66d9ef">for</span> hook <span style="color:#f92672">in</span> hooks<span style="color:#f92672">.</span>get_hooks(EXCLUDE_FROM_RELATED_FORMS):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>        <span style="color:#66d9ef">if</span> hook(field):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>            <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>  
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span><span style="color:#a6e22e">@hooks.register</span>(EXCLUDE_FROM_RELATED_FORMS)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">exclude_related_forms</span>(field):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>    <span style="color:#66d9ef">if</span> field<span style="color:#f92672">.</span>related_model <span style="color:#f92672">in</span> [Page, Image, Document]:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">True</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">False</span>
+</span></span></code></pre><h3 id="wagtail-feditaction-menu-item-is-shown">wagtail_fedit.action_menu_item_is_shown</h3>
 <p>Decide if the action menu item should be shown for the given instance.</p>
 <p>Return None if you cannot decide, False if you want to hide the item, and True if you want to show the item.</p>
 <p>Example of how this hook is called:</p>
-<pre><code class="language-python">for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
-    result = hook(context, instance)
-    if result is not None:
-        return result # &lt;- bool
-</code></pre>
-
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#66d9ef">for</span> hook <span style="color:#f92672">in</span> hooks<span style="color:#f92672">.</span>get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>    result <span style="color:#f92672">=</span> hook(context, instance)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">if</span> result <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>        <span style="color:#66d9ef">return</span> result <span style="color:#75715e"># &lt;- bool</span>
+</span></span></code></pre>
         </div>
     </main>
 

@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -278,23 +278,22 @@
 <p>We use separate permissions for publishing and submitting workflows, etc.</p>
 <p>Models which you want to allow the publish view for should also implement a <code>PermissionTester</code>- like object.</p>
 <p>Example of how you should implement the <code>Tester</code> object and all required permissions. (More details in <code>models.py</code>)</p>
-<pre><code class="language-python">
-class MyModel(...):
-    def permissions_for_user(self, user):
-        return MyModelPermissionTester(self, user)
-
-class MyModelPermissionTester(...):
-    def can_unpublish(self):
-        &quot;&quot;&quot; Can the user unpublish this object? (Required for un-publishing&quot;&quot;&quot;
-  
-    def can_publish(self):
-        &quot;&quot;&quot; Can the user publish this object? (Required for publishing)&quot;&quot;&quot;  
-  
-    def can_submit_for_moderation(self):
-        &quot;&quot;&quot; Can the user submit this object for moderation? (Optional) &quot;&quot;&quot;
-
-</code></pre>
-
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyModel</span>(<span style="color:#f92672">...</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">permissions_for_user</span>(self, user):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>        <span style="color:#66d9ef">return</span> MyModelPermissionTester(self, user)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyModelPermissionTester</span>(<span style="color:#f92672">...</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">can_unpublish</span>(self):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>        <span style="color:#e6db74">&#34;&#34;&#34; Can the user unpublish this object? (Required for un-publishing&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>  
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">can_publish</span>(self):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>        <span style="color:#e6db74">&#34;&#34;&#34; Can the user publish this object? (Required for publishing)&#34;&#34;&#34;</span>  
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>  
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">can_submit_for_moderation</span>(self):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>        <span style="color:#e6db74">&#34;&#34;&#34; Can the user submit this object for moderation? (Optional) &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>
+</span></span></code></pre>
         </div>
     </main>
 

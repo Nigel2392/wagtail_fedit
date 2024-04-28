@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -278,68 +278,66 @@ Adapters can be defined anywhere; we recommend a separate <code>adapters.py</cod
 <li><code>self.request</code> - The django HTTP request object.</li>
 <li><code>self.kwargs</code> - Any shared context / keyword arguments for this adapter.</li>
 </ul>
-<pre><code class="language-python"># myapp/adapters.py
-
-from wagtail_fedit.adapters import (
-    BaseFieldFuncAdapter,
-    VARIABLES,
-)
-
-class ColorizerAdapter(BaseFieldFuncAdapter):
-    # Keywords for the adapter can easily be defined.
-    # These will be used to inform the templatetag on what is nescessary, required and counts as a flag.
-    keywords = (
-        Keyword(
-            &quot;target&quot;,
-            help_text=&quot;The target element to apply the background-image to - this should be a css selector.&quot;,
-            type_hint=&quot;str&quot;,  # Type hint for the `adapter_help` command.
-            # optional=False, # Required is the default.
-            # absolute=False, # Counts as a keyword argument key=value instead of a boolean flag.
-            # default=None,   # Default value if not provided, only for optional keyword arguments.
-        ),
-    )
-
-    # How the adapter will be adressed inside of the template tag.
-    identifier = &quot;colorizer&quot;
-
-    # The function to call in javascript.
-    js_function = &quot;myColorizerJavascriptFunction&quot;
-
-    # A simple description of what this adapter does.
-    usage_description = &quot;Change the color of the text for the given target element.&quot;
-
-    def render_content(self, parent_context=None):
-        # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
-        return &quot;&quot;
-  
-    def get_response_data(self, parent_context=None):
-        &quot;&quot;&quot;
-        Return the data to be sent to the frontend adapter.
-        &quot;&quot;&quot;
-        data = super().get_response_data(parent_context)
-        return data | {
-            &quot;color&quot;: self.field_value,
-        }
-
-    def get_form_attrs(self) -&gt; dict:
-        &quot;&quot;&quot;
-        Return form attributes for the form inside of the edit modal.
-        This can be used to control editor size.
-        &quot;&quot;&quot;
-        attrs = super().get_form_attrs()
-        attrs[VARIABLES.FORM_SIZE_VAR] = &quot;full&quot; # Fullscreen, there is also `large`.
-        return attrs
-</code></pre>
-<p>We must then register the adapter to make sure it is available for templates.</p>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span><span style="color:#75715e"># myapp/adapters.py</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span><span style="color:#f92672">from</span> wagtail_fedit.adapters <span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>    BaseFieldFuncAdapter,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    VARIABLES,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">ColorizerAdapter</span>(BaseFieldFuncAdapter):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    <span style="color:#75715e"># Keywords for the adapter can easily be defined.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>    <span style="color:#75715e"># These will be used to inform the templatetag on what is nescessary, required and counts as a flag.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>    keywords <span style="color:#f92672">=</span> (
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>        Keyword(
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>            <span style="color:#e6db74">&#34;target&#34;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>            help_text<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;The target element to apply the background-image to - this should be a css selector.&#34;</span>,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>            type_hint<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;str&#34;</span>,  <span style="color:#75715e"># Type hint for the `adapter_help` command.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>            <span style="color:#75715e"># optional=False, # Required is the default.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>            <span style="color:#75715e"># absolute=False, # Counts as a keyword argument key=value instead of a boolean flag.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>            <span style="color:#75715e"># default=None,   # Default value if not provided, only for optional keyword arguments.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>        ),
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>    )
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>    <span style="color:#75715e"># How the adapter will be adressed inside of the template tag.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>    identifier <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;colorizer&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25</span><span>    <span style="color:#75715e"># The function to call in javascript.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26</span><span>    js_function <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;myColorizerJavascriptFunction&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28</span><span>    <span style="color:#75715e"># A simple description of what this adapter does.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29</span><span>    usage_description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Change the color of the text for the given target element.&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">render_content</span>(self, parent_context<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32</span><span>        <span style="color:#75715e"># This is not required; we will replace a CSS variable; thus we are not returning any actual content.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33</span><span>        <span style="color:#66d9ef">return</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34</span><span>  
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_response_data</span>(self, parent_context<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36</span><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37</span><span><span style="color:#e6db74">        Return the data to be sent to the frontend adapter.
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38</span><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39</span><span>        data <span style="color:#f92672">=</span> super()<span style="color:#f92672">.</span>get_response_data(parent_context)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40</span><span>        <span style="color:#66d9ef">return</span> data <span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41</span><span>            <span style="color:#e6db74">&#34;color&#34;</span>: self<span style="color:#f92672">.</span>field_value,
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42</span><span>        }
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">get_form_attrs</span>(self) <span style="color:#f92672">-&gt;</span> dict:
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45</span><span>        <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46</span><span><span style="color:#e6db74">        Return form attributes for the form inside of the edit modal.
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47</span><span><span style="color:#e6db74">        This can be used to control editor size.
+</span></span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48</span><span><span style="color:#e6db74">        &#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49</span><span>        attrs <span style="color:#f92672">=</span> super()<span style="color:#f92672">.</span>get_form_attrs()
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50</span><span>        attrs[VARIABLES<span style="color:#f92672">.</span>FORM_SIZE_VAR] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;full&#34;</span> <span style="color:#75715e"># Fullscreen, there is also `large`.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51</span><span>        <span style="color:#66d9ef">return</span> attrs
+</span></span></code></pre><p>We must then register the adapter to make sure it is available for templates.</p>
 <p>This should be done in a <code>wagtail_hooks.py</code> file.</p>
-<pre><code class="language-python"># myapp/wagtail_hooks.py
-
-from wagtail_fedit.adapters import adapter_registry
-from myapp.adapters import ColorizerAdapter
-
-adapter_registry.register(ColorizerAdapter)
-</code></pre>
-<p>View the custom Javascript adapter in the <a href="/wagtail_fedit/adapters/adapters_js.html">Adapters Javascript</a> page.</p>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#75715e"># myapp/wagtail_hooks.py</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span><span style="color:#f92672">from</span> wagtail_fedit.adapters <span style="color:#f92672">import</span> adapter_registry
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#f92672">from</span> myapp.adapters <span style="color:#f92672">import</span> ColorizerAdapter
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>adapter_registry<span style="color:#f92672">.</span>register(ColorizerAdapter)
+</span></span></code></pre><p>View the custom Javascript adapter in the <a href="/wagtail_fedit/adapters/adapters_js.html">Adapters Javascript</a> page.</p>
 
         </div>
     </main>

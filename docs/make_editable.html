@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>make_editable.md (v1.0.0) </title>
+    <title>Making your models editable (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -77,7 +77,7 @@
         *:is(h1, h2, h3, h4, h5, h6):has(> code) {
             color: #a10c31;
             background-color: #f9f2f4;
-            padding: 0 4px;
+            padding: 0 8px;
         }
         .navbar {
             display: flex;
@@ -278,60 +278,57 @@
 <li>
 <p>Define a template for your model.</p>
 <p>Example:</p>
-<pre><code class="language-django-html">{% load fedit static wagtailuserbar %} {# Load the required template tag libraries #}
-&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-    &lt;title&gt;Document&lt;/title&gt;
-    {# Load all registered CSS required for the adapters. Only included inside edit view! #}
-    {% fedit_scripts &quot;css&quot; %}
-&lt;/head&gt;
-&lt;body&gt;
-    {# Adress the model.field or model.my.related.field you wish to edit. #}
-    {# For help on arguments for the adapters please run the adapter_help command. #}
-    {# Example: `python3 ./manage.py adapter_help` #}
-    &lt;h1&gt;{% fedit field self.title inline %}&lt;/h1&gt;
-
-    &lt;main class=&quot;my-streamfield-content&quot;&gt;
-        {% fedit field self.content %}
-    &lt;/main&gt;
-
-    {% wagtailuserbar %}
-
-    {# Load all registered Javascript required for the adapters. Only included inside edit view! #}
-    {% fedit_scripts &quot;js&quot; %}
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-</li>
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1</span><span>{% load fedit static wagtailuserbar %} {# Load the required template tag libraries #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2</span><span><span style="color:#75715e">&lt;!DOCTYPE html&gt;</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3</span><span>&lt;<span style="color:#f92672">html</span> <span style="color:#a6e22e">lang</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;en&#34;</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4</span><span>&lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5</span><span>    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">charset</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;UTF-8&#34;</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6</span><span>    &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">name</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;viewport&#34;</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;width=device-width, initial-scale=1.0&#34;</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7</span><span>    &lt;<span style="color:#f92672">title</span>&gt;Document&lt;/<span style="color:#f92672">title</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8</span><span>    {# Load all registered CSS required for the adapters. Only included inside edit view! #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9</span><span>    {% fedit_scripts &#34;css&#34; %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10</span><span>&lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11</span><span>&lt;<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12</span><span>    {# Adress the model.field or model.my.related.field you wish to edit. #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13</span><span>    {# For help on arguments for the adapters please run the adapter_help command. #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14</span><span>    {# Example: `python3 ./manage.py adapter_help` #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15</span><span>    &lt;<span style="color:#f92672">h1</span>&gt;{% fedit field self.title inline %}&lt;/<span style="color:#f92672">h1</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17</span><span>    &lt;<span style="color:#f92672">main</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;my-streamfield-content&#34;</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18</span><span>        {% fedit field self.content %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19</span><span>    &lt;/<span style="color:#f92672">main</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21</span><span>    {% wagtailuserbar %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23</span><span>    {# Load all registered Javascript required for the adapters. Only included inside edit view! #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24</span><span>    {% fedit_scripts &#34;js&#34; %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25</span><span>&lt;/<span style="color:#f92672">body</span>&gt;
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26</span><span>&lt;/<span style="color:#f92672">html</span>&gt;
+</span></span></code></pre></li>
 <li>
 <p>If your needs some special form of rendering; we allow your model to define a custom render method.<br />
 The format of the method name should be <code>render_fedit_{fieldname}</code>.<br />
 Say we want all sub-blocks of our streamfield to automatically be made editable. This wouldn't be possible in the above configuration.<br />
 To fix this; we should first create a custom template to render our content.</p>
 <p>Example:</p>
-<pre><code class="language-django-html">{# myapp/render_my_field.html #}
-{% load fedit %}
-{% for block in self.content %}
-    {# Sub-Blocks wrapped by {# fedit block #} do not require the field_name or model argument. #}
-    {# This can (and probably should be) replaced with the `from_context` argument. #}
-    {# The variables are then taken from the parent {% fedit %} tag. The model and field name are shared through context. #}
-    {# This keeps everything extensible; but in this case it does not matter since what we are doing is instance- specific. #}
-    {% fedit block self.content block=block block_id=block.id %}
-{% endfor %}
-</code></pre>
-<pre><code class="language-python">from django.template.loader import render_to_string
-...
-
-class MyPage(...): # Can be any type of model.
-    content = StreamField(...)
-
-    def render_fedit_content(self, request, context):
-        return render_to_string(&quot;myapp/render_my_field.html&quot;, self.get_context(request) | context)
-</code></pre>
-<p>Your content will then automatically be rendered with that method when need be by using<br />
+<pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span>{# myapp/render_my_field.html #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span>{% load fedit %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>{% for block in self.content %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>    {# Sub-Blocks wrapped by {# fedit block #} do not require the field_name or model argument. #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    {# This can (and probably should be) replaced with the `from_context` argument. #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>    {# The variables are then taken from the parent {% fedit %} tag. The model and field name are shared through context. #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>    {# This keeps everything extensible; but in this case it does not matter since what we are doing is instance- specific. #}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span>    {% fedit block self.content block=block block_id=block.id %}
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">9</span><span>{% endfor %}
+</span></span></code></pre><pre style="color:#f8f8f2;background-color:#272822;"><code><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1</span><span><span style="color:#f92672">from</span> django.template.loader <span style="color:#f92672">import</span> render_to_string
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">2</span><span><span style="color:#f92672">...</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">MyPage</span>(<span style="color:#f92672">...</span>): <span style="color:#75715e"># Can be any type of model.</span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">5</span><span>    content <span style="color:#f92672">=</span> StreamField(<span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">6</span><span>
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">7</span><span>    <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">render_fedit_content</span>(self, request, context):
+</span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">8</span><span>        <span style="color:#66d9ef">return</span> render_to_string(<span style="color:#e6db74">&#34;myapp/render_my_field.html&#34;</span>, self<span style="color:#f92672">.</span>get_context(request) <span style="color:#f92672">|</span> context)
+</span></span></code></pre><p>Your content will then automatically be rendered with that method when need be by using<br />
 <code>{% fedit field self.content %} </code></p>
 </li>
 <li>
