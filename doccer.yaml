@@ -16,26 +16,33 @@ server:
 menu:
 #   logo: "static/logo.svg"
   items:
-    # - name: "Home"
-    #   path: ""
     - name: "Installation Instructions"
       path: "installation_instructions.md"
+
     - name: "Make something editable"
       path: "make_editable.md"
+
     - name: "Adapters"
       path: "adapters"
+
     - name: "Adapters Python"
       path: "adapters/adapters_python.md"
+      
     - name: "Adapters Javascript"
       path: "adapters/adapters_js.md"
+      
     - name: "Caveats"
       path: "caveats.md"
+      
     - name: "Hooks"
       path: "hooks.md"
+      
     - name: "Settings"
       path: "settings.md"
+      
     - name: "Permissions"
       path: "permissions.md"
+      
     - name: "Supported Features"
       path: "support.md"
 
