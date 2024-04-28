@@ -63,12 +63,18 @@
             font-size: 14px;
             overflow: auto;
         }
-        *:not(pre) > code {
+        *:not(pre, h1, h2, h3, h4, h5, h6) > code {
             font-size: 14px;
             color: #c7254e;
             background-color: #f9f2f4;
             padding: 2px 4px;
             border-radius: 4px;
+        }
+        *:is(h1, h2, h3, h4, h5, h6) > code {
+            color: #a10c31;
+            background-color: #f9f2f4;
+            background-color: transparent;
+            padding: 0;
         }
         .navbar {
             display: flex;
