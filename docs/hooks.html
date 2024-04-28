@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>Readme (v1.0.0) </title>
+    <title>hooks.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: README.md</span>
+                <span class="object-information__title">Template: hooks.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,11 +225,109 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
-<p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
-<p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
-<p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>
+            <h2 id="hooks">Hooks</h2>
+<h3 id="wagtail-feditconstruct-adapter-toolbar">wagtail_fedit.construct_adapter_toolbar</h3>
+<p>Construct the toolbar for the given adapter.<br />
+This is used to display the edit icon for the given adapter.</p>
+<p>How it is called:</p>
+<pre><code class="language-python">items = [
+    FeditAdapterEditButton(),
+]
+for hook in hooks.get_hooks(CONSTRUCT_ADAPTER_TOOLBAR):
+    hook(items=items, adapter=adapter)
+</code></pre>
+<h3 id="wagtail-feditregister-type-renderer">wagtail_fedit.register_type_renderer</h3>
+<p>Register a custom renderer for a type.</p>
+<p>Example of how this type of renderer can be used:</p>
+<pre><code class="language-python">@hooks.register(REGISTER_TYPE_RENDERER)
+def register_renderers(renderer_map):
+
+    # This is a custom renderer for the Page model.
+    # It will render the Page model as a simple h2 tag.
+    renderer_map[Page] = lambda request, context, instance, value: format_html(
+        '&lt;h2&gt;{0}&lt;/h2&gt;',
+        value.title
+    )
+</code></pre>
+<h3 id="wagtail-feditregister-css">wagtail_fedit.register_css</h3>
+<p>Register a custom CSS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.</p>
+<p>Example of how this hook is used in wagtail_hooks.py:</p>
+<pre><code class="language-python">@hooks.register(REGISTER_CSS)
+def register_css(request):
+    return [
+        format_html(
+            '&lt;link rel=&quot;stylesheet&quot; href=&quot;{0}&quot;&gt;',
+            static('css/custom.css')
+        ),
+    ]
+</code></pre>
+<h3 id="wagtail-feditfield-editor-size">wagtail_fedit.field_editor_size</h3>
+<p>Control the size of the editor for the given model-field type.</p>
+<p>Example of how this hook is called:</p>
+<pre><code class="language-python">for hook in hooks.get_hooks(FEDIT_FIELD_EDITOR_SIZE):
+    size = hook(model_instance, model_field)
+    if size:
+        return size
+</code></pre>
+<h3 id="wagtail-feditregister-js">wagtail_fedit.register_js</h3>
+<p>Register a custom JS file to be included when the utils.FEDIT_PREVIEW_VAR is set to True.</p>
+<p>This can be used to register custom adapter JS.</p>
+<p>Example of how this hook is used in wagtail_hooks.py:</p>
+<pre><code class="language-python">@hooks.register(REGISTER_JS)
+def register_js(request):
+    return [
+        format_html(
+            '&lt;script src=&quot;{0}&quot;&gt;&lt;/script&gt;',
+            static('js/custom.js')
+        ),
+    ]
+</code></pre>
+<h3 id="wagtail-feditregister-field-renderer">wagtail_fedit.register_field_renderer</h3>
+<p>Register a custom renderer for a field.</p>
+<p>Example of how this type of renderer is used in wagtail_hooks/renderers.py:</p>
+<pre><code class="language-python">@hooks.register(REGISTER_FIELD_RENDERER)
+def register_renderers(renderer_map):
+
+    # This is a custom renderer for RichText fields.
+    # It will render the RichText field as a RichText block.
+    renderer_map[RichTextField] =\
+        lambda request, context, instance, value: richtext(value)
+</code></pre>
+<h3 id="wagtail-feditregister-field-widgets">wagtail_fedit.register_field_widgets</h3>
+<p>Register a custom widget for a field.</p>
+<p>Example of how this hook is used in wagtail_hooks.py:</p>
+<pre><code class="language-python">@hooks.register(REGISTER_FIELD_WIDGETS)
+def register_field_widgets(widgets):
+    widgets[RichTextField] = AdminRichTextField
+    return widgets
+</code></pre>
+<h3 id="wagtail-feditexclude-related-forms">wagtail_fedit.exclude_related_forms</h3>
+<p>Exclude the given model type from the related forms.<br />
+This is used internally to exclude the Page, Image, and Document models from the related forms.<br />
+This way; the user will have the actual widget for the field instead of the related form.</p>
+<p>Example of how this hook is called and how it is used internally:</p>
+<pre><code class="language-python">def use_related_form(field: models.Field) -&gt; bool:
+    for hook in hooks.get_hooks(EXCLUDE_FROM_RELATED_FORMS):
+        if hook(field):
+            return False
+    return True
+
+  
+@hooks.register(EXCLUDE_FROM_RELATED_FORMS)
+def exclude_related_forms(field):
+    if field.related_model in [Page, Image, Document]:
+        return True
+    return False
+</code></pre>
+<h3 id="wagtail-feditaction-menu-item-is-shown">wagtail_fedit.action_menu_item_is_shown</h3>
+<p>Decide if the action menu item should be shown for the given instance.</p>
+<p>Return None if you cannot decide, False if you want to hide the item, and True if you want to show the item.</p>
+<p>Example of how this hook is called:</p>
+<pre><code class="language-python">for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
+    result = hook(context, instance)
+    if result is not None:
+        return result # &lt;- bool
+</code></pre>
 
         </div>
     </main>

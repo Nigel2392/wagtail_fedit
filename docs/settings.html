@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>Readme (v1.0.0) </title>
+    <title>settings.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: README.md</span>
+                <span class="object-information__title">Template: settings.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,11 +225,35 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
-<p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
-<p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
-<p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>
+            <h2 id="settings">Settings</h2>
+<h3 id="wagtail-fedit-sign-shared-context"><code>WAGTAIL_FEDIT_SIGN_SHARED_CONTEXT</code></h3>
+<p>Default: <code>True</code></p>
+<p>Sign the shared context with a secret key.<br />
+This is useful to prevent tampering with the shared context.<br />
+It will also be compressed with zlib if available.<br />
+It might not be in your site's security model to need this.</p>
+<h3 id="wagtail-fedit-share-with-sessions"><code>WAGTAIL_FEDIT_SHARE_WITH_SESSIONS</code></h3>
+<p>Default: <code>False</code></p>
+<p>Share the context through the session data.<br />
+This is useful if you are running into limits with the URL length.<br />
+This will store the context in the session and pass the session<br />
+key to the iFrame instead of the context.</p>
+<h3 id="wagtail-fedit-use-adapter-session-id"><code>WAGTAIL_FEDIT_USE_ADAPTER_SESSION_ID</code></h3>
+<p>Default: <code>True</code></p>
+<p>Use the get_element_id method of the adapter to generate a session ID.<br />
+<em>This could <strong>maybe</strong> interfere with other editable- block's session data, but is highly unlikely!</em><br />
+This is useful to not clutter session data too much.<br />
+If <code>False</code>, the session ID will be generated each time the page is loaded.</p>
+<h3 id="wagtail-fedit-track-locales"><code>WAGTAIL_FEDIT_TRACK_LOCALES</code></h3>
+<p>Default: <code>False</code></p>
+<p>Track the locales of the users across the views.</p>
+<p><strong>This sets the initial request.LANGUAGE_CODE (if available) in the shared context.</strong></p>
+<p>If this is false, there is no guarantee that the language of a saved field/model<br />
+will be the same as it initially was, generally it will be - however this might mess up with Wagtail's <code>Page.locale</code> and<br />
+the page not being available in the context afterwards.</p>
+<h3 id="wagtail-fedit-tippy-enabled"><code>WAGTAIL_FEDIT_TIPPY_ENABLED</code></h3>
+<p>Default: <code>True</code></p>
+<p>Enable Tippy.js tooltips for toolbar buttons.</p>
 
         </div>
     </main>

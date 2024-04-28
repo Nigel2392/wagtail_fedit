@@ -1,0 +1,49 @@
+{{ define "navbar" }}
+    <nav class="navbar">
+        <div class="navbar-logo">
+            <a href="{{ .Config.Server.BaseURL }}">
+                {{ if .Menu.Logo }}
+                    <img src="{{ Asset .Menu.Logo }}">
+                {{ else }}
+                    <svg viewBox="156.788 68.877 88.5 34" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient gradientUnits="userSpaceOnUse" x1="217.443" y1="71.064" x2="217.443" y2="102.613" id="gradient-0" gradientTransform="matrix(0.913232, -0.407441, 0.878782, 1.96969, -89.471664, 7.256761)">
+                          <stop offset="0" style="stop-color: rgb(0% 50.196% 100%)"/>
+                          <stop offset="1" style="stop-color: rgb(198, 225, 255);"/>
+                        </linearGradient>
+                      </defs>
+                      <text style="fill: url('#gradient-0'); font-family: Impact; font-size: 28px; paint-order: fill; white-space: pre;" x="156.788" y="96.877" transform="matrix(1, 0, 0, 1, 0, -3.552713678800501e-15)">DOCCER</text>
+                    </svg>
+                {{ end }}
+            </a>
+        </div>
+        <ul class="navbar-menu">
+            <li>
+                <a href="{{ .Config.Server.BaseURL }}" class="navbar-item navbar-title">
+                    {{ .Config.Project.Name }}
+                </a>
+            </li>
+            {{ range $menuItem := .Menu.Items }}
+                <li>
+                    <a href="{{ $menuItem.URL }}" class="navbar-item">
+                        {{ $menuItem.Name }}
+                    </a>
+                </li>
+            {{ end }}
+        </ul>
+        <ul class="navbar-menu navbar-footer">
+            <li>
+                <span class="navbar-item navbar-item-small">
+                    v{{ .Config.Project.Version }}
+                </span>
+            </li>
+            {{ range $menuItem := .Footer.Items }}
+                <li>
+                    <a href="{{ $menuItem.URL }}" class="navbar-item" target="_blank">
+                        {{ $menuItem.Name }}
+                    </a>
+                </li>
+            {{ end }}
+        </ul>
+    </nav>
+{{ end }}

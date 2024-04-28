@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>Readme (v1.0.0) </title>
+    <title>permissions.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: README.md</span>
+                <span class="object-information__title">Template: permissions.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,11 +225,34 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
-<p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
-<p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
-<p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>
+            <h2 id="permissions">Permissions</h2>
+<p><strong>Note: This is not required for pages.</strong></p>
+<p><strong>The <code>Page</code> model already provides this interface.</strong></p>
+<p>We have the following basic permission requirements:</p>
+<ul>
+<li>You must have <code>wagtailadmin.access_admin</code> to edit a block/field.</li>
+<li>You must have the appropriate <code>app_label.change_*</code> permission for the model.</li>
+</ul>
+<p>This however only applies to editing.</p>
+<p>We use separate permissions for publishing and submitting workflows, etc.</p>
+<p>Models which you want to allow the publish view for should also implement a <code>PermissionTester</code>- like object.</p>
+<p>Example of how you should implement the <code>Tester</code> object and all required permissions. (More details in <code>models.py</code>)</p>
+<pre><code class="language-python">
+class MyModel(...):
+    def permissions_for_user(self, user):
+        return MyModelPermissionTester(self, user)
+
+class MyModelPermissionTester(...):
+    def can_unpublish(self):
+        &quot;&quot;&quot; Can the user unpublish this object? (Required for un-publishing&quot;&quot;&quot;
+  
+    def can_publish(self):
+        &quot;&quot;&quot; Can the user publish this object? (Required for publishing)&quot;&quot;&quot;  
+  
+    def can_submit_for_moderation(self):
+        &quot;&quot;&quot; Can the user submit this object for moderation? (Optional) &quot;&quot;&quot;
+
+</code></pre>
 
         </div>
     </main>

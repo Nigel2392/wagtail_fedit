@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>Readme (v1.0.0) </title>
+    <title>adapters_python.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: README.md</span>
+                <span class="object-information__title">Template: adapters\adapters_python.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,11 +225,79 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
-<p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
-<p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
-<p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>
+            <h3 id="adapters-python">Adapters Python</h3>
+<p>We will get started creating the adapter definition.<br />
+Adapters can be defined anywhere; we recommend a separate <code>adapters.py</code> file.</p>
+<p>Adapter instances also have access to the following variables:</p>
+<ul>
+<li><code>self.object</code> - The model instance.</li>
+<li><code>self.field_name</code> - The field name.</li>
+<li><code>self.meta_field</code> - The models.Field instance.</li>
+<li><code>self.field_value</code> - The field value (Retrieved with <code>getattr(self.object, self.field_name)</code>).</li>
+<li><code>self.request</code> - The django HTTP request object.</li>
+<li><code>self.kwargs</code> - Any shared context / keyword arguments for this adapter.</li>
+</ul>
+<pre><code class="language-python"># myapp/adapters.py
+
+from wagtail_fedit.adapters import (
+    BaseFieldFuncAdapter,
+    VARIABLES,
+)
+
+class ColorizerAdapter(BaseFieldFuncAdapter):
+    # Keywords for the adapter can easily be defined.
+    # These will be used to inform the templatetag on what is nescessary, required and counts as a flag.
+    keywords = (
+        Keyword(
+            &quot;target&quot;,
+            help_text=&quot;The target element to apply the background-image to - this should be a css selector.&quot;,
+            type_hint=&quot;str&quot;,  # Type hint for the `adapter_help` command.
+            # optional=False, # Required is the default.
+            # absolute=False, # Counts as a keyword argument key=value instead of a boolean flag.
+            # default=None,   # Default value if not provided, only for optional keyword arguments.
+        ),
+    )
+
+    # How the adapter will be adressed inside of the template tag.
+    identifier = &quot;colorizer&quot;
+
+    # The function to call in javascript.
+    js_function = &quot;myColorizerJavascriptFunction&quot;
+
+    # A simple description of what this adapter does.
+    usage_description = &quot;Change the color of the text for the given target element.&quot;
+
+    def render_content(self, parent_context=None):
+        # This is not required; we will replace a CSS variable; thus we are not returning any actual content.
+        return &quot;&quot;
+  
+    def get_response_data(self, parent_context=None):
+        &quot;&quot;&quot;
+        Return the data to be sent to the frontend adapter.
+        &quot;&quot;&quot;
+        data = super().get_response_data(parent_context)
+        return data | {
+            &quot;color&quot;: self.field_value,
+        }
+
+    def get_form_attrs(self) -&gt; dict:
+        &quot;&quot;&quot;
+        Return form attributes for the form inside of the edit modal.
+        This can be used to control editor size.
+        &quot;&quot;&quot;
+        attrs = super().get_form_attrs()
+        attrs[VARIABLES.FORM_SIZE_VAR] = &quot;full&quot; # Fullscreen, there is also `large`.
+        return attrs
+</code></pre>
+<p>We must then register the adapter to make sure it is available for templates.</p>
+<p>This should be done in a <code>wagtail_hooks.py</code> file.</p>
+<pre><code class="language-python"># myapp/wagtail_hooks.py
+
+from wagtail_fedit.adapters import adapter_registry
+from myapp.adapters import ColorizerAdapter
+
+adapter_registry.register(ColorizerAdapter)
+</code></pre>
 
         </div>
     </main>

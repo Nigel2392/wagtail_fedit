@@ -1,0 +1,129 @@
+{{ define "head" }}
+    <title>{{.Title}} (v{{ .Config.Project.Version }}) </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        nav {
+            width: 250px;
+            position: fixed;
+            height: 100%;
+            overflow: auto;
+            padding: 0;
+            margin: 0;
+        }
+        main {
+            margin: 0;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+        main h1, main h2, main h3, main h4, main h5, main h6, main ol, main ul {
+            margin: 0;
+        }
+        main > * {
+            width: 100%;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 8px;
+            border-left: 3px solid #ccc;
+            margin: 10px 0;
+            font-size: 14px;
+            overflow: auto;
+        }
+        *:not(pre) > code {
+            font-size: 14px;
+            color: #c7254e;
+            background-color: #f9f2f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .navbar {
+            display: flex;
+            flex-direction: column;
+            background-color: #333;
+            color: #fff;
+        }
+        .navbar-logo {
+            padding: 10px 20px;
+        }
+        .navbar-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .navbar-menu {
+            display: flex;
+            flex-direction: column;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .navbar-menu li {
+            list-style-type: none;
+        }
+        .navbar-menu li .navbar-item {
+            display: block;
+            padding: 10px 20px;
+            color: #fff;
+            text-decoration: none;
+        }
+        .navbar-menu li a.navbar-item:hover {
+            background-color: #555;
+        }
+        .navbar-menu li .navbar-item-small {
+            padding: 5px 20px;
+        }
+        .navbar-footer {
+            margin-top: auto;
+            margin-bottom: 10px;
+        }
+        .main-content-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            position: relative;
+        }
+        .main-content-lint {
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: space-between;
+            background-color: #f4f4f4;
+            position: sticky;
+            width: 100%;
+            z-index: 1000;
+            top: 0;
+        }
+        .main-content {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 20px;
+            width: 90%;
+        }
+        .documentation-links {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+        .documentation-link {
+            text-decoration: none;
+        }
+    </style>
+    <link rel="icon" type="image/png" href="{{ Asset "static/favicon.png" }}">
+{{ end }}

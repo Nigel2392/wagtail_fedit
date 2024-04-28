@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>Readme (v1.0.0) </title>
+    <title>adapters_js.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: README.md</span>
+                <span class="object-information__title">Template: adapters\adapters_js.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,11 +225,32 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
-<p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
-<p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
-<p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>
+            <h3 id="adapters-javascript">Adapters Javascript</h3>
+<p>We now need to create the javascript function to actually apply the color to the styles of the element.<br />
+This function will be called <code>myColorizerJavascriptFunction</code>, as defined in the adapter's <code>__init__</code> method.</p>
+<pre><code class="language-javascript">// myapp/static/myapp/js/custom.js
+function myColorizerJavascriptFunction(element, response) {
+    element.style.color = response.color;
+}
+</code></pre>
+<p>We must then register this javascript file to be included in the frontend editing interface.</p>
+<p>This should be done in a <code>wagtail_hooks.py</code> file.</p>
+<pre><code class="language-python"># myapp/wagtail_hooks.py
+
+from django.utils.html import format_html
+from django.templatetags.static import static
+from wagtail_fedit.hooks import REGISTER_JS
+from wagtail import hooks
+
+@hooks.register(REGISTER_JS)
+def register_js(request):
+    return [
+        format_html(
+            '&lt;script src=&quot;{0}&quot;&gt;&lt;/script&gt;',
+            static('myapp/js/custom.js')
+        ),
+    ]
+</code></pre>
 
         </div>
     </main>

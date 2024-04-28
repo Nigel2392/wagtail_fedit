@@ -1,0 +1,36 @@
+project:
+  name: "Wagtail FEdit"
+  version: "1.0.0"
+  repository: "https://github.com/Nigel2392/wagtail_fedit"
+  input: "./docs_src"
+  output: "./docs"
+
+server:
+  base_url: "/wagtail_fedit/"
+  static_url: "https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/"
+  hostname: "localhost"
+  port: 8080
+  # private_key: "path/to/private_key"
+  # certificate: "path/to/public_key"
+
+menu:
+#   logo: "static/logo.svg"
+  items:
+    # - name: "Home"
+    #   path: ""
+    - name: "Installation Instructions"
+      path: "installation_instructions.md"
+    - name: "Adapters"
+      path: "adapters"
+    - name: "Caveats"
+      path: "caveats.md"
+    - name: "Hooks"
+      path: "hooks.md"
+    - name: "Settings"
+      path: "settings.md"
+    - name: "Supported Features"
+      path: "support.md"
+
+# context:
+#   Title: "Project Name"
+#   description: "This is a project that does things."

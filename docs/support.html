@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>Readme (v1.0.0) </title>
+    <title>support.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: README.md</span>
+                <span class="object-information__title">Template: support.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,11 +225,18 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
-<p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
-<p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
-<p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>
+            <h2 id="revisions">Revisions</h2>
+<p>Revision support is included out of the box.<br />
+If your model inherits from a <code>RevisionMixin</code>, we will automatically create drafts for you.<br />
+These will not be published (If the model inherits from <code>DraftStateMixin</code>) until you choose to do so.</p>
+<h2 id="workflows">Workflows</h2>
+<p>We include a <code>WorkFlow</code> to submit this object for moderation.</p>
+<p>More workflow support will be included in the future.</p>
+<h2 id="logs">Logs</h2>
+<p>Logs are also included out of the box.<br />
+We will automatically update your model's history; including possible revisions.<br />
+This will allow you to backtrack each change made on the frontend.<br />
+This however does mean that a possibly large amount of data will be stored in your database.</p>
 
         </div>
     </main>

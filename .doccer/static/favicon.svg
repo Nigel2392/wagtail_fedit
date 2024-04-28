@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="132.409 134.5966 90.822 112.6547" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="217.443" y1="71.064" x2="217.443" y2="102.613" id="gradient-0" gradientTransform="matrix(0.691907, -0.721987, 1.454535, 1.393937, -82.261483, 116.567863)">
+      <stop offset="0" style="stop-color: rgb(0% 50.196% 100%)"/>
+      <stop offset="1" style="stop-color: rgb(222, 237, 255);"/>
+    </linearGradient>
+  </defs>
+  <rect style="stroke: rgb(0, 0, 0); fill: rgb(66, 66, 66);" x="132.409" y="141.013" width="90.822" height="101.339" rx="12" ry="12"/>
+  <text style="fill: url('#gradient-0'); font-family: 'Bauhaus 93'; font-size: 28px; paint-order: fill; white-space: pre;" transform="matrix(3.908389091491699, 0, 0, 3.5763630867004395, -474.6424560546875, -122.1288070678711)" x="156.788" y="96.877">D</text>
+</svg>

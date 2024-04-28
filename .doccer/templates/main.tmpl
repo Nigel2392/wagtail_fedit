@@ -1,0 +1,19 @@
+{{ define "main" }}
+    <main class="main-content-wrapper">
+        <div class="main-content-lint">
+            <div class="object-information">
+                <span class="object-information__title">{{ .Object }}</span>
+            </div>
+            <div class="documentation-links">
+                {{ if .Config.Project.Repository }}
+                    <a href="{{ .Config.Project.Repository }}" class="documentation-link" target="_blank">
+                        <i class="fab fa-github"></i> View on GitHub
+                    </a>
+                {{ end }}
+            </div>
+        </div>
+        <div class="main-content">
+            {{ .Content }}
+        </div>
+    </main>
+{{ end }}
