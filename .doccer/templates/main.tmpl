@@ -7,12 +7,12 @@
             {{ if (or .Previous .Next) }}
                 <div class="pagination">
                     {{ if .Previous }}
-                        <a href="{{ .Previous.URL }}" hx-get="{{ .Previous.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="pagination__link pagination__link--previous">
+                        <a href="{{ .Previous.URL }}" hx-get="{{ .Previous.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--previous">
                             << {{ .Previous.GetName }}
                         </a>
                     {{ end }}
                     {{ if .Next }}
-                        <a href="{{ .Next.URL }}" hx-get="{{ .Next.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="pagination__link pagination__link--next">
+                        <a href="{{ .Next.URL }}" hx-get="{{ .Next.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--next">
                             {{ .Next.GetName }} >>
                         </a>
                     {{ end }}
