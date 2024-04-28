@@ -5,7 +5,7 @@ wagtail_fedit
 
 Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.
 
-(View the documentation)[https://nigel2392.github.io/wagtail_fedit/]
+[View the documentation](https://nigel2392.github.io/wagtail_fedit/)
 
 Getting Started
 ---------------
