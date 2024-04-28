@@ -39,7 +39,7 @@ class MyPage(Page):
 
 {% load fedit %}
 {% fedit colorizer page.color target=".my-colorized-div" %}
-<div class="my-colorized-div" style="color: {{ page.color }}">
+<div class="my-colorized-div" style="color: {{ "{{ page.color }}" }}">
     <h1>Colorized Text!</h1>
 </div>
 
