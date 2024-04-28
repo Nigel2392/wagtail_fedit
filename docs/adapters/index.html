@@ -3,7 +3,7 @@
 <html>
     <head>
         
-    <title>index.html (v1.0.0) </title>
+    <title>readme.md (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -214,7 +214,7 @@
     <main class="main-content-wrapper">
         <div class="main-content-lint">
             <div class="object-information">
-                <span class="object-information__title">Template: index.html</span>
+                <span class="object-information__title">Template: adapters\readme.md</span>
             </div>
             <div class="documentation-links">
                 
@@ -225,10 +225,49 @@
             </div>
         </div>
         <div class="main-content">
-            <pre><p><a href="/wagtail_fedit/adapters\adapters.html">.\adapters.md</a></p>
-<p><a href="/wagtail_fedit/adapters\adapters_js.html">.\adapters_js.md</a></p>
-<p><a href="/wagtail_fedit/adapters\adapters_python.html">.\adapters_python.md</a></p>
-</pre>
+            <h2 id="adapters">Adapters</h2>
+<p>Creating a custom adapter is relatively simple.<br />
+We highly recommend you to inherit from <code>BaseFieldFuncAdapter</code> or <code>BaseBlockFuncAdapter</code>.<br />
+These adapters are basically pre-setup to callback to a javascript function on successful form submission.<br />
+This will save you the most amount of work.</p>
+<p>We will create an adapter to change the color of a text field.</p>
+<p>Our adapter will be called <code>colorizer</code>.</p>
+<ol>
+<li>Our model is defined as follows:</li>
+</ol>
+<pre><code class="language-python">from wagtail.models import Page
+from wagtail.admin.panels import FieldPanel
+from django.db import models
+
+class MyPage(Page):
+    COLOR_CHOICES = [
+        (&quot;#000000&quot;, &quot;Black&quot;),
+        (&quot;#FFFFFF&quot;, &quot;White&quot;),
+        (&quot;#FF0000&quot;, &quot;Red&quot;),
+        (&quot;#00FF00&quot;, &quot;Green&quot;),
+        (&quot;#0000FF&quot;, &quot;Blue&quot;),
+    ]
+
+    color = models.CharField(max_length=7, default=&quot;#000000&quot;, choices=COLOR_CHOICES)
+
+    content_panels = Page.content_panels + [
+        FieldPanel(&quot;color&quot;),
+    ]
+</code></pre>
+<ol start="2">
+<li>We have the following HTML template:</li>
+</ol>
+<pre><code class="language-django-html">...
+
+{% load fedit %}
+{% fedit colorizer page.color target=&quot;.my-colorized-div&quot; %}
+&lt;div class=&quot;my-colorized-div&quot; style=&quot;color: {{ page.color }}&quot;&gt;
+    &lt;h1&gt;Colorized Text!&lt;/h1&gt;
+&lt;/div&gt;
+
+...
+</code></pre>
+
         </div>
     </main>
 
