@@ -1,5 +1,6 @@
 {{ Set "Title" "Making your models editable" }}
-
+{{ Set "Previous" (index .Tree.installation_instructions) }}
+{{ Set "Next" (index .Tree.adapters.root) }}
 ## Getting Editing!
 1. If you want to get into the frontend-editing interface for a model it must inherit from `PreviewableMixin`.
 

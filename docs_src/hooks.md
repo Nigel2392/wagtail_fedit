@@ -1,4 +1,6 @@
 {{ Set "Title" "Wagtail Hooks" }}
+{{ Set "Previous" (index .Tree.caveats) }}
+{{ Set "Next" (index .Tree.settings) }}
 ## Hooks
 
 ### wagtail_fedit.construct_adapter_toolbar

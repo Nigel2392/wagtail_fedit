@@ -1,5 +1,6 @@
 {{ Set "Title" "Adapters Javascript" }}
-{{ Set "Title" "Adapters Javascript" }}
+{{ Set "Previous" (index .Tree.adapters.adapters_python) }}
+{{ Set "Next" (index .Tree.caveats) }}
 
 ### Adapters Javascript
 

@@ -4,6 +4,20 @@
             <div class="object-information">
                 <span class="object-information__title">{{ .Object }}</span>
             </div>
+            {{ if (or .Previous .Next) }}
+                <div class="pagination">
+                    {{ if .Previous }}
+                        <a href="{{ .Previous.URL }}" hx-get="{{ .Previous.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="pagination__link pagination__link--previous">
+                            << {{ .Previous.GetName }}
+                        </a>
+                    {{ end }}
+                    {{ if .Next }}
+                        <a href="{{ .Next.URL }}" hx-get="{{ .Next.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="pagination__link pagination__link--next">
+                            {{ .Next.GetName }} >>
+                        </a>
+                    {{ end }}
+                </div>
+            {{ end }}
             <div class="documentation-links">
                 {{ if .Config.Project.Repository }}
                     <a href="{{ .Config.Project.Repository }}" class="documentation-link" target="_blank">

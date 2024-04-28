@@ -25,7 +25,7 @@
             </li>
             {{ range $menuItem := .Menu.Items }}
                 <li>
-                    <a href="{{ $menuItem.URL }}" class="navbar-item">
+                    <a href="{{ $menuItem.URL }}"  hx-get="{{ $menuItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         {{ $menuItem.Name }}
                     </a>
                 </li>

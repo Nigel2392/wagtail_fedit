@@ -1,4 +1,5 @@
 {{ Set "Title" "Supported Features" }}
+{{ Set "Previous" (index .Tree.permissions) }}
 
 ## Revisions
 

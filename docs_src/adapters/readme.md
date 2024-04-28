@@ -1,4 +1,6 @@
 {{ Set "Title" "Creating an Adapter" }}
+{{ Set "Previous" (index .Tree.make_editable) }}
+{{ Set "Next" (index .Tree.adapters.adapters_python) }}
 ## Adapters
 
 Creating a custom adapter is relatively simple.

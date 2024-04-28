@@ -6,6 +6,7 @@
     <title>Caveats (v1.0.0) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
     <style>
         html,
         body {
@@ -181,55 +182,61 @@
             </li>
             
                 <li>
-                    <a href="/wagtail_fedit/installation_instructions.html" class="navbar-item">
+                    <a href="/wagtail_fedit/installation_instructions.html"  hx-get="/wagtail_fedit/installation_instructions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Installation Instructions
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/make_editable.html" class="navbar-item">
+                    <a href="/wagtail_fedit/make_editable.html"  hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Make something editable
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/adapters" class="navbar-item">
+                    <a href="/wagtail_fedit/adapters"  hx-get="/wagtail_fedit/adapters" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Adapters
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/adapters/adapters_python.html" class="navbar-item">
+                    <a href="/wagtail_fedit/adapters/adapters_python.html"  hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Adapters Python
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/adapters/adapters_js.html" class="navbar-item">
+                    <a href="/wagtail_fedit/adapters/adapters_js.html"  hx-get="/wagtail_fedit/adapters/adapters_js.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Adapters Javascript
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/caveats.html" class="navbar-item">
+                    <a href="/wagtail_fedit/caveats.html"  hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Caveats
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/hooks.html" class="navbar-item">
+                    <a href="/wagtail_fedit/hooks.html"  hx-get="/wagtail_fedit/hooks.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Hooks
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/settings.html" class="navbar-item">
+                    <a href="/wagtail_fedit/settings.html"  hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Settings
                     </a>
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/support.html" class="navbar-item">
+                    <a href="/wagtail_fedit/permissions.html"  hx-get="/wagtail_fedit/permissions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
+                        Permissions
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/wagtail_fedit/support.html"  hx-get="/wagtail_fedit/support.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="navbar-item">
                         Supported Features
                     </a>
                 </li>
@@ -257,6 +264,20 @@
             <div class="object-information">
                 <span class="object-information__title">Template: caveats.md</span>
             </div>
+            
+                <div class="pagination">
+                    
+                        <a href="/wagtail_fedit/adapters/adapters_js.html" hx-get="/wagtail_fedit/adapters/adapters_js.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="pagination__link pagination__link--previous">
+                            << adapters_js.md
+                        </a>
+                    
+                    
+                        <a href="/wagtail_fedit/hooks.html" hx-get="/wagtail_fedit/hooks.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" class="pagination__link pagination__link--next">
+                            hooks.md >>
+                        </a>
+                    
+                </div>
+            
             <div class="documentation-links">
                 
                     <a href="https://github.com/Nigel2392/wagtail_fedit" class="documentation-link" target="_blank">

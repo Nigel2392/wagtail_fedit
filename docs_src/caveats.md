@@ -1,4 +1,6 @@
 {{ Set "Title" "Caveats" }}
+{{ Set "Previous" (index .Tree.adapters.adapters_js) }}
+{{ Set "Next" (index .Tree.hooks) }}
 ## Caveats
 
 ### ID Attribute

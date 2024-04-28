@@ -1,4 +1,6 @@
 {{ Set "Title" "Adapters Python" }}
+{{ Set "Previous" (index .Tree.adapters.root) }}
+{{ Set "Next" (index .Tree.adapters.adapters_js) }}
 ### Adapters Python
 
 We will get started creating the adapter definition.

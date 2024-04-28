@@ -34,6 +34,8 @@ menu:
       path: "hooks.md"
     - name: "Settings"
       path: "settings.md"
+    - name: "Permissions"
+      path: "permissions.md"
     - name: "Supported Features"
       path: "support.md"
 

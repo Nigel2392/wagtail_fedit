@@ -1,4 +1,5 @@
 {{ Set "Title" "Installation Instructions" }}
+{{ Set "Next" (index .Tree.make_editable) }}
 Getting Started
 ---------------
 1. Add 'wagtail_fedit' to your INSTALLED_APPS setting like this:
