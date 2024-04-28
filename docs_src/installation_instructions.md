@@ -1,4 +1,5 @@
 {{ Set "Title" "Installation Instructions" }}
+{{ Set "Previous" (index .Tree.root) }}
 {{ Set "Next" (index .Tree.make_editable) }}
 Getting Started
 ---------------

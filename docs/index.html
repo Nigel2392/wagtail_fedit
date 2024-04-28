@@ -138,6 +138,21 @@
             z-index: 1000;
             top: 0;
         }
+        .pagination {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+        .pagination__link {
+            text-decoration: none;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
         .main-content {
             padding-top: 10px;
             padding-bottom: 10px;
@@ -194,7 +209,7 @@
                 </li>
             
                 <li>
-                    <a href="/wagtail_fedit/adapters" hx-get="/wagtail_fedit/adapters" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
+                    <a href="/wagtail_fedit/adapters/" hx-get="/wagtail_fedit/adapters/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
                         Adapters
                     </a>
                 </li>
@@ -265,6 +280,15 @@
                 <span class="object-information__title">Template: README.md</span>
             </div>
             
+                <div class="pagination">
+                    
+                    
+                        <a href="/wagtail_fedit/installation_instructions.html" hx-get="/wagtail_fedit/installation_instructions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--next">
+                            installation_instructions.md >>
+                        </a>
+                    
+                </div>
+            
             <div class="documentation-links">
                 
                     <a href="https://github.com/Nigel2392/wagtail_fedit" class="documentation-link" target="_blank">
@@ -274,8 +298,7 @@
             </div>
         </div>
         <div class="main-content">
-            <!--  -->
-<h1 id="wagtail-fedit">wagtail_fedit</h1>
+            <h1 id="wagtail-fedit">wagtail_fedit</h1>
 <p><img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/wagtail_fedit_example.png?raw=true" alt="Wagtail FEdit Example" /></p>
 <p>Wagtail FEdit is a library to allow your Wagtail pages and content-blocks to be edited on the frontend.</p>
 <p>View <a href="/wagtail_fedit/installation_instructions.html">installation instructions</a></p>

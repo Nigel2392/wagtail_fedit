@@ -1,4 +1,5 @@
-<!-- {{ Set "Title" "Readme" }} -->
+{{ Set "Title" "Readme" }}
+{{ Set "Next" (index .Tree.installation_instructions) }}
 wagtail_fedit
 =============
 
