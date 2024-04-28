@@ -11,6 +11,7 @@
             font-family: Arial, sans-serif;
             font-size: 16px;
             line-height: 1.6;
+            scrollbar-gutter: stable;
         }
         *, *:before, *:after {
             box-sizing: border-box;
@@ -135,15 +136,14 @@
             top: 0;
         }
         .main-content-lint > * {
-            width: 25%;
+            width: 30%;
+            flex: 1;
         }
         .main-content-lint > *:last-child {
             justify-content: flex-end;
             text-align: right;
         }
         .object-information {
-            max-width: 250px;
-            margin-right: 10px;
             text-wrap: nowrap;
             overflow: hidden;
             white-space: nowrap;
@@ -155,9 +155,15 @@
             flex-wrap: nowrap;
             justify-content: space-evenly;
             align-items: center;
+            width: 40%;
             flex: 1;
-            width: 50%;
             gap: 10px;
+        }
+        .pagination__link:first-child {
+            text-align: left;
+        }
+        .pagination__link:last-child {
+            text-align: right;
         }
         .pagination__link {
             text-decoration: none;
