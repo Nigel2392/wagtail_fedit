@@ -1,3 +1,4 @@
+{{ Set "Title" "Django Settings" }}
 ## Settings
 
 ### `WAGTAIL_FEDIT_SIGN_SHARED_CONTEXT`

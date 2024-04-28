@@ -1,3 +1,6 @@
+{{ Set "Title" "Adapters Javascript" }}
+{{ Set "Title" "Adapters Javascript" }}
+
 ### Adapters Javascript
 
 We now need to create the javascript function to actually apply the color to the styles of the element.

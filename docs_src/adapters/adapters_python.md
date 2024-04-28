@@ -1,3 +1,4 @@
+{{ Set "Title" "Adapters Python" }}
 ### Adapters Python
 
 We will get started creating the adapter definition.

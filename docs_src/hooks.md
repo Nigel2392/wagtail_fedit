@@ -1,3 +1,4 @@
+{{ Set "Title" "Wagtail Hooks" }}
 ## Hooks
 
 ### wagtail_fedit.construct_adapter_toolbar

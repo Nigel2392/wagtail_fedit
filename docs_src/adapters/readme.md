@@ -1,3 +1,4 @@
+{{ Set "Title" "Creating an Adapter" }}
 ## Adapters
 
 Creating a custom adapter is relatively simple.

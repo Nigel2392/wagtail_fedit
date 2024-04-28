@@ -1,3 +1,4 @@
+{{ Set "Title" "Permissions" }}
 ## Permissions
 
 **Note: This is not required for pages.**
