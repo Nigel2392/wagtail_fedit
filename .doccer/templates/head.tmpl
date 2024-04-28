@@ -145,6 +145,7 @@
         .pagination {
             display: flex;
             flex-direction: row;
+            flex-wrap: nowrap;
             justify-content: space-evenly;
             align-items: center;
             flex: 1;
@@ -154,12 +155,20 @@
             text-decoration: none;
             color: #333;
             border-radius: 5px;
+            text-wrap: nowrap;
         }
         .pagination__link,
         .pagination__placeholder {
             flex: 1;
             text-align: center;
         }
+
+        @media screen and (max-width: 768px) {
+            .pagination {
+                order: 3;
+            }
+        }
+
         .main-content {
             padding-top: 10px;
             padding-bottom: 10px;
