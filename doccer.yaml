@@ -24,12 +24,12 @@ menu:
 
     - name: "Adapters"
       path: "adapters"
-
-    - name: "Adapters Python"
-      path: "adapters/adapters_python.md"
-      
-    - name: "Adapters Javascript"
-      path: "adapters/adapters_js.md"
+      items:
+        - name: "Adapters Python"
+          path: "adapters/adapters_python.md"
+  
+        - name: "Adapters Javascript"
+          path: "adapters/adapters_js.md"
       
     - name: "Caveats"
       path: "caveats.md"

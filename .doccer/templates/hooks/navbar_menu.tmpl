@@ -2,9 +2,26 @@
     <ul class="navbar-menu">
         {{ range $menuItem := .Menu.Items }}
             <li>
-                <a href="{{ $menuItem.URL }}" hx-get="{{ $menuItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item {{ $menuItem.Classname }}" {{ if $menuItem.Attributes }}{{ range $key, $value := $menuItem.Attributes }}{{ $key }}="{{ html $value }}"{{ end }}{{ end }}>
-                    {{ $menuItem.Name }}
-                </a>
+                {{ if (gt (len $menuItem.Items) 0) }}
+                    <div class="navbar-dropdown-button">
+                        <a href="{{ $menuItem.URL }}"hx-get="{{ $menuItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item {{ $menuItem.Classname }}" {{ if $menuItem.Attributes }}{{ range $key, $value := $menuItem.Attributes }}{{ $key }}="{{ html $value }}"{{ end }}{{ end }}>
+                            {{ $menuItem.Name }}
+                        </a>
+                    </div>
+                    <ul class="navbar-dropdown">
+                        {{ range $subItem := $menuItem.Items }}
+                            <li>
+                                <a href="{{ $subItem.URL }}"hx-get="{{ $subItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item {{ $subItem.Classname }}" {{ if $subItem.Attributes }}{{ range $key, $value := $subItem.Attributes }}{{ $key }}="{{ html $value }}"{{ end }}{{ end }}>
+                                    {{ $subItem.Name }}
+                                </a>
+                            </li>
+                        {{ end }}
+                    </ul>
+                {{ else }}
+                    <a href="{{ $menuItem.URL }}"hx-get="{{ $menuItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item {{ $menuItem.Classname }}" {{ if $menuItem.Attributes }}{{ range $key, $value := $menuItem.Attributes }}{{ $key }}="{{ html $value }}"{{ end }}{{ end }}>
+                        {{ $menuItem.Name }}
+                    </a>
+                {{ end }}
             </li>
         {{ end }}
     </ul>
