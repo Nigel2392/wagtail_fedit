@@ -1,0 +1,11 @@
+{{ define "feature_template" }}
+    <ul class="navbar-menu">
+        {{ range $menuItem := .Menu.Items }}
+            <li>
+                <a href="{{ $menuItem.URL }}" hx-get="{{ $menuItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item {{ $menuItem.Classname }}" {{ if $menuItem.Attributes }}{{ range $key, $value := $menuItem.Attributes }}{{ $key }}="{{ html $value }}"{{ end }}{{ end }}>
+                    {{ $menuItem.Name }}
+                </a>
+            </li>
+        {{ end }}
+    </ul>
+{{ end }}

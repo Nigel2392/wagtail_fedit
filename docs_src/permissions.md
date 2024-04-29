@@ -1,6 +1,6 @@
-{{ Set "Title" "Permissions" }}
-{{ Set "Previous" (index .Tree.settings) }}
-{{ Set "Next" (index .Tree.support) }}
+// Title: Permissions
+// Next: support.md
+// Previous: settings.md
 ## Permissions
 
 **Note: This is not required for pages.**

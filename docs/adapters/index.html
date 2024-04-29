@@ -6,7 +6,6 @@
     <title>Creating an Adapter (v1.5.4) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
     <style>
         html,
         body {
@@ -41,22 +40,22 @@
             margin: 0;
         }
         h1 {
-            font-size: 3em;
-        }
-        h2 {
             font-size: 2.5em;
         }
-        h3 {
-            font-size: 1.83em;
+        h2 {
+            font-size: 2em;
         }
-        h4 {
+        h3 {
             font-size: 1.5em;
         }
+        h4 {
+            font-size: 1.2em;
+        }
         h5 {
-            font-size: 1.17em;
+            font-size: 1em;
         }
         h6 {
-            font-size: 1em;
+            font-size: 0.8em;
         }
         main > * {
             width: 100%;
@@ -199,13 +198,15 @@
         .documentation-link {
             text-decoration: none;
         }
+
     </style>
     <link rel="icon" type="image/png" href="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/favicon.png?raw=true">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
 
     </head>
     <body>
         
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="navbar-logo">
             <a href="/wagtail_fedit/">
                 
@@ -221,74 +222,198 @@
                 
             </a>
         </div>
-        <ul class="navbar-menu">
+        
+        
+    <style>
+        .navbar-search-menu {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .navbar-search-wrapper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin: 5px 10px;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+        }
+        .navbar-search-wrapper .navbar-search-icon {
+            width: 35px;
+            height: 35px;
+            padding-top: 5px;
+            padding-left: 10px;
+            padding-bottom: 5px;
+            fill: currentColor;
+        }
+        .navbar-search-wrapper .navbar-search-input {
+            border: none;
+            background: none;
+            color: inherit;
+            font-size: 1rem;
+            margin: 0;
+            width: 100%;
+            outline: none;
+            height: 40px;
+        }
+
+    </style>
+    <ul class="navbar-search-menu" id="navbar-search">
+        <li class="navbar-search-wrapper">
+            <svg class="navbar-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M0 0h24v24H0z" fill="none"/>
+                <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input class="navbar-search-input" type="text" placeholder="Search..." />
+        </li>
+    </ul>
+    <script id="root_data" type="application/base64">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</script>
+    <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        function decodeBase64(s) {
+            var e={},i,b=0,c,x,l=0,a,r='',w=String.fromCharCode,L=s.length;
+            var A="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+            for(i=0;i<64;i++){e[A.charAt(i)]=i;}
+            for(x=0;x<L;x++){
+                c=e[s.charAt(x)];b=(b<<6)+c;l+=6;
+                while(l>=8){((a=(b>>>(l-=8))&0xff)||(x<(L-2)))&&(r+=w(a));}
+            }
+            return r;
+        };
+        document.addEventListener('DOMContentLoaded', async function() {
+            let data = document.getElementById('root_data').textContent;
+            
+            
+            
+            
+            
+            
+            data     = atob(data);
+            data     = data.split('').map(function(x){return x.charCodeAt(0);});
+            data     = new Uint8Array(data);
+            data     = pako.inflate(data);
+            data     = String.fromCharCode.apply(null, new Uint16Array(data));
+            data     =  JSON.parse(data);
+            
+            const searchInput = document.querySelector('.navbar-search-input');
+            const miniSearch = new MiniSearch({
+                fields: ['title', 'content'],
+                storeFields: ['title', 'content', 'url'],
+                idField: 'url',
+                searchOptions: {
+                    boost: { title: 2, url: 1 }
+                },
+            });
+
+            miniSearch.addAll(data);
+
+            const searchResults = document.createElement('ul');
+            searchResults.innerHTML = '';
+            searchResults.classList.add('navbar-menu');
+            const navbarSearch = document.getElementById('navbar-search');
+            navbarSearch.appendChild(searchResults);
+            
+            
+            
+            
+
+            searchInput.addEventListener('input', function() {
+                searchResults.innerHTML = '';
+                const query = searchInput.value;
+                if (query === '') {
+                    return;
+                }
+                const results = miniSearch.search(query, {
+                    combineWith: 'AND',
+                });
+                results.forEach(function(result) {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = result.url;
+                    a.textContent = result.title;
+                    a.classList.add('navbar-item');
+                    li.appendChild(a);
+                    searchResults.appendChild(li);
+                });
+            });
+        });
+    </script>
+
+
+    <ul class="navbar-menu">
+        
             <li>
-                <a href="/wagtail_fedit/" class="navbar-item navbar-title">
+                <a href="/wagtail_fedit/" hx-get="/wagtail_fedit/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item navbar-title" >
                     Wagtail FEdit
                 </a>
             </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/installation_instructions.html" hx-get="/wagtail_fedit/installation_instructions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Installation Instructions
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/make_editable.html" hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Make something editable
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/adapters/" hx-get="/wagtail_fedit/adapters/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Adapters
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/adapters/adapters_python.html" hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Adapters Python
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/adapters/adapters_js.html" hx-get="/wagtail_fedit/adapters/adapters_js.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Adapters Javascript
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/caveats.html" hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Caveats
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/hooks.html" hx-get="/wagtail_fedit/hooks.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Hooks
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/settings.html" hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Settings
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/permissions.html" hx-get="/wagtail_fedit/permissions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Permissions
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="/wagtail_fedit/support.html" hx-get="/wagtail_fedit/support.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        Supported Features
-                    </a>
-                </li>
-            
-        </ul>
+        
+            <li>
+                <a href="/wagtail_fedit/installation_instructions.html" hx-get="/wagtail_fedit/installation_instructions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Installation Instructions
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/make_editable.html" hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Make something editable
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/adapters/" hx-get="/wagtail_fedit/adapters/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Adapters
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/adapters/adapters_python.html" hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Adapters Python
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/adapters/adapters_js.html" hx-get="/wagtail_fedit/adapters/adapters_js.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Adapters Javascript
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/caveats.html" hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Caveats
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/hooks.html" hx-get="/wagtail_fedit/hooks.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Hooks
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/settings.html" hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Settings
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/permissions.html" hx-get="/wagtail_fedit/permissions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Permissions
+                </a>
+            </li>
+        
+            <li>
+                <a href="/wagtail_fedit/support.html" hx-get="/wagtail_fedit/support.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+                    Supported Features
+                </a>
+            </li>
+        
+    </ul>
+
+
         <ul class="navbar-menu navbar-footer">
             <li>
                 <span class="navbar-item navbar-item-small">
@@ -297,7 +422,7 @@
             </li>
             
                 <li>
-                    <a href="https://github.com/Nigel2392/doccer" class="navbar-item" target="_blank">
+                    <a href="https://github.com/Nigel2392/doccer" class="navbar-item " target="_blank">
                         View Doccer on GitHub
                     </a>
                 </li>
@@ -312,15 +437,17 @@
                 <span class="object-information__title">adapters\readme.md</span>
             </div>
             
+            
+            
                 <div class="pagination">
                     
-                        <a href="/wagtail_fedit/make_editable.html" hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--previous">
-                            << make_editable.md
+                        <a href="/wagtail_fedit/make_editable.html" class="pagination__link pagination__link--previous" hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true">
+                            Making your models editable
                         </a>
                     
                     
-                        <a href="/wagtail_fedit/adapters/adapters_python.html" hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--next">
-                            adapters_python.md >>
+                        <a href="/wagtail_fedit/adapters/adapters_python.html" class="pagination__link pagination__link--next" hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true">
+                            Adapters Python 
                         </a>
                     
                 </div>

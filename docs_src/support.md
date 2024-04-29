@@ -1,6 +1,5 @@
-{{ Set "Title" "Supported Features" }}
-{{ Set "Previous" (index .Tree.permissions) }}
-
+// Title: Supported Features
+// Previous: permissions.md
 ## Revisions
 
 Revision support is included out of the box.

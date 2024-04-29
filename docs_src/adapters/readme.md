@@ -1,6 +1,6 @@
-{{ Set "Title" "Creating an Adapter" }}
-{{ Set "Previous" (index .Tree.make_editable) }}
-{{ Set "Next" (index .Tree.adapters.adapters_python) }}
+// Title: Creating an Adapter
+// Previous: make_editable.md
+// Next: adapters/adapters_python.md
 ## Adapters
 
 Creating a custom adapter is relatively simple.

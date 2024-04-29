@@ -1,6 +1,6 @@
-{{ Set "Title" "Installation Instructions" }}
-{{ Set "Previous" (index .Tree.root) }}
-{{ Set "Next" (index .Tree.make_editable) }}
+// Title: Installation Instructions
+// Previous: README.md
+// Next: make_editable.md
 Getting Started
 ---------------
 1. Add 'wagtail_fedit' to your INSTALLED_APPS setting like this:

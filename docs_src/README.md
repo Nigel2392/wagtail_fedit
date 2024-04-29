@@ -1,5 +1,5 @@
-{{ Set "Title" "Readme" }}
-{{ Set "Next" (index .Tree.installation_instructions) }}
+// Title: Wagtail FEdit Documentation
+// Next: installation_instructions.md
 wagtail_fedit
 =============
 

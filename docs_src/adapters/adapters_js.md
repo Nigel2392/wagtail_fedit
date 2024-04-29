@@ -1,7 +1,6 @@
-{{ Set "Title" "Adapters Javascript" }}
-{{ Set "Previous" (index .Tree.adapters.adapters_python) }}
-{{ Set "Next" (index .Tree.caveats) }}
-
+// Title: Adapters Javascript
+// Previous: adapters/adapters_python.md
+// Next: caveats.md
 ### Adapters Javascript
 
 We now need to create the javascript function to actually apply the color to the styles of the element.

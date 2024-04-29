@@ -1,6 +1,6 @@
-{{ Set "Title" "Caveats" }}
-{{ Set "Previous" (index .Tree.adapters.adapters_js) }}
-{{ Set "Next" (index .Tree.hooks) }}
+// Title: Caveats
+// Next: hooks.md
+// Previous: adapters/adapters_js.md
 ## Caveats
 
 ### ID Attribute

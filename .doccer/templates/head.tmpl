@@ -1,8 +1,7 @@
 {{ define "head" }}
-    <title>{{.Title}} (v{{ .Config.Project.Version }}) </title>
+    <title>{{.Object.GetTitle}} (v{{ .Config.Project.Version }}) </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
     <style>
         html,
         body {
@@ -37,22 +36,22 @@
             margin: 0;
         }
         h1 {
-            font-size: 3em;
-        }
-        h2 {
             font-size: 2.5em;
         }
-        h3 {
-            font-size: 1.83em;
+        h2 {
+            font-size: 2em;
         }
-        h4 {
+        h3 {
             font-size: 1.5em;
         }
+        h4 {
+            font-size: 1.2em;
+        }
         h5 {
-            font-size: 1.17em;
+            font-size: 1em;
         }
         h6 {
-            font-size: 1em;
+            font-size: 0.8em;
         }
         main > * {
             width: 100%;
@@ -195,6 +194,8 @@
         .documentation-link {
             text-decoration: none;
         }
+
     </style>
     <link rel="icon" type="image/png" href="{{ Asset "static/favicon.png" }}">
+    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
 {{ end }}

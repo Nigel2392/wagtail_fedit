@@ -4,18 +4,20 @@
             <div class="object-information">
                 <span class="object-information__title">{{ .Object }}</span>
             </div>
-            {{ if (or .Previous .Next) }}
+            {{ $NextObject := .Object.GetNext }}
+            {{ $PrevObject := .Object.GetPrevious }}
+            {{ if (or $NextObject $PrevObject) }}
                 <div class="pagination">
-                    {{ if .Previous }}
-                        <a href="{{ .Previous.URL }}" hx-get="{{ .Previous.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--previous">
-                            << {{ .Previous.GetName }}
+                    {{ if $PrevObject }}
+                        <a href="{{ $PrevObject.URL }}" class="pagination__link pagination__link--previous" hx-get="{{ $PrevObject.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true">
+                            {{ $PrevObject.GetTitle }}
                         </a>
                     {{ else }}
                         <span class="pagination__placeholder"></span>
                     {{ end }}
-                    {{ if .Next }}
-                        <a href="{{ .Next.URL }}" hx-get="{{ .Next.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--next">
-                            {{ .Next.GetName }} >>
+                    {{ if $NextObject }}
+                        <a href="{{ $NextObject.URL }}" class="pagination__link pagination__link--next" hx-get="{{ $NextObject.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true">
+                            {{ $NextObject.GetTitle }} 
                         </a>
                     {{ else }}
                         <span class="pagination__placeholder"></span>

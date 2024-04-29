@@ -1,6 +1,7 @@
-{{ Set "Title" "Django Settings" }}
-{{ Set "Previous" (index .Tree.hooks) }}
-{{ Set "Next" (index .Tree.permissions) }}
+// Title: Django Settings
+// Next: permissions.md
+// Previous: hooks.md
+
 ## Settings
 
 ### `WAGTAIL_FEDIT_SIGN_SHARED_CONTEXT`

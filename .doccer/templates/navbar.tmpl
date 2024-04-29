@@ -1,5 +1,5 @@
 {{ define "navbar" }}
-    <nav class="navbar">
+    <nav class="navbar" id="navbar">
         <div class="navbar-logo">
             <a href="{{ .Config.Server.BaseURL }}">
                 {{ if .Menu.Logo }}
@@ -17,20 +17,9 @@
                 {{ end }}
             </a>
         </div>
-        <ul class="navbar-menu">
-            <li>
-                <a href="{{ .Config.Server.BaseURL }}" class="navbar-item navbar-title">
-                    {{ .Config.Project.Name }}
-                </a>
-            </li>
-            {{ range $menuItem := .Menu.Items }}
-                <li>
-                    <a href="{{ $menuItem.URL }}" hx-get="{{ $menuItem.URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item">
-                        {{ $menuItem.Name }}
-                    </a>
-                </li>
-            {{ end }}
-        </ul>
+        
+        {{ RenderHook . "render_navbar_content" }}
+
         <ul class="navbar-menu navbar-footer">
             <li>
                 <span class="navbar-item navbar-item-small">
@@ -39,7 +28,7 @@
             </li>
             {{ range $menuItem := .Footer.Items }}
                 <li>
-                    <a href="{{ $menuItem.URL }}" class="navbar-item" target="_blank">
+                    <a href="{{ $menuItem.URL }}" class="navbar-item {{ $menuItem.Classname }}" target="_blank">
                         {{ $menuItem.Name }}
                     </a>
                 </li>

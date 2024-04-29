@@ -1,6 +1,6 @@
-{{ Set "Title" "Adapters Python" }}
-{{ Set "Previous" (index .Tree.adapters.root) }}
-{{ Set "Next" (index .Tree.adapters.adapters_js) }}
+// Title: Adapters Python
+// Previous: adapters/readme.md
+// Next: adapters/adapters_js.md
 ### Adapters Python
 
 We will get started creating the adapter definition.
