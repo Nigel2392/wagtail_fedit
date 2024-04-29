@@ -1,6 +1,6 @@
 // Title: Wagtail Hooks
-// Next: settings.md
 // Previous: caveats.md
+// Next: settings.md
 ## Hooks
 
 ### wagtail_fedit.construct_adapter_toolbar
