@@ -1,6 +1,9 @@
 # Removed for actions
 **/migrations/**
 
+# Documentation bootstrap icons
+.doccer/static/bootstrap-icons/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
