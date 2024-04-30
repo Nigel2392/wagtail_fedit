@@ -16,8 +16,8 @@ server:
 menu:
 #   logo: "static/logo.svg"
   items:
-    - name: "Installation Instructions"
-      path: "installation_instructions.md"
+    - name: "Wagtail FEdit"
+      path: "README.md"
       icon: "list-ol"
 
     - name: "Installation Instructions"
