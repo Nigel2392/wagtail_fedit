@@ -18,6 +18,10 @@ menu:
   items:
     - name: "Installation Instructions"
       path: "installation_instructions.md"
+      icon: "list-ol"
+
+    - name: "Installation Instructions"
+      path: "installation_instructions.md"
       icon: "file-earmark-arrow-down"
 
     - name: "Make something editable"
