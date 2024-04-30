@@ -18,32 +18,42 @@ menu:
   items:
     - name: "Installation Instructions"
       path: "installation_instructions.md"
+      icon: "file-earmark-arrow-down"
 
     - name: "Make something editable"
       path: "make_editable.md"
+      icon: "pencil-square"
 
     - name: "Adapters"
       path: "adapters"
+      icon: "subtract"
       items:
         - name: "Adapters Python"
+          icon: "filetype-py"
           path: "adapters/adapters_python.md"
   
         - name: "Adapters Javascript"
+          icon: "filetype-js"
           path: "adapters/adapters_js.md"
       
     - name: "Caveats"
+      icon: "exclamation-circle"
       path: "caveats.md"
       
     - name: "Hooks"
+      icon: "stack"
       path: "hooks.md"
       
     - name: "Settings"
+      icon: "gear"
       path: "settings.md"
       
     - name: "Permissions"
+      icon: "shield-lock"
       path: "permissions.md"
       
     - name: "Supported Features"
+      icon: "list-stars"
       path: "support.md"
 
 # context:

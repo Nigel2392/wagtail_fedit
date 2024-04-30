@@ -19,43 +19,43 @@
         *, *:before, *:after {
             box-sizing: border-box;
         }
+        p:has(img:only-child) {
+            display: block;
+            margin: 0 auto;
+        }
         img {
             max-width: 100%;
             height: auto;
         }
-        nav {
-            width: 250px;
-            position: fixed;
-            height: 100%;
-            overflow: auto;
-            padding: 0;
-            margin: 0;
-        }
-        main {
-            margin: 0;
-            margin-left: 250px;
-            width: calc(100% - 250px);
-        }
         main h1, main h2, main h3, main h4, main h5, main h6, main ol, main ul {
             margin: 0;
+            font-size: var(--font-size, 1em);
         }
         h1 {
-            font-size: 2.5em;
+            --font-size: 2.5rem;
+        }
+        h1 img, h2 img, h3 img, h4 img, h5 img, h6 img {
+            min-height: calc(var(--font-size) * 0.8);
         }
         h2 {
-            font-size: 2em;
+            --font-size: 2rem;
         }
         h3 {
-            font-size: 1.5em;
+            --font-size: 1.5rem;
         }
         h4 {
-            font-size: 1.2em;
+            --font-size: 1.2rem;
         }
         h5 {
-            font-size: 1em;
+            --font-size: 1rem;
         }
         h6 {
-            font-size: 0.8em;
+            --font-size: 0.8rem;
+        }
+        #navbar {
+            padding: 0;
+            margin: 0;
+            z-index: 10;
         }
         main > * {
             width: 100%;
@@ -65,7 +65,7 @@
             padding: 8px;
             border-left: 3px solid #ccc;
             margin: 10px 0;
-            font-size: 14px;
+            font-size: 14px !important;
             overflow: auto;
         }
         *:not(pre, h1, h2, h3, h4, h5, h6) > code {
@@ -87,7 +87,7 @@
             color: #fff;
         }
         .navbar-logo {
-            padding: 10px 20px;
+            padding: 10px;
         }
         .navbar-title {
             font-size: 1.5em;
@@ -103,17 +103,61 @@
         .navbar-menu li {
             list-style-type: none;
         }
-        .navbar-menu li .navbar-item {
-            display: block;
-            padding: 10px 20px;
+        .navbar-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
             color: #fff;
             text-decoration: none;
+            vertical-align: middle;
+            justify-content: flex-start;
+            padding: 10px 0;
         }
-        .navbar-menu li a.navbar-item:hover {
+        button.navbar-item {
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            width: 100%;
+        }
+        button.navbar-item:hover,
+        a.navbar-item:hover {
             background-color: #555;
         }
-        .navbar-menu li .navbar-item-small {
-            padding: 5px 20px;
+        .navbar-item .navbar-item-icon img,
+        .navbar-item img.navbar-item-icon,
+        .navbar-item .navbar-item-icon svg,
+        .navbar-item svg.navbar-item-icon {
+            vertical-align: middle;
+            object-fit: contain;
+            margin-right: 5px;
+        }
+        .navbar-item img.navbar-item-icon,
+        .navbar-item .navbar-item-icon img {
+            width: 36px;
+            height: 36px;
+        }
+        .navbar-item svg.navbar-item-icon,
+        .navbar-item .navbar-item-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+        .navbar-item .navbar-item-text {
+            vertical-align: middle;
+        }
+        .navbar-item-small {
+            font-size: 0.8em;
+        }
+        .navbar-menu.navbar-opener .navbar-item-text {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .navbar-menu.navbar-opener {
+            display: none;
+        }
+        .navbar-menu.navbar-opener svg {
+            width: 40px;
+            height: 40px;
         }
         .navbar-footer {
             margin-top: auto;
@@ -129,22 +173,27 @@
             padding: 4px 10px;
             margin-bottom: 10px;
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             flex-direction: row;
             justify-content: space-between;
             background-color: #f4f4f4;
+            overflow: hidden;
             position: sticky;
             width: 100%;
-            z-index: 1000;
+            z-index: 5;
             top: 0;
         }
         .main-content-lint > * {
-            width: 30%;
-            flex: 1;
+            width: 50%;
+            min-width: 150px;
         }
         .main-content-lint > *:last-child {
             justify-content: flex-end;
             text-align: right;
+        }
+        .main-content {
+            padding: 0 1em;
+            margin: 0 auto;
         }
         .object-information {
             text-wrap: nowrap;
@@ -155,43 +204,13 @@
             flex-direction: row;
             align-items: center;
         }
-        .pagination {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            justify-content: space-evenly;
-            align-items: center;
-            width: 40%;
-            flex: 1;
-            gap: 10px;
+        .main-content img {
+            max-height: 350px;
+            margin: 0 auto;
         }
-        .pagination__link:first-child {
-            text-align: left;
-        }
-        .pagination__link:last-child {
-            text-align: right;
-        }
-        .pagination__link {
-            text-decoration: none;
-            color: #333;
-            border-radius: 5px;
-            text-wrap: nowrap;
-        }
-        .pagination__link,
-        .pagination__placeholder {
-            flex: 1;
-            text-align: center;
-        }
-        @media screen and (max-width: 768px) {
-            .pagination {
-                order: 3;
-            }
-        }
-        .main-content {
-            padding-top: 10px;
-            padding-bottom: 10px;
-            padding-left: 20px;
-            width: 90%;
+        .main-content svg {
+            vertical-align: middle;
+            display: inline-block;
         }
         .documentation-links {
             display: flex;
@@ -209,10 +228,194 @@
         .documentation-link svg {
             vertical-align: middle;
         }
+        .pagination {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: center;
+            margin-bottom: 3em;
+            flex: 1;
+        }
+        .pagination__link:first-child {
+            text-align: left;
+            justify-content: flex-start;
+        }
+        .pagination__link:first-child svg {
+            margin-right: 5px;
+        }
+        .pagination__link:last-child {
+            text-align: right;
+            justify-content: flex-end;
+        }
+        .pagination__link:last-child svg {
+            margin-left: 5px;
+        }
+        .pagination__link {
+            text-underline-offset: 5px;
+            color: #333;
+            border-radius: 5px;
+            text-wrap: nowrap;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .pagination__link svg {
+            vertical-align: middle;
+        }
+        .pagination__link,
+        .pagination__placeholder {
+            flex: 1;
+            text-align: center;
+        }
+        .pagination__link .pagination__link-text {
+            display: none;
+        }
+        .pagination__link svg {
+            transform: scale(1.5);
+        }
+        @media screen and (max-width: 320px) {
+            #navbar .navbar-item {
+                padding: 10px;
+            }
+        }
+        @media screen and (min-width: 320px) {
+            #navbar {
+                width: 50px;
+                position: fixed;
+                height: 100%;
+                overflow: auto;
+            }
+            #navbar .navbar-logo {
+                display: none;
+            }
+            #navbar.open .navbar-logo {
+                display: block;
+            }
+            main {
+                margin: 0;
+                margin-left: 50px;
+                width: calc(100% - 50px);
+            }
+            .main-content {
+                margin: 0 auto;
+                padding: 10px 1em;
+            }
+            .navbar-menu.navbar-opener {
+                display: flex;
+            }
+            .navbar-item-text {
+                display: none;
+            }
+            #navbar .navbar-dropdown {
+                margin: 0;
+                padding: 0;
+            }
+             
+                 
+             
+            #navbar.open {
+                width: 250px;
+            }
+            #navbar .navbar-item {
+                justify-content: center;
+            }
+            #navbar.open .navbar-item {
+                justify-content: flex-start;
+                padding: 10px;
+            }
+            #navbar.open .navbar-item-small {
+                padding: 5px 10px;
+            }
+            .navbar-item .navbar-item-icon img,
+            .navbar-item img.navbar-item-icon,
+            .navbar-item .navbar-item-icon svg,
+            .navbar-item svg.navbar-item-icon {
+                margin-right: 0;
+            }
+            #navbar.open .navbar-item .navbar-item-icon img,
+            #navbar.open .navbar-item img.navbar-item-icon,
+            #navbar.open .navbar-item .navbar-item-icon svg,
+            #navbar.open .navbar-item svg.navbar-item-icon {
+                margin-right: 5px;
+            }
+            #navbar.open .navbar-item-text {
+                display: inline-block;
+            }
 
+            #navbar.open .navbar-item-open {
+                display: none;
+            }
+            #navbar:not(.open) .navbar-item-close {
+                display: none;
+            }
+        }
+        @media screen and (min-width: 768px) {
+            .main-content {
+                margin: 0 auto;
+                padding: 10px 2.5em;
+            }
+            .pagination__link .pagination__link-text {
+                display: inline-block;
+            }
+            .pagination__link:first-child .pagination__link-text {
+                content: "Previous";
+            }
+            .pagination__link svg {
+                transform: scale(1);
+            }
+        }
+        @media screen and (min-width: 1200px) {
+            #navbar {
+                width: 250px;
+                position: fixed;
+                height: 100%;
+                overflow: auto;
+                padding: 0;
+                margin: 0;
+            }
+            #navbar .navbar-logo {
+                display: block;
+            }
+            main {
+                margin: 0;
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            .main-content {
+                padding-top: 10px;
+                padding-bottom: 10px;
+                padding-left: 20px;
+                max-width: min(1100px, calc(100% - 60px));
+            }
+            #navbar .navbar-item {
+                padding: 10px;
+                justify-content: flex-start;
+            }
+             
+                 
+             
+            #navbar .navbar-item-small {
+                padding: 5px 10px;
+            }
+            #navbar .navbar-item .navbar-item-icon img,
+            #navbar .navbar-item img.navbar-item-icon,
+            #navbar .navbar-item .navbar-item-icon svg,
+            #navbar .navbar-item svg.navbar-item-icon {
+                vertical-align: middle;
+                object-fit: contain;
+                margin-right: 5px;
+            }
+            #navbar .navbar-item .navbar-item-text {
+                display: inline-block;
+            }
+            #navbar .navbar-menu.navbar-opener {
+                display: none;
+            }
+        }
     </style>
     <link rel="icon" type="image/png" href="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/favicon.png?raw=true">
-    <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12" crossorigin="anonymous"></script>
 
     </head>
     <body>
@@ -233,7 +436,25 @@
                 
             </a>
         </div>
-        
+
+        <ul class="navbar-menu navbar-opener">
+            <li>
+                <button class="navbar-item navbar-item-open" id="navbarOpen">
+                    <span class="navbar-item-icon open"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right" viewBox="0 0 16 16">
+  <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753"/>
+</svg></span>
+                </button>
+                <button class="navbar-item navbar-item-close" id="navbarClose">
+                    <span class="navbar-item-icon close"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left" viewBox="0 0 16 16">
+  <path d="M10 12.796V3.204L4.519 8zm-.659.753-5.48-4.796a1 1 0 0 1 0-1.506l5.48-4.796A1 1 0 0 1 11 3.204v9.592a1 1 0 0 1-1.659.753"/>
+</svg></span>
+                    <span class="navbar-item-text">
+                        Close
+                    </span>
+                </button>
+            </li>
+        </ul>
+
         
     <style>
         .navbar-search-menu {
@@ -251,12 +472,13 @@
             border-radius: 0.5rem;
             border: 1px solid #ccc;
         }
-        .navbar-search-wrapper .navbar-search-icon {
+        .navbar-search-wrapper > svg {
             width: 35px;
             height: 35px;
             padding-top: 5px;
             padding-left: 10px;
             padding-bottom: 5px;
+            margin-right: 5px;
             fill: currentColor;
         }
         .navbar-search-wrapper .navbar-search-input {
@@ -269,14 +491,28 @@
             outline: none;
             height: 40px;
         }
-
+        @media screen and (min-width: 320px) {
+            #navbar .navbar-search-menu {
+                display: none;
+            }
+            #navbar.open .navbar-search-menu {
+                display: flex;
+            }
+        }
+        @media screen and (min-width: 1200px) {
+            #navbar .navbar-search-menu {
+                display: flex;
+            }
+            #navbar .navbar-search-input {
+                display: inline-block;
+            }
+        }
     </style>
     <ul class="navbar-search-menu" id="navbar-search">
         <li class="navbar-search-wrapper">
-            <svg class="navbar-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M0 0h24v24H0z" fill="none"/>
-                <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 0 0-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 0 0 5.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+</svg>
             <input class="navbar-search-input" type="text" placeholder="Search..." />
         </li>
     </ul>
@@ -358,47 +594,96 @@
         
             <li>
                 
-                    <a href="/wagtail_fedit/"hx-get="/wagtail_fedit/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item navbar-title" >
-                        Wagtail FEdit
-                    </a>
+                    
+    <a href="/wagtail_fedit/installation_instructions.html" hx-get="/wagtail_fedit/installation_instructions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-file-earmark-arrow-down" viewBox="0 0 16 16">
+  <path d="M8.5 6.5a.5.5 0 0 0-1 0v3.793L6.354 9.146a.5.5 0 1 0-.708.708l2 2a.5.5 0 0 0 .708 0l2-2a.5.5 0 0 0-.708-.708L8.5 10.293z"/>
+  <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2M9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Installation Instructions
+        </span>
+    </a>
+
                 
             </li>
         
             <li>
                 
-                    <a href="/wagtail_fedit/installation_instructions.html"hx-get="/wagtail_fedit/installation_instructions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Installation Instructions
-                    </a>
-                
-            </li>
-        
-            <li>
-                
-                    <a href="/wagtail_fedit/make_editable.html"hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Make something editable
-                    </a>
+                    
+    <a href="/wagtail_fedit/make_editable.html" hx-get="/wagtail_fedit/make_editable.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+  <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+  <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Make something editable
+        </span>
+    </a>
+
                 
             </li>
         
             <li>
                 
                     <div class="navbar-dropdown-button">
-                        <a href="/wagtail_fedit/adapters/"hx-get="/wagtail_fedit/adapters/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                            Adapters
-                        </a>
+                        
+    <a href="/wagtail_fedit/adapters/" hx-get="/wagtail_fedit/adapters/" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-subtract" viewBox="0 0 16 16">
+  <path d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Adapters
+        </span>
+    </a>
+
                     </div>
                     <ul class="navbar-dropdown">
                         
                             <li>
-                                <a href="/wagtail_fedit/adapters/adapters_python.html"hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                                    Adapters Python
-                                </a>
+                                
+    <a href="/wagtail_fedit/adapters/adapters_python.html" hx-get="/wagtail_fedit/adapters/adapters_python.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filetype-py" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2H7v-1h5a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM0 11.85h1.6q.434 0 .732.179.302.175.46.477t.158.677-.16.677q-.158.299-.464.474a1.45 1.45 0 0 1-.732.173H.79v1.342H0zm2.06 1.714a.8.8 0 0 0 .085-.381q0-.34-.185-.521-.185-.182-.513-.182H.788v1.406h.66a.8.8 0 0 0 .374-.082.57.57 0 0 0 .238-.24m2.963.75v1.535H4.23v-1.52L2.89 11.85h.876l.853 1.696h.032l.856-1.696h.855z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Adapters Python
+        </span>
+    </a>
+
                             </li>
                         
                             <li>
-                                <a href="/wagtail_fedit/adapters/adapters_js.html"hx-get="/wagtail_fedit/adapters/adapters_js.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                                    Adapters Javascript
-                                </a>
+                                
+    <a href="/wagtail_fedit/adapters/adapters_js.html" hx-get="/wagtail_fedit/adapters/adapters_js.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-filetype-js" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2H8v-1h4a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.186 15.29a1.2 1.2 0 0 1-.111-.449h.765a.58.58 0 0 0 .255.384q.105.073.249.114.143.041.319.041.246 0 .413-.07a.56.56 0 0 0 .255-.193.5.5 0 0 0 .085-.29.39.39 0 0 0-.153-.326q-.151-.12-.462-.193l-.619-.143a1.7 1.7 0 0 1-.539-.214 1 1 0 0 1-.351-.367 1.1 1.1 0 0 1-.123-.524q0-.366.19-.639.19-.272.528-.422.336-.15.776-.149.457 0 .78.152.324.153.5.41.18.255.2.566h-.75a.56.56 0 0 0-.12-.258.6.6 0 0 0-.247-.181.9.9 0 0 0-.369-.068q-.325 0-.513.152a.47.47 0 0 0-.184.384q0 .18.143.3a1 1 0 0 0 .405.175l.62.143q.327.075.566.211.24.136.375.358t.135.56q0 .37-.188.656a1.2 1.2 0 0 1-.539.439q-.351.158-.858.158-.381 0-.665-.09a1.4 1.4 0 0 1-.478-.252 1.1 1.1 0 0 1-.29-.375m-3.104-.033A1.3 1.3 0 0 1 0 14.791h.765a.6.6 0 0 0 .073.27.5.5 0 0 0 .454.246q.285 0 .422-.164.138-.165.138-.466v-2.745h.79v2.725q0 .66-.357 1.005-.354.345-.984.345a1.6 1.6 0 0 1-.569-.094 1.15 1.15 0 0 1-.407-.266 1.1 1.1 0 0 1-.243-.39"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Adapters Javascript
+        </span>
+    </a>
+
                             </li>
                         
                     </ul>
@@ -407,41 +692,101 @@
         
             <li>
                 
-                    <a href="/wagtail_fedit/caveats.html"hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Caveats
-                    </a>
+                    
+    <a href="/wagtail_fedit/caveats.html" hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-circle" viewBox="0 0 16 16">
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+  <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Caveats
+        </span>
+    </a>
+
                 
             </li>
         
             <li>
                 
-                    <a href="/wagtail_fedit/hooks.html"hx-get="/wagtail_fedit/hooks.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Hooks
-                    </a>
+                    
+    <a href="/wagtail_fedit/hooks.html" hx-get="/wagtail_fedit/hooks.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
+  <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z"/>
+  <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Hooks
+        </span>
+    </a>
+
                 
             </li>
         
             <li>
                 
-                    <a href="/wagtail_fedit/settings.html"hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Settings
-                    </a>
+                    
+    <a href="/wagtail_fedit/settings.html" hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+  <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+  <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Settings
+        </span>
+    </a>
+
                 
             </li>
         
             <li>
                 
-                    <a href="/wagtail_fedit/permissions.html"hx-get="/wagtail_fedit/permissions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Permissions
-                    </a>
+                    
+    <a href="/wagtail_fedit/permissions.html" hx-get="/wagtail_fedit/permissions.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-shield-lock" viewBox="0 0 16 16">
+  <path d="M5.338 1.59a61 61 0 0 0-2.837.856.48.48 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.7 10.7 0 0 0 2.287 2.233c.346.244.652.42.893.533q.18.085.293.118a1 1 0 0 0 .101.025 1 1 0 0 0 .1-.025q.114-.034.294-.118c.24-.113.547-.29.893-.533a10.7 10.7 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.8 11.8 0 0 1-2.517 2.453 7 7 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7 7 0 0 1-1.048-.625 11.8 11.8 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 63 63 0 0 1 5.072.56"/>
+  <path d="M9.5 6.5a1.5 1.5 0 0 1-1 1.415l.385 1.99a.5.5 0 0 1-.491.595h-.788a.5.5 0 0 1-.49-.595l.384-1.99a1.5 1.5 0 1 1 2-1.415"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Permissions
+        </span>
+    </a>
+
                 
             </li>
         
             <li>
                 
-                    <a href="/wagtail_fedit/support.html"hx-get="/wagtail_fedit/support.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
-                        Supported Features
-                    </a>
+                    
+    <a href="/wagtail_fedit/support.html" hx-get="/wagtail_fedit/support.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item " >
+        <span class="navbar-item-icon">
+            
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list-stars" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/>
+  <path d="M2.242 2.194a.27.27 0 0 1 .516 0l.162.53c.035.115.14.194.258.194h.551c.259 0 .37.333.164.493l-.468.363a.28.28 0 0 0-.094.3l.173.569c.078.256-.213.462-.423.3l-.417-.324a.27.27 0 0 0-.328 0l-.417.323c-.21.163-.5-.043-.423-.299l.173-.57a.28.28 0 0 0-.094-.299l-.468-.363c-.206-.16-.095-.493.164-.493h.55a.27.27 0 0 0 .259-.194zm0 4a.27.27 0 0 1 .516 0l.162.53c.035.115.14.194.258.194h.551c.259 0 .37.333.164.493l-.468.363a.28.28 0 0 0-.094.3l.173.569c.078.255-.213.462-.423.3l-.417-.324a.27.27 0 0 0-.328 0l-.417.323c-.21.163-.5-.043-.423-.299l.173-.57a.28.28 0 0 0-.094-.299l-.468-.363c-.206-.16-.095-.493.164-.493h.55a.27.27 0 0 0 .259-.194zm0 4a.27.27 0 0 1 .516 0l.162.53c.035.115.14.194.258.194h.551c.259 0 .37.333.164.493l-.468.363a.28.28 0 0 0-.094.3l.173.569c.078.255-.213.462-.423.3l-.417-.324a.27.27 0 0 0-.328 0l-.417.323c-.21.163-.5-.043-.423-.299l.173-.57a.28.28 0 0 0-.094-.299l-.468-.363c-.206-.16-.095-.493.164-.493h.55a.27.27 0 0 0 .259-.194z"/>
+</svg>
+            
+        </span>
+        <span class="navbar-item-text">
+            Supported Features
+        </span>
+    </a>
+
                 
             </li>
         
@@ -451,17 +796,38 @@
         <ul class="navbar-menu navbar-footer">
             <li>
                 <span class="navbar-item navbar-item-small">
+                    <span class="navbar-item-text">
+                        <span class="navbar-item-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tag" viewBox="0 0 16 16">
+  <path d="M6 4.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m-1 0a.5.5 0 1 0-1 0 .5.5 0 0 0 1 0"/>
+  <path d="M2 1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 1 6.586V2a1 1 0 0 1 1-1m0 5.586 7 7L13.586 9l-7-7H2z"/>
+</svg>
+                        </span>
+                    </span>
                     v1.5.4
                 </span>
             </li>
             
                 <li>
                     <a href="https://github.com/Nigel2392/doccer" class="navbar-item " target="_blank">
-                        View Doccer on GitHub
+                        <img src="https://github.com/Nigel2392/wagtail_fedit/blob/main/.github/static/favicon.png?raw=true" class="navbar-item-icon">
+                        <span class="navbar-item-text">
+                            View Doccer on GitHub
+                        </span>
                     </a>
                 </li>
             
         </ul>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                navbarOpen.onclick = function() {
+                    navbar.classList.toggle('open');
+                };
+                navbarClose.onclick = function() {
+                    navbar.classList.toggle('open');
+                };
+            });
+        </script>
     </nav>
 
         
@@ -470,31 +836,13 @@
             <div class="object-information">
                 <span class="object-information__title">hooks.md</span>
             </div>
-            
-            
-            
-                <div class="pagination">
-                    
-                        <a href="/wagtail_fedit/caveats.html" class="pagination__link pagination__link--previous" hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true">
-                            Caveats
-                        </a>
-                    
-                    
-                        <a href="/wagtail_fedit/settings.html" class="pagination__link pagination__link--next" hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true">
-                            Django Settings 
-                        </a>
-                    
-                </div>
-            
             <div class="documentation-links">
                 
                     <a href="https://github.com/Nigel2392/wagtail_fedit" class="documentation-link" target="_blank">
                         View on Github
                         <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
-                            
-                            
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
-                        </svg>
+  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+</svg>
                     </a>
                 
             </div>
@@ -595,6 +943,28 @@ This way; the user will have the actual widget for the field instead of the rela
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">3</span><span>    <span style="color:#66d9ef">if</span> result <span style="color:#f92672">is</span> <span style="color:#f92672">not</span> <span style="color:#66d9ef">None</span>:
 </span></span><span style="display:flex;"><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">4</span><span>        <span style="color:#66d9ef">return</span> result <span style="color:#75715e"># &lt;- bool</span>
 </span></span></code></pre>
+            
+            
+            
+                <div class="pagination">
+                    
+                        <a href="/wagtail_fedit/caveats.html" hx-get="/wagtail_fedit/caveats.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--previous">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+</svg>
+                            <span class="pagination__link-text">Caveats</span>
+                        </a>
+                    
+                    
+                        <a href="/wagtail_fedit/settings.html" hx-get="/wagtail_fedit/settings.html" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="pagination__link pagination__link--next">
+                            <span class="pagination__link-text">Django Settings</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"/>
+</svg>
+                        </a>
+                    
+                </div>
+            
         </div>
     </main>
 

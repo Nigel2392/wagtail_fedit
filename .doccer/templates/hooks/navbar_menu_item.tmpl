@@ -1,0 +1,17 @@
+{{ define "menu_item" }}
+    <a href="{{ .URL }}" hx-get="{{ .URL }}" hx-select=".main-content-wrapper" hx-target=".main-content-wrapper" hx-swap="outerHTML" hx-push-url="true" class="navbar-item {{ .Classname }}" {{ if .Attributes }}{{ range $key, $value := .Attributes }}{{ $key }}="{{ html $value }}"{{ end }}{{ end }}>
+        <span class="navbar-item-icon">
+            {{ if .Icon }}
+                {{ Icon .Icon }}
+            {{ else }}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <circle style="stroke: currentColor; fill: none; stroke-width: 1px;" cx="12" cy="12" r="11"/>
+                    <text style="fill: currentColor; font-family: Arial, sans-serif; text-anchor: middle; dominant-baseline: central;" x="12" y="12">{{ .PreviewLetter }}</text>
+                </svg>
+            {{ end }}
+        </span>
+        <span class="navbar-item-text">
+            {{ .Name }}
+        </span>
+    </a>
+{{ end }}

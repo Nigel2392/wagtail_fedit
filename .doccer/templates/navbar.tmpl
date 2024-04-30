@@ -17,22 +17,54 @@
                 {{ end }}
             </a>
         </div>
-        
+
+        <ul class="navbar-menu navbar-opener">
+            <li>
+                <button class="navbar-item navbar-item-open" id="navbarOpen">
+                    <span class="navbar-item-icon open">{{ Icon "caret-right" "16x16" }}</span>
+                </button>
+                <button class="navbar-item navbar-item-close" id="navbarClose">
+                    <span class="navbar-item-icon close">{{ Icon "caret-left" "16x16" }}</span>
+                    <span class="navbar-item-text">
+                        Close
+                    </span>
+                </button>
+            </li>
+        </ul>
+
         {{ RenderHook . "render_navbar_content" }}
 
         <ul class="navbar-menu navbar-footer">
             <li>
                 <span class="navbar-item navbar-item-small">
+                    <span class="navbar-item-text">
+                        <span class="navbar-item-icon">
+                            {{ Icon "tag" "16x16" }}
+                        </span>
+                    </span>
                     v{{ .Config.Project.Version }}
                 </span>
             </li>
             {{ range $menuItem := .Footer.Items }}
                 <li>
                     <a href="{{ $menuItem.URL }}" class="navbar-item {{ $menuItem.Classname }}" target="_blank">
-                        {{ $menuItem.Name }}
+                        <img src="{{ Asset "static/favicon.png" }}" class="navbar-item-icon">
+                        <span class="navbar-item-text">
+                            {{ $menuItem.Name }}
+                        </span>
                     </a>
                 </li>
             {{ end }}
         </ul>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                navbarOpen.onclick = function() {
+                    navbar.classList.toggle('open');
+                };
+                navbarClose.onclick = function() {
+                    navbar.classList.toggle('open');
+                };
+            });
+        </script>
     </nav>
 {{ end }}
