@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "noImplicitAny": true,
+      "module": "commonjs",
+      "target": "es5",
+      "allowJs": true,
+      "moduleResolution": "node"
+    },
+    "include": [
+      "wagtail_fedit/static_src/**/*.ts",
+      "wagtail_fedit/static_src/**/*.tsx",
+      "wagtail_fedit/static_src/**/*.js"
+    ]
+  }

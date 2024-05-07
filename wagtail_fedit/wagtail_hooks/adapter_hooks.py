@@ -78,22 +78,10 @@ def register_css(request):
 
 @hooks.register(REGISTER_JS, order=-1)
 def register_js(request):
-    scripts = []
-    if TIPPY_ENABLED:
-        scripts.extend([
-            format_html(
-                '<script src="{0}"></script>',
-                static('wagtail_fedit/vendor/tippy/popper.min.js')
-            ),
-            format_html(
-                '<script src="{0}"></script>',
-                static('wagtail_fedit/vendor/tippy/tippy-bundle.min.js')
-            ),
-        ])
-    scripts.extend([
+    scripts = [
         format_html(
             '<script src="{0}"></script>',
-            static('wagtail_fedit/js/frontend.js')
+            static('wagtail_fedit/js/edit.js')
         ),
-    ])
+    ]
     return scripts

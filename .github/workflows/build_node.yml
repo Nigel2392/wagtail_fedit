@@ -1,0 +1,25 @@
+name: build_node
+on: [pull_request, push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node
+        uses: actions/setup-node@v4
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build static files
+        run: ./node_modules/.bin/webpack --mode production
+
+      - name: Commit and push if there are changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -f dist/
+          git commit -m "Add compiled files" -a || echo "No changes to commit"
+          git push

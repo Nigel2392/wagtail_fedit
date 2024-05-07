@@ -21,6 +21,9 @@ from wagtail.models import (
 
 import warnings
 
+from ..settings import (
+    TIPPY_ENABLED,
+)
 from ..adapters import (
     adapter_registry,
     RegistryLookUpError,
@@ -278,6 +281,10 @@ def static_hook_output(context, css_or_js) -> dict:
 
 @register.simple_tag(takes_context=False, name="tooltip")
 def tooltip(content, wrapping: str = None, **kwargs) -> str:
+
+    if not TIPPY_ENABLED:
+        return ""
+
     kwargs["content"] = content
     s = [
         "data-tooltip='true'"
