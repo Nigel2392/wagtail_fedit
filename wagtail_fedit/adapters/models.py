@@ -1,7 +1,11 @@
 from django.utils.translation import gettext_lazy as _
 from django.http import HttpRequest
+from django.utils import translation
 
-from wagtail.models import Page
+from wagtail.log_actions import log
+from wagtail.models import (
+    Page, RevisionMixin
+)
 from wagtail.admin.panels import (
     page_utils,
     model_utils,
@@ -104,6 +108,22 @@ class ModelAdapter(BlockFieldReplacementAdapter):
 
     def form_valid(self, form):
         self.object = form.save()
+
+        extra_log_kwargs = {}
+        if isinstance(self.object, RevisionMixin):
+            extra_log_kwargs["revision"] = self.object.latest_revision
+
+        with translation.override(None):
+            log(
+                instance=self.object,
+                action="wagtail_fedit.edit_model",
+                user=self.request.user,
+                data={
+                    "model_verbose": self.object._meta.verbose_name,
+                },
+                content_changed=form.has_changed(),
+                **extra_log_kwargs,
+            )
 
     def get_form(self):
         if self.request.method == "POST":

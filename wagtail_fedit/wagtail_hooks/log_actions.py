@@ -48,6 +48,20 @@ def register_core_log_actions(actions):
             except KeyError:
                 return _("Edit Field")
 
+    @actions.register_action("wagtail_fedit.edit_model")
+    class ModelChangedFormatter(LogFormatter):
+        label = _("Model Changed (Frontend)")
+        message = _("A model was changed from the frontend")
+
+        def format_message(self, log_entry):
+            data = log_entry.data
+
+            if not "model_verbose" in data:
+                return self.label
+            
+            return _("Changed '%(model)s' (Frontend)") % {
+                "model": gettext(data["model_verbose"]),
+            }
             
     @actions.register_action("wagtail_fedit.edit_block")
     class BlockChangedFormatter(LogFormatter):
