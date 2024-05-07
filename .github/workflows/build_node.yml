@@ -20,6 +20,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add -f dist/
+          git add -f wagtail_fedit/static/wagtail_fedit/editor.js
           git commit -m "Add compiled files" -a || echo "No changes to commit"
           git push
