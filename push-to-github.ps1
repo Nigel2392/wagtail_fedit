@@ -1,7 +1,8 @@
 param (
     [string]$CommitMessage = "Update to package",
     [bool]$Tag = $false,
-    [string]$TagName = "0.0.0"
+    [string]$TagName = "0.0.0",
+    [bool]$Fake = $false
 )
 
 if ($TagName -ne "0.0.0") {
@@ -9,6 +10,14 @@ if ($TagName -ne "0.0.0") {
 }
 
 $ProjectName = "wagtail_fedit"
+
+
+npx webpack
+
+if ($Fake) {
+    Write-Host "Fake mode enabled, exiting (not pushing)..."
+    exit
+}
 
 
 function IsNumeric ($Value) {
