@@ -15,11 +15,3 @@ jobs:
 
       - name: Build static files
         run: ./node_modules/.bin/webpack --mode production
-
-      - name: Commit and push if there are changes
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -f wagtail_fedit/static/wagtail_fedit/js/edit.js
-          git commit -m "Add compiled files" -a || echo "No changes to commit"
-          git push
