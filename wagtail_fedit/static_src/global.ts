@@ -2,14 +2,14 @@ export {};
 
 import { initNewEditors, setScrollParams } from "./editors/base/init";
 import { BaseWagtailFeditEditor } from "./editors/base/base";
-import { WagtailFeditPublishMenu } from "./menu";
+import { WagtailFeditPublishMenu } from "./components/menu";
 import {
     BaseFuncEditor,
     WagtailFeditFuncEditor,
     BlockFieldEditor,
     backgroundImageAdapter,
 } from "./editors/editors";
-import { Tooltip } from "./editors/base/tooltips";
+import { Tooltip } from "./components/tooltips";
 import { iFrame } from "./editors/base/iframe";
 
 export {

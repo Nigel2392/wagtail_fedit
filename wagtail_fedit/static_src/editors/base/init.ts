@@ -1,5 +1,5 @@
 import { WrapperElement } from "./base";
-import { Tooltip } from "./tooltips";
+import { Tooltip } from "../../components/tooltips";
 
 export {
     initNewEditors,

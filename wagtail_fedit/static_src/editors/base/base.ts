@@ -1,6 +1,6 @@
 import { initNewEditors } from "./init";
 import { WagtailFeditorAPI } from "./api";
-import { EditorModal } from "./modal";
+import { EditorModal } from "../../components/modal";
 import { iFrame } from "./iframe";
 
 export {
