@@ -7,8 +7,14 @@
       "moduleResolution": "node"
     },
     "include": [
+      "wagtail_fedit/static_src/**/*.js",
       "wagtail_fedit/static_src/**/*.ts",
-      "wagtail_fedit/static_src/**/*.tsx",
-      "wagtail_fedit/static_src/**/*.js"
+      "wagtail_fedit/static_src/**/*.tsx"
+    ],
+    "exclude": [
+      "node_modules",
+      "wagtail_fedit/static_src/**/*.test.js",
+      "wagtail_fedit/static_src/**/*.test.ts",
+      "wagtail_fedit/static_src/**/*.test.tsx"
     ]
   }

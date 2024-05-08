@@ -15,3 +15,6 @@ jobs:
 
       - name: Build static files
         run: ./node_modules/.bin/webpack --mode production
+
+      - name: Run tests
+        run: ./node_modules/.bin/jest --coverage

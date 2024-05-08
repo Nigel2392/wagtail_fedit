@@ -16,7 +16,7 @@ type FuncResponseObject = ResponseObject & {
 
 
 class BaseFuncEditor extends BaseWagtailFeditEditor {
-    
+
     static get funcMap() {
         return window as any;
     }

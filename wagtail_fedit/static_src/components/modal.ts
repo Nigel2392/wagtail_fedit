@@ -1,6 +1,8 @@
 export {
     EditorModal,
+    ModalElement,
     ModalOptions,
+    modalIdentifier,
 };
 
 const modalIdentifier = "wagtail-fedit-modal";
@@ -16,6 +18,12 @@ type ModalOptions = {
 
     onOpen?: () => void;
     onClose?: () => void;
+    onDestroy?: () => void;
+}
+
+
+type ModalElement = HTMLElement & {
+    modal: EditorModal;
 }
 
 
@@ -44,7 +52,7 @@ class EditorModal {
         return (<typeof EditorModal>this.constructor).modalWrapper;
     }
 
-    get modal(): HTMLElement {
+    get modal(): ModalElement {
         var modal = this.wrapper.querySelector(`.${modalIdentifier}`);
 
         if (modal && modal.id !== `${modalIdentifier}-${this.options.modalId}-modal`) {
@@ -56,7 +64,9 @@ class EditorModal {
             modal = this.buildModal();
         }
 
-        return modal as HTMLElement;
+        var md = modal as ModalElement;
+        md.modal = this;
+        return md;
     }
 
     get innerHTML() {
@@ -79,14 +89,19 @@ class EditorModal {
         return this.modal.children;
     }
 
-    buildModal(): HTMLElement {
+    buildModal(): ModalElement {
         var wrapper = this.wrapper;
-        var modal = wrapper.querySelector(`.${modalIdentifier}`);
+        var modal = wrapper.querySelector(`.${modalIdentifier}`) as ModalElement;
         if (!modal) {
             wrapper.innerHTML = this.modalHtml;
-            modal = wrapper.querySelector(`.${modalIdentifier}`);
+            modal = wrapper.querySelector(`.${modalIdentifier}`) as ModalElement;
         }
-        return modal as HTMLElement;
+
+        if (!modal.modal) {
+            modal.modal = this;
+        }
+
+        return modal as ModalElement;
     }
 
     addClass(className: string) {
@@ -111,6 +126,14 @@ class EditorModal {
 
         if (this.options.onClose) {
             this.options.onClose();
+        }
+    }
+
+    destroy() {
+        this.wrapper.remove();
+
+        if (this.options.onDestroy) {
+            this.options.onDestroy();
         }
     }
 

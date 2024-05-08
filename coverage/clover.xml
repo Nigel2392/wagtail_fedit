@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1715176177723" clover="3.2.0">
+  <project timestamp="1715176177724" name="All files">
+    <metrics statements="61" coveredstatements="42" conditionals="12" coveredconditionals="9" methods="20" coveredmethods="10" elements="93" coveredelements="61" complexity="0" loc="61" ncloc="61" packages="1" files="1" classes="1"/>
+    <file name="modal.ts" path="C:\Users\NigelvanKeulenGoodad\Desktop\goodadvice\Packages\wagtail_fedit\wagtail_fedit\static_src\components\modal.ts">
+      <metrics statements="61" coveredstatements="42" conditionals="12" coveredconditionals="9" methods="20" coveredmethods="10"/>
+      <line num="2" count="1" type="stmt"/>
+      <line num="5" count="1" type="stmt"/>
+      <line num="8" count="1" type="stmt"/>
+      <line num="9" count="1" type="stmt"/>
+      <line num="35" count="5" type="stmt"/>
+      <line num="36" count="5" type="stmt"/>
+      <line num="40" count="26" type="stmt"/>
+      <line num="41" count="26" type="cond" truecount="1" falsecount="0"/>
+      <line num="42" count="21" type="stmt"/>
+      <line num="44" count="5" type="stmt"/>
+      <line num="45" count="5" type="stmt"/>
+      <line num="46" count="5" type="stmt"/>
+      <line num="47" count="5" type="stmt"/>
+      <line num="48" count="5" type="stmt"/>
+      <line num="52" count="26" type="stmt"/>
+      <line num="56" count="6" type="stmt"/>
+      <line num="58" count="6" type="cond" truecount="2" falsecount="1"/>
+      <line num="59" count="0" type="stmt"/>
+      <line num="60" count="0" type="stmt"/>
+      <line num="63" count="6" type="cond" truecount="1" falsecount="0"/>
+      <line num="64" count="1" type="stmt"/>
+      <line num="67" count="6" type="stmt"/>
+      <line num="68" count="6" type="stmt"/>
+      <line num="69" count="6" type="stmt"/>
+      <line num="73" count="0" type="stmt"/>
+      <line num="77" count="0" type="stmt"/>
+      <line num="81" count="0" type="stmt"/>
+      <line num="85" count="0" type="stmt"/>
+      <line num="89" count="0" type="stmt"/>
+      <line num="93" count="5" type="stmt"/>
+      <line num="94" count="5" type="stmt"/>
+      <line num="95" count="5" type="cond" truecount="1" falsecount="0"/>
+      <line num="96" count="5" type="stmt"/>
+      <line num="97" count="5" type="stmt"/>
+      <line num="100" count="5" type="cond" truecount="1" falsecount="0"/>
+      <line num="101" count="5" type="stmt"/>
+      <line num="104" count="5" type="stmt"/>
+      <line num="108" count="2" type="stmt"/>
+      <line num="112" count="1" type="stmt"/>
+      <line num="116" count="5" type="stmt"/>
+      <line num="118" count="5" type="cond" truecount="1" falsecount="0"/>
+      <line num="119" count="5" type="stmt"/>
+      <line num="124" count="1" type="stmt"/>
+      <line num="125" count="1" type="stmt"/>
+      <line num="127" count="1" type="cond" truecount="1" falsecount="0"/>
+      <line num="128" count="1" type="stmt"/>
+      <line num="133" count="5" type="stmt"/>
+      <line num="135" count="5" type="cond" truecount="1" falsecount="0"/>
+      <line num="136" count="5" type="stmt"/>
+      <line num="141" count="0" type="cond" truecount="0" falsecount="1"/>
+      <line num="142" count="0" type="stmt"/>
+      <line num="144" count="0" type="stmt"/>
+      <line num="145" count="0" type="stmt"/>
+      <line num="150" count="0" type="stmt"/>
+      <line num="154" count="0" type="cond" truecount="0" falsecount="1"/>
+      <line num="155" count="0" type="stmt"/>
+      <line num="158" count="0" type="stmt"/>
+      <line num="160" count="0" type="stmt"/>
+      <line num="164" count="0" type="stmt"/>
+      <line num="168" count="0" type="stmt"/>
+      <line num="172" count="0" type="stmt"/>
+    </file>
+  </project>
+</coverage>
