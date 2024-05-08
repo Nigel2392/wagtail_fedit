@@ -15,7 +15,7 @@ $ProjectName = "wagtail_fedit"
 npx webpack
 
 if ($Fake) {
-    Write-Host "Fake mode enabled, exiting (not pushing)..."
+    Write-Host "Fake mode enabled, exiting... (not pushing)"
     exit
 }
 

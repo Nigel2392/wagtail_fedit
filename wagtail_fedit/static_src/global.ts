@@ -2,7 +2,7 @@ export {};
 
 import { initNewEditors, setScrollParams } from "./editors/base/init";
 import { BaseWagtailFeditEditor } from "./editors/base/base";
-import { WagtailFeditPublishMenu } from "./editors/base/menu";
+import { WagtailFeditPublishMenu } from "./menu";
 import {
     BaseFuncEditor,
     WagtailFeditFuncEditor,

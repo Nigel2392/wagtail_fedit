@@ -1,16 +1,10 @@
-import { BaseWagtailFeditEditor } from "./base/base";
+import { BaseWagtailFeditEditor, ResponseObject } from "./base/base";
 
 export {
     BaseFuncEditor,
     WagtailFeditFuncEditor,
     BlockFieldEditor,
     backgroundImageAdapter,
-};
-
-type ResponseObject = {
-    success: boolean;
-    html?: string | null;
-    refetch?: boolean;
 };
 
 type FuncResponseObject = ResponseObject & {

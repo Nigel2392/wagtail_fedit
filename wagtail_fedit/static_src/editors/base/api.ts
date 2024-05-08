@@ -19,7 +19,7 @@ class WagtailFeditorAPI {
     }
 
     closeModal() {
-        this.editor.closeModal();
+        this.editor.modal.closeModal();
     }
 
     executeEvent(name: string, detail: any) {

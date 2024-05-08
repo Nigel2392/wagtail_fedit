@@ -12,7 +12,7 @@ function getEditorClass(element: HTMLElement) {
     if (editorClass) {
         return window.wagtailFedit.editors[editorClass];
     }
-    return null;
+    throw new Error("No editor class found for element");
 }
 
 

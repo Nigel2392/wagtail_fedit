@@ -1,22 +1,25 @@
 import { initNewEditors } from "./init";
 import { WagtailFeditorAPI } from "./api";
+import { EditorModal } from "./modal";
 import { iFrame } from "./iframe";
 
 export {
     BaseWagtailFeditEditor,
+    ResponseObject,
     WrapperElement,
 };
+
 
 interface WrapperElement extends HTMLDivElement {
     editorAPI: WagtailFeditorAPI;
 }
 
 
-const modalHtml = `
-<div class="wagtail-fedit-modal-wrapper">
-    <div class="wagtail-fedit-modal" id="wagtail-fedit-modal-__ID__-modal">
-    </div>
-</div>`
+type ResponseObject = {
+    success: boolean;
+    html?: string | null;
+    refetch?: boolean;
+};
 
 
 class BaseWagtailFeditEditor extends EventTarget {
@@ -25,21 +28,28 @@ class BaseWagtailFeditEditor extends EventTarget {
     wrapperElement: WrapperElement;
     api: WagtailFeditorAPI;
     sharedContext: string;
-    modalHtml: string;
     editBtn: HTMLElement;
     iframe: iFrame;
-    modal: HTMLElement;
+    modal: EditorModal;
 
     constructor(element: WrapperElement) {
         super();
+        this.api = new WagtailFeditorAPI(this);
         this.initialTitle = document.title;
         this.wrapperElement = element;
-        this.api = new WagtailFeditorAPI(this);
         this.sharedContext = null;
-        this.modalHtml = null;
         this.editBtn = null;
-        this.init();
         this.iframe = null;
+        this.init();
+
+        this.modal = new EditorModal({
+            modalId: this.wrapperElement.id,
+            onClose: () => {
+                window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
+                document.title = this.initialTitle;
+                this.executeEvent(window.wagtailFedit.EVENTS.MODAL_CLOSE);
+            },
+        });
 
         if (window.location.hash === `#${this.wrapperElement.id}`) {
             this.makeModal();
@@ -62,26 +72,11 @@ class BaseWagtailFeditEditor extends EventTarget {
         return Array.from(elements).filter(filterFn) as WrapperElement[];
     }
 
-    get modalWrapper() {
-        const modalWrapper = document.querySelector("#wagtail-fedit-modal-wrapper");
-        if (modalWrapper) {
-            return modalWrapper;
-        }
-        const wrapper = document.createElement("div") as WrapperElement;
-        wrapper.id = "wagtail-fedit-modal-wrapper";
-        wrapper.classList.add("wagtail-fedit-modal-wrapper");
-        wrapper.editorAPI = this.api;
-        document.body.appendChild(wrapper);
-        return wrapper;
-    }
 
     init() {
         this.sharedContext = this.wrapperElement.dataset.sharedContext;
-        this.modalHtml = modalHtml.replace("__ID__", this.wrapperElement.dataset.id);
-        this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
-
         this.wrapperElement.editorAPI = this.api;
-
+        this.editBtn = this.wrapperElement.querySelector(".wagtail-fedit-edit-button");
         this.editBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -97,10 +92,7 @@ class BaseWagtailFeditEditor extends EventTarget {
         this.wrapperElement.focus();
     }
 
-    /**
-     * @returns {Promise<ResponseObject>}
-     */
-    refetch() {
+    refetch(): Promise<any> {
         return new Promise((resolve, reject) => {
             fetch(this.getRefetchUrl()).then((response) => {
                 return response.json();
@@ -118,7 +110,7 @@ class BaseWagtailFeditEditor extends EventTarget {
         })
     }
 
-    onResponse(response: any): any | Promise<any> {
+    onResponse(response: ResponseObject): any | Promise<any> {
         throw new Error("onResponse not implemented, cannot call super");
     }
 
@@ -143,9 +135,6 @@ class BaseWagtailFeditEditor extends EventTarget {
     }
 
     async makeModal() {
-        this.modalWrapper.innerHTML = this.modalHtml;
-        this.modal = this.modalWrapper.querySelector(".wagtail-fedit-modal");
-
         this.iframe = new iFrame({
             url: this.getEditUrl(),
             id: "wagtail-fedit-iframe",
@@ -179,8 +168,9 @@ class BaseWagtailFeditEditor extends EventTarget {
                             }
 
                             const cancelButton = this.iframe.document.querySelector(".wagtail-fedit-cancel-button");
-                            cancelButton.addEventListener("click", this.closeModal.bind(this));
-                            this.iframe.onCancel = this.closeModal.bind(this);
+                            const modalCloseFn = this.modal.closeModal.bind(this.modal);
+                            cancelButton.addEventListener("click", modalCloseFn);
+                            this.iframe.onCancel = modalCloseFn;
                             this.executeEvent(window.wagtailFedit.EVENTS.SUBMIT_ERROR, {
                                 element: this.wrapperElement,
                                 response: response,
@@ -189,7 +179,7 @@ class BaseWagtailFeditEditor extends EventTarget {
                         }
                         const ret = this.onResponse(response);
                         const success = () => {
-                            this.closeModal();
+                            this.modal.closeModal();
                             this.executeEvent(window.wagtailFedit.EVENTS.CHANGE, {
                                 element: this.wrapperElement,
                             });
@@ -202,7 +192,7 @@ class BaseWagtailFeditEditor extends EventTarget {
                     });
                 };
                 this.iframe.formElement.onsubmit = onSubmit;
-                this.iframe.onCancel = this.closeModal.bind(this);
+                this.iframe.onCancel = this.modal.closeModal.bind(this.modal);
                 
                 // Check if we need to apply the fedit-full class to the modal
                 const formWrapper = this.iframe.formWrapper;
@@ -213,7 +203,7 @@ class BaseWagtailFeditEditor extends EventTarget {
                         formWrapper.classList.contains(`fedit-${option}`) ||
                         (this.iframe.formElement.dataset.editorSize || "").toLowerCase() === option
                     )) {
-                        this.modal.classList.add(`fedit-${option}`);
+                        this.modal.addClass(`fedit-${option}`);
                         break;
                     }
                 }
@@ -228,10 +218,10 @@ class BaseWagtailFeditEditor extends EventTarget {
                 });
             },
             onError: () => {
-                this.closeModal();
+                this.modal.closeModal();
             },
             onCancel: () => {
-                this.closeModal();
+                this.modal.closeModal();
             },
         });
 
@@ -240,19 +230,14 @@ class BaseWagtailFeditEditor extends EventTarget {
         const closeBtn = document.createElement("button");
         closeBtn.innerHTML = "&times;";
         closeBtn.classList.add("wagtail-fedit-close-button");
-        closeBtn.addEventListener("click", this.closeModal.bind(this));
+        closeBtn.addEventListener("click", this.modal.closeModal.bind(this.modal));
         this.modal.appendChild(closeBtn);
         this.executeEvent(window.wagtailFedit.EVENTS.MODAL_OPEN, {
             iframe: this.iframe,
             modal: this.modal,
         });
-    }
 
-    closeModal() {
-        this.modalWrapper.remove();
-        window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
-        document.title = this.initialTitle;
-        this.executeEvent(window.wagtailFedit.EVENTS.MODAL_CLOSE);
+        this.modal.openModal()
     }
 
     executeEvent(name: string, detail?: any): void { 

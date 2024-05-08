@@ -1,5 +1,6 @@
 export {
     iFrame,
+    FrameOptions,
 };
 
 type FrameOptions = {

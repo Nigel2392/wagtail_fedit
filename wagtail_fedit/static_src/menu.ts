@@ -1,5 +1,3 @@
-import * as _ from "../../global";
-
 export {
     WagtailFeditPublishMenu,
 }
