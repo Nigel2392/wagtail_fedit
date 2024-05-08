@@ -17,4 +17,4 @@
       "wagtail_fedit/static_src/**/*.test.ts",
       "wagtail_fedit/static_src/**/*.test.tsx"
     ]
-  }
+}

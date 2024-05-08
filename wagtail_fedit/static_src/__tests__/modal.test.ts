@@ -61,7 +61,7 @@ describe("EditorModal", () => {
         let elem = document.querySelector(`.${modalIdentifier}`) as ModalElement;
 
         if (elem) {
-            fail("Modal should not be open");
+            fail("Modal element should not exist yet");
         }
         
         modal.buildModal();
@@ -73,6 +73,25 @@ describe("EditorModal", () => {
 
         expect(modal.wrapper.classList.contains("open")).toBe(false);
         expect(modalClosed).toBe(true);
+    });
+
+    it("should destroy the modal", () => {
+        let elem = document.querySelector(`.${modalIdentifier}`) as ModalElement;
+
+        if (elem) {
+            fail("Modal element should not exist yet");
+        }
+
+        modal.buildModal();
+        modal.openModal();
+        elem = document.querySelector(`.${modalIdentifier}`) as ModalElement;
+        expect(elem).toBeInstanceOf(HTMLElement);
+
+        modal.destroy();
+
+        elem = document.querySelector(`.${modalIdentifier}`) as ModalElement;
+        expect(elem).toBe(null);
+        expect(modalDestroyed).toBe(true);
     });
 
 });
