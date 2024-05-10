@@ -46,5 +46,5 @@ def register_wagtail_fedit_menu_item():
     return WagtailFEditPageActionMenuItem(order=1)
  
 @hooks.register('register_snippet_action_menu_item')
-def register_wagtail_fedit_snippet_menu_item():
+def register_wagtail_fedit_snippet_menu_item(model_class = None):
     return WagtailFEditSnippetActionMenuItem(order=1)
