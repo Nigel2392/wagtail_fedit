@@ -53,9 +53,6 @@ class iFrame {
         this.render();
     }
 
-    /**
-     * @returns {HTMLIFrameElement}
-     */
     get element() {
         if (!this.iframe) {
             this.iframe = this._renderFrame(this.url, this.srcdoc, this.onLoad);
