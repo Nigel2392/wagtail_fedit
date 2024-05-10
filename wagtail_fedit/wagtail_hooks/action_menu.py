@@ -15,7 +15,9 @@ class WagtailFEditActionMenuItemMixin:
     icon_name = "desktop"
 
     def is_shown(self, context):
-        instance = context.get("instance", context["page"])
+        instance = context.get("instance", context.get("page", None))
+        if instance is None:
+            return False
 
         for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
             result = hook(context, instance)
