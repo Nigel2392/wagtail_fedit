@@ -14,6 +14,12 @@ type FuncResponseObject = ResponseObject & {
     };
 };
 
+type BackgroundImageResponse = FuncResponseObject & {
+    url: string;
+    css_variable_name: string;
+};
+    
+
 
 class BaseFuncEditor extends BaseWagtailFeditEditor {
 
@@ -92,7 +98,7 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
 }
 
 
-function backgroundImageAdapter(element: HTMLElement, response: any) {
+function backgroundImageAdapter(element: HTMLElement, response: BackgroundImageResponse) {
     const url = response.url;
     const cssVar = response.css_variable_name;
     if (cssVar) {
