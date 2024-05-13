@@ -30,7 +30,10 @@ class WagtailFEditActionMenuItemMixin:
         )
     
     def get_url(self, context):
-        instance = context.get("instance", context["page"])
+        instance = context.get("instance", context.get("page", None))
+        if instance is None:
+            return None
+        
         return reverse(
             "wagtail_fedit:editable",
             args=[instance.pk, instance._meta.app_label, instance._meta.model_name]
