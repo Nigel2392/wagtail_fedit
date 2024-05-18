@@ -225,3 +225,4 @@ class FieldAdapter(BlockFieldReplacementAdapter):
 
 class DomPositionedFieldAdapter(DomPositionedMixin, FieldAdapter):
     identifier = "dom-field"
+    keywords = FieldAdapter.keywords

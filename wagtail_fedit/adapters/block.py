@@ -188,3 +188,4 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     
 class DomPositionedBlockAdapter(DomPositionedMixin, BlockAdapter):
     identifier = "dom-block"
+    keywords = BlockAdapter.keywords
