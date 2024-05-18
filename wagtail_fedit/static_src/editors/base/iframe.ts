@@ -69,7 +69,10 @@ class iFrame {
     }
 
     get document() {
-        return this.element.contentWindow.document;
+        if (!this.window) {
+            return null;
+        }
+        return this.window.document;
     }
 
     get window(): iFrameWindow {
@@ -77,15 +80,15 @@ class iFrame {
     }
 
     get mainElement() {
-        return this.document.querySelector("#main");
+        return this.document?.querySelector("#main");
     }
 
     get formElement(): HTMLFormElement {
-        return this.document.querySelector("#wagtail-fedit-form");
+        return this.document?.querySelector("#wagtail-fedit-form");
     }
 
     get formWrapper() {
-        return this.document.querySelector(".wagtail-fedit-form-wrapper");
+        return this.document?.querySelector(".wagtail-fedit-form-wrapper");
     }
 
     destroy() {
