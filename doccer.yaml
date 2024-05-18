@@ -1,6 +1,6 @@
 project:
   name: "Wagtail FEdit"
-  version: "1.5.5"
+  version: "1.5.6"
   repository: "https://github.com/Nigel2392/wagtail_fedit"
   input: "./docs_src"
   output: "./docs"
