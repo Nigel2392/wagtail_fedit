@@ -4,6 +4,7 @@ export {
     BaseFuncEditor,
     WagtailFeditFuncEditor,
     BlockFieldEditor,
+    DomPositionedBlockFieldEditor,
     backgroundImageAdapter,
 };
 
@@ -97,6 +98,46 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
     }
 }
 
+class DomPositionedBlockFieldEditor extends BlockFieldEditor {
+    get buttonsElement() {
+        let elem = this.wrapperElement.querySelector(".wagtail-fedit-buttons")
+        return elem  as HTMLElement
+    }
+
+    get formElement() {
+        let elem = this.wrapperElement.querySelector(".wagtail-fedit-adapter-form")
+        return elem  as HTMLElement
+    }
+
+    get contentElement() {
+        let elem = this.wrapperElement.querySelector(".wagtail-fedit-adapter-content")
+        return elem  as HTMLElement
+    }
+    
+    get autoResize() {
+        return true
+    }
+
+    openEditor() {
+        this.openIframe(this.formElement, (iframe) => {
+            this.contentElement.style.display = "none";
+            this.addEventListener((window.wagtailFedit.EVENTS.EDITOR_LOAD), (event) => {
+                let height = this.iframe.formElement.clientHeight;
+                this.iframe.element.style.height = `${height}px`;
+            });
+        });
+    }
+
+    closeEditor() {
+        this.opened = false;
+        window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
+        document.title = this.initialTitle;
+        this.contentElement.style.display = "block";
+        this.iframe.destroy();
+        delete this.iframe;
+        this.executeEvent(window.wagtailFedit.EVENTS.EDITOR_CLOSE);
+    }
+}
 
 function backgroundImageAdapter(element: HTMLElement, response: BackgroundImageResponse) {
     const url = response.url;

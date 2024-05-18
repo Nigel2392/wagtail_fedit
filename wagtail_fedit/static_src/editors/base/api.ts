@@ -14,12 +14,12 @@ class WagtailFeditorAPI {
         this.editor = editor;
     }
 
-    openModal() {
-        this.editor.makeModal();
+    openEditor() {
+        this.editor.openEditor();
     }
 
-    closeModal() {
-        this.editor.modal.closeModal();
+    closeEditor() {
+        this.editor.closeEditor();
     }
 
     executeEvent(name: string, detail: any) {

@@ -185,6 +185,7 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
 
     # The template used to render the form.
     template_name           = "wagtail_fedit/editor/adapter_iframe.html"
+    editable_template_name  = "wagtail_fedit/content/editable_adapter.html"
 
     signer: Signer          = Signer()
     
@@ -265,6 +266,12 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
         Return the template names for the adapter.
         """
         return [self.template_name]
+    
+    def get_editable_template_names(self) -> list[str]:
+        """
+        Return the template names for the adapter.
+        """
+        return [self.editable_template_name]
 
     @property
     def field_value(self):
@@ -467,3 +474,7 @@ class BlockFieldReplacementAdapter(BaseAdapter):
         )
         return data
 
+class DomPositionedMixin(BaseAdapter):
+    template_name = "wagtail_fedit/editor/adapter_iframe_dom_positioned.html"
+    editable_template_name  = "wagtail_fedit/content/editable_dom_positioned_adapter.html"
+    js_constructor = "wagtail_fedit.editors.DomPositionedBlockFieldEditor"

@@ -12,26 +12,6 @@ class WagtailFeditPublishMenu {
         this.publishButtonsWrapper = publishButton.parentElement.querySelector(".wagtail-fedit-form-buttons");
         const buttons = this.publishButtonsWrapper.querySelectorAll(".wagtail-fedit-userbar-button");
         
-        let initialIsHidden = false;
-        for (let i = 0; i < buttons.length; i++) {
-            const button = buttons[i];
-            if (button.classList.contains("initially-hidden")) {
-                initialIsHidden = true;
-                break;
-            }
-        }
-
-        if (initialIsHidden) {
-            document.addEventListener(window.wagtailFedit.EVENTS.CHANGE, () => {
-                for (let i = 0; i < buttons.length; i++) {
-                    const button = buttons[i];
-                    if (button.classList.contains("initially-hidden")) {
-                        button.classList.remove("initially-hidden");
-                    }
-                }
-            })
-        }
-
         this.init();
     }
 

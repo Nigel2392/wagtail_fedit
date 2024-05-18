@@ -1,0 +1,11 @@
+{% extends "./base_iframe.html" %}
+
+{% block header %}{% endblock %}
+{% block info %}{% endblock %}
+
+{% block padded %}
+    <div class="wagtail-fedit-form-wrapper">
+        {% include "./adapter_form_errors.html" with view=view form=form %}
+        {% include "./adapter_form.html" with edit_url=edit_url form_attrs=form_attrs form=form meta_field=meta_field %}
+    </div>
+{% endblock %}

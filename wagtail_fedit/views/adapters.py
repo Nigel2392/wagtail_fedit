@@ -112,18 +112,18 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
                 )
             )
 
-        shared_context = request.GET.get("shared_context")
-        if shared_context:
+        shared_context_str: dict = request.GET.get("shared_context")
+        if shared_context_str:
             self.shared_context = self.adapter_class.decode_shared_context(
                 request,
                 self.instance,
                 field_name,
-                shared_context,
+                shared_context_str,
             )
         else:
             self.shared_context = {}
 
-        self.adapter = self.adapter_class(
+        self.adapter: BaseAdapter = self.adapter_class(
             request=request,
             object=self.instance,
             field_name=field_name,
@@ -183,9 +183,9 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         return self.adapter.get_help_text()
     
     def get_context_data(self, **kwargs):
-        shared_context = None
+        shared_context_str = None
         if self.shared_context:
-            shared_context =\
+            shared_context_str =\
                 self.request.GET["shared_context"]
 
         verbose_name = self.model._meta.verbose_name
@@ -204,7 +204,8 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             extra.update({
                 "verbose_name": verbose_name,
                 "locked_for_user": self.locked_for_user,
-                "shared_context": shared_context,
+                "shared_context": self.shared_context,
+                "shared_context_str": shared_context_str,
                 "form_attrs": self.adapter.get_form_attrs(),
                 "locked": self.lock is not None,
                 **self.adapter.get_form_context(

@@ -12,6 +12,7 @@ from wagtail import hooks
 
 from .base import (
     BlockFieldReplacementAdapter,
+    DomPositionedMixin,
     VARIABLES,
 )
 from ..hooks import (
@@ -220,3 +221,7 @@ class FieldAdapter(BlockFieldReplacementAdapter):
             self.meta_field,
             parent_context,
         )
+
+
+class DomPositionedFieldAdapter(DomPositionedMixin, FieldAdapter):
+    identifier = "dom-field"

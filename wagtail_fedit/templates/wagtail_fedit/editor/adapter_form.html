@@ -2,12 +2,19 @@
 <form id="wagtail-fedit-form" data-edit-form action="{{ edit_url }}" method="post" {% for k, v in form_attrs.items %}{{ k }}="{{ v|safe }}" {% endfor %}>
     {% csrf_token %}
     {% block form %}
-        {% panel id="wagtail-fedit-editor" icon="draft" heading=verbose_name %}
+        {% fragment as panel_content %}
             <div class="wagtail-fedit-form">
                 {% for field in form %}
                     {% include "./field.html" %}
                 {% endfor %}
             </div>
-        {% endpanel %}
+        {% endfragment %}
+        {% if use_panel %}
+            {% panel id="wagtail-fedit-editor" icon="draft" heading=verbose_name %}
+                {{ panel_content }}
+            {% endpanel %}
+        {% else %}
+            {{ panel_content }}
+        {% endif %}
     {% endblock %}
 </form>

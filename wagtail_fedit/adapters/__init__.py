@@ -1,6 +1,7 @@
 from .base import (
     Keyword,
     BaseAdapter,
+    DomPositionedMixin,
     AdapterError,
 )
 from .registry import (
@@ -12,9 +13,11 @@ from .registry import (
 )
 from .block import (
     BlockAdapter,
+    DomPositionedBlockAdapter,
 )
 from .field import (
     FieldAdapter,
+    DomPositionedFieldAdapter,
 )
 from .models import (
     ModelAdapter,

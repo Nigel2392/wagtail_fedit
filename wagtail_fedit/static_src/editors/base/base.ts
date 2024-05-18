@@ -31,6 +31,7 @@ class BaseWagtailFeditEditor extends EventTarget {
     editBtn: HTMLElement;
     iframe: iFrame;
     modal: EditorModal;
+    opened: boolean;
 
     constructor(element: WrapperElement) {
         super();
@@ -42,17 +43,8 @@ class BaseWagtailFeditEditor extends EventTarget {
         this.iframe = null;
         this.init();
 
-        this.modal = new EditorModal({
-            modalId: this.wrapperElement.id,
-            onClose: () => {
-                window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
-                document.title = this.initialTitle;
-                this.executeEvent(window.wagtailFedit.EVENTS.MODAL_CLOSE);
-            },
-        });
-
         if (window.location.hash === `#${this.wrapperElement.id}`) {
-            this.makeModal();
+            this.openEditor();
             this.focus();
         }
     }
@@ -80,7 +72,10 @@ class BaseWagtailFeditEditor extends EventTarget {
         this.editBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            await this.makeModal();
+            if (this.opened) {
+                return;
+            }
+            this.openEditor();
         });
     }
 
@@ -134,11 +129,23 @@ class BaseWagtailFeditEditor extends EventTarget {
         return url.toString();
     }
 
-    async makeModal() {
+    get autoResize() {
+        return false
+    }
+
+    openIframe(wrapper: HTMLElement, fn: (iframe: iFrame) => void) {
+
+        if (this.iframe) {
+            fn(this.iframe);
+            return;
+        }
+
         this.iframe = new iFrame({
             url: this.getEditUrl(),
             id: "wagtail-fedit-iframe",
             className: null,
+            autoResize: this.autoResize,
+            executeOnloadImmediately: true,
             onLoad: () => {
                 const onSubmit = (e: Event) => {
                     e.preventDefault();
@@ -168,9 +175,9 @@ class BaseWagtailFeditEditor extends EventTarget {
                             }
 
                             const cancelButton = this.iframe.document.querySelector(".wagtail-fedit-cancel-button");
-                            const modalCloseFn = this.modal.closeModal.bind(this.modal);
-                            cancelButton.addEventListener("click", modalCloseFn);
-                            this.iframe.onCancel = modalCloseFn;
+                            const closeFn = this.closeEditor.bind(this);
+                            cancelButton.addEventListener("click", closeFn);
+                            this.iframe.onCancel = closeFn;
                             this.executeEvent(window.wagtailFedit.EVENTS.SUBMIT_ERROR, {
                                 element: this.wrapperElement,
                                 response: response,
@@ -179,7 +186,7 @@ class BaseWagtailFeditEditor extends EventTarget {
                         }
                         const ret = this.onResponse(response);
                         const success = () => {
-                            this.modal.closeModal();
+                            this.closeEditor();
                             this.executeEvent(window.wagtailFedit.EVENTS.CHANGE, {
                                 element: this.wrapperElement,
                             });
@@ -192,9 +199,9 @@ class BaseWagtailFeditEditor extends EventTarget {
                     });
                 };
                 this.iframe.formElement.onsubmit = onSubmit;
-                this.iframe.onCancel = this.modal.closeModal.bind(this.modal);
+                this.iframe.onCancel = this.closeEditor.bind(this);
                 
-                // Check if we need to apply the fedit-full class to the modal
+                // Check if we need to apply the fedit-full class to the iframe wrapper
                 const formWrapper = this.iframe.formWrapper;
                 const options = ["large", "full"]
 
@@ -203,7 +210,7 @@ class BaseWagtailFeditEditor extends EventTarget {
                         formWrapper.classList.contains(`fedit-${option}`) ||
                         (this.iframe.formElement.dataset.editorSize || "").toLowerCase() === option
                     )) {
-                        this.modal.addClass(`fedit-${option}`);
+                        wrapper.classList.add(`fedit-${option}`);
                         break;
                     }
                 }
@@ -212,32 +219,56 @@ class BaseWagtailFeditEditor extends EventTarget {
                 window.history.pushState(null, this.iframe.document.title, url + `#${this.wrapperElement.id}`);
                 document.title = this.iframe.document.title;
 
-                this.executeEvent(window.wagtailFedit.EVENTS.MODAL_LOAD, {
+                this.executeEvent(window.wagtailFedit.EVENTS.EDITOR_LOAD, {
                     iframe: this.iframe,
-                    modal: this.modal,
                 });
             },
             onError: () => {
-                this.modal.closeModal();
+                this.closeEditor();
             },
             onCancel: () => {
-                this.modal.closeModal();
+                this.closeEditor();
             },
         });
 
-        this.modal.appendChild(this.iframe.element);
 
-        const closeBtn = document.createElement("button");
-        closeBtn.innerHTML = "&times;";
-        closeBtn.classList.add("wagtail-fedit-close-button");
-        closeBtn.addEventListener("click", this.modal.closeModal.bind(this.modal));
-        this.modal.appendChild(closeBtn);
-        this.executeEvent(window.wagtailFedit.EVENTS.MODAL_OPEN, {
-            iframe: this.iframe,
-            modal: this.modal,
+        wrapper.appendChild(this.iframe.element);
+
+        fn(this.iframe);
+    }
+
+    openEditor() {
+        if (!this.modal) {
+            this.modal = new EditorModal({
+                modalId: this.wrapperElement.id,
+            });
+        }
+
+        this.opened = true;
+
+        this.openIframe((this.modal as any), (iframe) => {
+            const closeBtn = document.createElement("button");
+            closeBtn.innerHTML = "&times;";
+            closeBtn.classList.add("wagtail-fedit-close-button");
+            closeBtn.addEventListener("click", this.closeEditor.bind(this));
+
+            this.modal.appendChild(closeBtn);
+
+            this.executeEvent(window.wagtailFedit.EVENTS.EDITOR_OPEN, {
+                iframe: this.iframe,
+                modal: this.modal,
+            });
+    
+            this.modal.openModal()
         });
+    }
 
-        this.modal.openModal()
+    closeEditor() {
+        this.opened = false;
+        window.history.pushState(null, this.initialTitle, window.location.href.split("#")[0]);
+        document.title = this.initialTitle;
+        this.executeEvent(window.wagtailFedit.EVENTS.EDITOR_CLOSE);
+        this.modal.closeModal();
     }
 
     executeEvent(name: string, detail?: any): void { 
@@ -249,11 +280,10 @@ class BaseWagtailFeditEditor extends EventTarget {
        
         detail.editor = this;
         detail.api = this.api;
-        let eventStr = name.toLowerCase();
         if (!name.startsWith(`${window.wagtailFedit.NAMESPACE}:`)) {
-            eventStr = `${window.wagtailFedit.NAMESPACE}:${name}`;
+            name = `${window.wagtailFedit.NAMESPACE}:${name}`;
         }
-        const event = new CustomEvent(eventStr, {
+        const event = new CustomEvent(name, {
             detail: detail,
         });
         super.dispatchEvent(event);

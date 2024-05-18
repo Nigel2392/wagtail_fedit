@@ -523,7 +523,7 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
     js_constructor = adapter.get_js_constructor()
     
     return render_to_string(
-        "wagtail_fedit/content/editable_adapter.html",
+        adapter.get_editable_template_names(),
         {
             "identifier": adapter.identifier,
             "adapter": adapter,

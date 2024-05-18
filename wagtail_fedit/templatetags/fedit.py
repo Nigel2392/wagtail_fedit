@@ -231,9 +231,9 @@ def do_render_fedit(parser: Parser, token: Token):
 def render_adapter(context: Context, adapter: BaseAdapter) -> str:
     adapter_context = {}
     
+    
     if "adapter_context" in context:
         adapter_context = context["adapter_context"]
-        del context["adapter_context"]
 
     context = _flatten_context(
         context,
@@ -242,7 +242,12 @@ def render_adapter(context: Context, adapter: BaseAdapter) -> str:
         adapter_context,
     )
 
-    context.update(adapter_context)
+    if "adapter_context" in context:
+        del context["adapter_context"]
+
+    context.update(
+        adapter_context,
+    )
 
     return adapter.render_content(
         context,

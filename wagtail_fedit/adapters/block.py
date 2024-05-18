@@ -14,6 +14,7 @@ from wagtail.models import (
 
 from .base import (
     BlockFieldReplacementAdapter,
+    DomPositionedMixin,
     AdapterError,
     Keyword,
     VARIABLES,
@@ -184,4 +185,6 @@ class BlockAdapter(BlockFieldReplacementAdapter):
             parent_context = parent_context.flatten()
 
         return self.block.render(parent_context)
-        
+    
+class DomPositionedBlockAdapter(DomPositionedMixin, BlockAdapter):
+    identifier = "dom-block"

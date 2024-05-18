@@ -7,6 +7,7 @@ import {
     BaseFuncEditor,
     WagtailFeditFuncEditor,
     BlockFieldEditor,
+    DomPositionedBlockFieldEditor,
     backgroundImageAdapter,
 } from "./editors/editors";
 import { Tooltip } from "./components/tooltips";
@@ -20,7 +21,6 @@ export {
 
 type EditorCallback = (targetElement: HTMLElement, response: any) => void;
 
-
 declare global {
     interface Window {
         wagtailFedit: {
@@ -28,9 +28,9 @@ declare global {
             EVENTS: {
                 SUBMIT: string;
                 CHANGE: string;
-                MODAL_OPEN: string;
-                MODAL_LOAD: string;
-                MODAL_CLOSE: string;
+                EDITOR_OPEN: string;
+                EDITOR_LOAD: string;
+                EDITOR_CLOSE: string;
                 SUBMIT_ERROR: string;
             };
             editors: Record<string, typeof BaseWagtailFeditEditor>;
@@ -46,14 +46,15 @@ window.wagtailFedit = {
     EVENTS: {
         SUBMIT: "wagtail-fedit:submit",
         CHANGE: "wagtail-fedit:change",
-        MODAL_OPEN: "wagtail-fedit:modalOpen",
-        MODAL_LOAD: "wagtail-fedit:modalLoad",
-        MODAL_CLOSE: "wagtail-fedit:modalClose",
+        EDITOR_OPEN: "wagtail-fedit:editorOpen",
+        EDITOR_LOAD: "wagtail-fedit:editorLoad",
+        EDITOR_CLOSE: "wagtail-fedit:editorClose",
         SUBMIT_ERROR: "wagtail-fedit:submitError",
     },
     editors: {
         "wagtail_fedit.editors.BaseFuncEditor": BaseFuncEditor,
         "wagtail_fedit.editors.BlockFieldEditor": BlockFieldEditor,
+        "wagtail_fedit.editors.DomPositionedBlockFieldEditor": DomPositionedBlockFieldEditor,
         "wagtail_fedit.editors.WagtailFeditFuncEditor": WagtailFeditFuncEditor,
     },
     funcs: {

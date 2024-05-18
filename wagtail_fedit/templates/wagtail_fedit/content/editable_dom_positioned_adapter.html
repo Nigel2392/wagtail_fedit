@@ -1,0 +1,12 @@
+{% extends "./editable_adapter.html" %}{% load fedit %}
+{% block root %}
+    <div class="wagtail-fedit-buttons">
+        {% for button in buttons %}
+            {{ button }}
+        {% endfor %}
+    </div>
+    <div class="wagtail-fedit-adapter-form"></div>
+    <div class="wagtail-fedit-adapter-content">
+        {% render_adapter adapter %}
+    </div>
+{% endblock %}

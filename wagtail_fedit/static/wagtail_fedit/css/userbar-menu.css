@@ -26,7 +26,7 @@
     fill: var(--w-color-critical-200);
     opacity: 1;
 }
-.wagtail-fedit-userbar-button.initially-hidden {
+.wagtail-fedit-userbar-button {
     display: none;
 }
 .w-userbar__item a.wagtail-fedit-userbar-button {

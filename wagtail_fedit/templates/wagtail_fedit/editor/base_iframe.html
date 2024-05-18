@@ -20,11 +20,13 @@
 {% block furniture %}
 
     <main class="content-wrapper w-overflow-x-hidden" id="main">
+
         {% block header %}
             <header id="modal-header">
                 <h1 id="modal-title">{{ view.get_header_title }}</h1>
             </header>
         {% endblock %}
+
         <div class="messages" role="status">
             {# Always show messages div so it can be appended to by JS #}
             {% if messages or form.non_field_errors %}
@@ -41,43 +43,47 @@
             {% endif %}
         </div>
 
-        <div class="nice-padding">
-    
-            {% if help_text %}
-                {% panel id="wagtail-fedit-help-text" icon="help" heading=help_text.heading %}
-                    {% help_block status=help_text.status %}
-                        <p><strong>{{ help_text.title }}</strong></p>
-                        <p>{{ help_text.text }}</p>
-                    {% endhelp_block %}
-                {% endpanel %}
-            {% endif %}
-
-            {% translate "Locked" as locked_heading %}
-            {% if locked and not locked_for_user %}
-                {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
-                    {% help_block status="info" %}
-                        <p>{% translate "This object is locked" %}</p>
-                        <p>{% translate "You are still able to edit this object." %}</p>
-                    {% endhelp_block %}
-                {% endpanel %}
-            {% endif %}
-
-            {% if locked_for_user %}
-                {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
-                    {% help_block status="info" %}
-                        <p>{% translate "This object is locked and cannot be edited." %}</p>
-                    {% endhelp_block %}
-                {% endpanel %}
-            {% else %}
+        {% block padded %}
+            <div class="nice-padding">
             
-                {% block content %}
+                {% block info %}
+                    {% if help_text %}
+                        {% panel id="wagtail-fedit-help-text" icon="help" heading=help_text.heading %}
+                            {% help_block status=help_text.status %}
+                                <p><strong>{{ help_text.title }}</strong></p>
+                                <p>{{ help_text.text }}</p>
+                            {% endhelp_block %}
+                        {% endpanel %}
+                    {% endif %}
 
-                    
-
+                    {% translate "Locked" as locked_heading %}
+                    {% if locked and not locked_for_user %}
+                        {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
+                            {% help_block status="info" %}
+                                <p>{% translate "This object is locked" %}</p>
+                                <p>{% translate "You are still able to edit this object." %}</p>
+                            {% endhelp_block %}
+                        {% endpanel %}
+                    {% endif %}
                 {% endblock %}
-                
-            {% endif %}
-        </div>
+
+                {% if locked_for_user %}
+                    {% panel id="wagtail-fedit-lock-text" icon="help" heading=locked_heading %}
+                        {% help_block status="info" %}
+                            <p>{% translate "This object is locked and cannot be edited." %}</p>
+                        {% endhelp_block %}
+                    {% endpanel %}
+                {% else %}
+
+                    {% block content %}
+
+
+
+                    {% endblock %}
+
+                {% endif %}
+            </div>
+        {% endblock %}
     </main>
     {% block sidebar_root %}
         <aside>

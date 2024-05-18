@@ -8,6 +8,8 @@ type FrameOptions = {
     className: string;
     srcdoc?: string;
     url?: string;
+    autoResize?: boolean;
+    executeOnloadImmediately?: boolean;
     onLoad?: NewFrameFunc;
     onError?: FrameFunc;
     onCancel?: FrameFunc;
@@ -26,6 +28,8 @@ class iFrame {
     private iframe: HTMLIFrameElement;
     private id: string;
     private className: string;
+    autoResize: boolean = true;
+    executeOnloadImmediately: boolean = false;
     onLoad: NewFrameFunc;
     onError: FrameFunc;
     onCancel: FrameFunc;
@@ -39,6 +43,8 @@ class iFrame {
             onLoad = () => {},
             onError = () => {},
             onCancel = () => {},
+            autoResize = false,
+            executeOnloadImmediately = false,
         } = options;
 
 
@@ -47,6 +53,8 @@ class iFrame {
         this.iframe = null;
         this.id = id;
         this.className = className;
+        this.autoResize = autoResize;
+        this.executeOnloadImmediately = executeOnloadImmediately;
         this.onLoad = onLoad;
         this.onError = onError;
         this.onCancel = onCancel;
@@ -80,6 +88,10 @@ class iFrame {
         return this.document.querySelector(".wagtail-fedit-form-wrapper");
     }
 
+    destroy() {
+        this.iframe.remove();
+    }
+
     update(url?: string, srcdoc?: string) {
         this.srcdoc = srcdoc;
         this.url = url;
@@ -107,12 +119,38 @@ class iFrame {
         }
         iframe.id = this.id;
         iframe.className = this.className;
+        let interval: NodeJS.Timeout;
         iframe.onload = () => {
+            if (!this.formElement) {
+                onError();
+                return;
+            }
+            if (this.autoResize) {
+                interval = setInterval(() => {
+                    if (!this.formElement) {
+                        clearInterval(interval);
+                        return;
+                    }
+    
+                    let height = this.formElement.scrollHeight;
+                    iframe.style.height = `${height}px`;
+                }, 10);
+            }
+
             const cancelButton = this.document.querySelector(".wagtail-fedit-cancel-button");
             if (cancelButton) {
-                cancelButton.addEventListener("click", this.onCancel);
+                cancelButton.addEventListener("click", () => {
+                    clearInterval(interval);
+                    this.onCancel();
+                });
             }
-            onLoad({ newFrame: iframe});
+            if (this.document.readyState === "complete" || this.executeOnloadImmediately) {
+                onLoad({ newFrame: iframe });
+            } else {
+                iframe.contentWindow.addEventListener("DOMContentLoaded", () => {
+                    onLoad({ newFrame: iframe });
+                });
+            }
         };
         iframe.onerror = () => {
             onError();
