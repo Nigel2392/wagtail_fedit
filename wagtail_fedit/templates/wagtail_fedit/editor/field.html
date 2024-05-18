@@ -9,7 +9,7 @@
         {% endfor %}
 
     {% else %}
-        {% if not use_panel %}
+        {% if use_panel %}
             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
         {% endif %}
         {{ field }}

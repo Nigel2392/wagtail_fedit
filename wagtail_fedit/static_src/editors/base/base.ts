@@ -129,8 +129,8 @@ class BaseWagtailFeditEditor extends EventTarget {
         return url.toString();
     }
 
-    get autoResize() {
-        return false
+    get frameOptions() {
+        return {}
     }
 
     openIframe(wrapper: HTMLElement, fn: (iframe: iFrame) => void) {
@@ -144,8 +144,8 @@ class BaseWagtailFeditEditor extends EventTarget {
             url: this.getEditUrl(),
             id: "wagtail-fedit-iframe",
             className: null,
-            autoResize: this.autoResize,
             executeOnloadImmediately: true,
+            ...this.frameOptions,
             onLoad: () => {
                 const onSubmit = (e: Event) => {
                     e.preventDefault();

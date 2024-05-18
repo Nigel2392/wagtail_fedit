@@ -78,10 +78,6 @@ main > div.nice-padding {
     overflow-x: hidden;
     overflow-y: auto;
 }
-.wagtail-fedit-form-wrapper {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-}
 main > div.nice-padding::-webkit-scrollbar {
   width: 0.8em;
   background-color: var(--w-color-surface-page);

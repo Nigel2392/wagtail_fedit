@@ -114,17 +114,17 @@ class DomPositionedBlockFieldEditor extends BlockFieldEditor {
         return elem  as HTMLElement
     }
     
-    get autoResize() {
-        return true
+    get frameOptions() {
+        return {
+            onResize: (oldHeight: number, newHeight: number) => {
+                this.iframe.element.style.height = `${newHeight}px`;
+            },
+        }
     }
 
     openEditor() {
         this.openIframe(this.formElement, (iframe) => {
             this.contentElement.style.display = "none";
-            this.addEventListener((window.wagtailFedit.EVENTS.EDITOR_LOAD), (event) => {
-                let height = this.iframe.formElement.clientHeight;
-                this.iframe.element.style.height = `${height}px`;
-            });
         });
     }
 

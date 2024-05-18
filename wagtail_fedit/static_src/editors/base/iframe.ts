@@ -8,11 +8,11 @@ type FrameOptions = {
     className: string;
     srcdoc?: string;
     url?: string;
-    autoResize?: boolean;
     executeOnloadImmediately?: boolean;
     onLoad?: NewFrameFunc;
     onError?: FrameFunc;
     onCancel?: FrameFunc;
+    onResize?: (h: number) => void;
 };
 
 type NewFrameFunc = (options: { newFrame: HTMLIFrameElement }) => void;
@@ -28,11 +28,11 @@ class iFrame {
     private iframe: HTMLIFrameElement;
     private id: string;
     private className: string;
-    autoResize: boolean = true;
     executeOnloadImmediately: boolean = false;
     onLoad: NewFrameFunc;
     onError: FrameFunc;
     onCancel: FrameFunc;
+    onResize: (oldH: number, newH: number) => void;
 
     constructor(options: FrameOptions) {
         const {
@@ -43,7 +43,7 @@ class iFrame {
             onLoad = () => {},
             onError = () => {},
             onCancel = () => {},
-            autoResize = false,
+            onResize = () => {},
             executeOnloadImmediately = false,
         } = options;
 
@@ -53,7 +53,7 @@ class iFrame {
         this.iframe = null;
         this.id = id;
         this.className = className;
-        this.autoResize = autoResize;
+        this.onResize = onResize;
         this.executeOnloadImmediately = executeOnloadImmediately;
         this.onLoad = onLoad;
         this.onError = onError;
@@ -122,22 +122,31 @@ class iFrame {
         }
         iframe.id = this.id;
         iframe.className = this.className;
-        let interval: NodeJS.Timeout;
         iframe.onload = () => {
             if (!this.formElement) {
                 onError();
                 return;
             }
-            if (this.autoResize) {
+            
+            let formElement = this.formElement;
+            let lastHeight = formElement.scrollHeight;
+            if (this.onResize) {
+                this.onResize(0, lastHeight);
+            }
+            let interval: NodeJS.Timeout;
+
+            if (this.onResize) {
                 interval = setInterval(() => {
-                    if (!this.formElement) {
+                    if (!formElement) {
                         clearInterval(interval);
                         return;
                     }
     
-                    let height = this.formElement.scrollHeight;
-                    iframe.style.height = `${height}px`;
-                }, 10);
+                    if (lastHeight !== formElement.scrollHeight) {
+                        this.onResize(lastHeight, formElement.scrollHeight);
+                        lastHeight = formElement.scrollHeight;
+                    }
+                }, 25);
             }
 
             const cancelButton = this.document.querySelector(".wagtail-fedit-cancel-button");
