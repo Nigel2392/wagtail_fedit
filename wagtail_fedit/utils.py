@@ -493,13 +493,16 @@ def base_adapter_context(adapter: "BaseAdapter", context: Union[Context, dict]) 
 
     return context
 
-def shared_context_url(shared_context: str, base_url: str, **kwargs) -> str:
+def shared_context_url(shared_context: str, base_url: str, hash: str = None, **kwargs) -> str:
     """
     Append the shared context to a URL.
     """
     kwargs["shared_context"] = shared_context
     encoded = urlencode(kwargs)
-    return f"{base_url}?{encoded}"
+    url = f"{base_url}?{encoded}"
+    if hash:
+        url = f"{url}#{hash}"
+    return url
 
 def get_reverse_kwargs(adapter: "BaseAdapter") -> dict:
     reverse_kwargs = {

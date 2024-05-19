@@ -102,7 +102,7 @@ class FieldEditor extends BaseWagtailFeditEditor {
 }
 
 
-type Constructor<T = any> = new (...args: any[]) => T;
+type Constructor<T = BaseWagtailFeditEditor> = new (...args: any[]) => T;
 
 function MovableMixin<T extends Constructor>(base: T) {
     return class extends base {
@@ -121,6 +121,9 @@ function MovableMixin<T extends Constructor>(base: T) {
                         } else {
                             alert("Failed to move block: " + response.error);
                         }
+                    }).catch((error: any) => {
+                        console.error("Failed to move block", error);
+                        alert("Failed to move block");
                     });
                 });
             }
@@ -174,7 +177,7 @@ class DomPositionedFieldEditor extends FieldEditor {
 }
 
 class DomPositionedBlockEditor extends MovableMixin(DomPositionedFieldEditor) {
-    
+
 }
 
 
