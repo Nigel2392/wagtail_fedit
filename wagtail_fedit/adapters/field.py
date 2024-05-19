@@ -39,6 +39,7 @@ class FieldAdapter(BlockFieldReplacementAdapter):
     on successful form submission.
     """
     identifier = "field"
+    js_constructor = "wagtail_fedit.editors.FieldEditor"
 
     def __init__(self, object, field_name: str, request: HttpRequest, **kwargs):
         super().__init__(object, field_name, request, **kwargs)
@@ -225,4 +226,5 @@ class FieldAdapter(BlockFieldReplacementAdapter):
 
 class DomPositionedFieldAdapter(DomPositionedMixin, FieldAdapter):
     identifier = "dom-field"
+    js_constructor = "wagtail_fedit.editors.DomPositionedFieldEditor"
     keywords = FieldAdapter.keywords

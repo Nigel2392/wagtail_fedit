@@ -23,7 +23,7 @@ class TestBlockEdit(BaseFEditTest):
                 with self.assertRaises(AttributeError):
                     model.revisions.count()
 
-            bound, _ = find_block(block_id=self.BLOCK_ID, field=model.content)
+            bound, _, _, _ = find_block(block_id=self.BLOCK_ID, field=model.content)
             initial_content = bound.value["link"]["text"]
 
             response = self.client.post(
@@ -50,7 +50,7 @@ class TestBlockEdit(BaseFEditTest):
                     model.revisions.count()
                 chk = model
 
-            bound, contentpath = find_block(block_id=self.BLOCK_ID, field=chk.content)
+            bound, contentpath, parent, idx = find_block(block_id=self.BLOCK_ID, field=chk.content)
             self.assertEqual(bound.value["link"]["text"], f"{initial_content} test case {i + 1}",
                 msg=f"Block: {bound.block} does not contain the expected value: {initial_content} test case {i + 1}"
             )
@@ -91,7 +91,7 @@ class TestBlockEdit(BaseFEditTest):
     def test_lock_unchanged(self):
         self.client.force_login(self.other_admin_user)
         initial_content = self.lock_model.content
-        initial_bound, _ = find_block(block_id=self.BLOCK_ID, field=self.lock_model.content)
+        initial_bound, _, parent, idx = find_block(block_id=self.BLOCK_ID, field=self.lock_model.content)
 
         response = self.client.post(
             self.get_block_url(

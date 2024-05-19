@@ -1,5 +1,7 @@
-from typing import Type
-from .base import BaseAdapter
+from typing import Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .adapters.base import BaseAdapter
 
 
 class RegistryLookUpError(Exception):
@@ -8,15 +10,12 @@ class RegistryLookUpError(Exception):
 class DuplicateAdapterError(Exception):
     pass
 
-class AdapterSubclassError(TypeError):
-    pass
-
 
 class AdapterRegistry:
     def __init__(self):
-        self.adapters: dict[str, Type[BaseAdapter]] = {}
+        self.adapters: dict[str, Type["BaseAdapter"]] = {}
 
-    def __getitem__(self, identifier: str) -> Type[BaseAdapter]:
+    def __getitem__(self, identifier: str) -> Type["BaseAdapter"]:
         """
         Retrieve an adapter by its identifier or raise a RegistryLookUpError if not found.
         """
@@ -25,17 +24,16 @@ class AdapterRegistry:
         except KeyError:
             raise RegistryLookUpError(f"No adapter found with identifier '{identifier}'.")
 
-    def register(self, adapter_class: Type[BaseAdapter]):
+    def register(self, adapter_class: Type["BaseAdapter"]):
         """
         Register an adapter class with the registry.
         """
-        if isinstance(adapter_class, BaseAdapter):
-            raise AdapterSubclassError(f"{adapter_class.__class__.__name__} must be a subclass of BaseAdapter; got instance.")
-        
         if adapter_class.identifier in self.adapters:
             raise DuplicateAdapterError(f"An adapter with identifier '{adapter_class.identifier}' is already registered.")
 
         self.adapters[adapter_class.identifier] = adapter_class
+
+        adapter_class.on_register(self)
 
     def unregister(self, identifier):
         """

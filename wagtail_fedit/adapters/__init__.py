@@ -4,13 +4,6 @@ from .base import (
     DomPositionedMixin,
     AdapterError,
 )
-from .registry import (
-    AdapterRegistry,
-    RegistryLookUpError,
-    DuplicateAdapterError,
-    AdapterSubclassError,
-    registry as adapter_registry,
-)
 from .block import (
     BlockAdapter,
     DomPositionedBlockAdapter,

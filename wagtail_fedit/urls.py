@@ -9,10 +9,10 @@ adapter_based_views = (
     ("edit", views.EditAdapterView),
     ("refetch", views.AdapterRefetchView),
 )
-
+ 
 for name, view in adapter_based_views:
     view.url_name = f"wagtail_fedit:{name}"
-    view.url_pattern = f"{name}/<str:adapter_id>/<str:app_label>/<str:model_name>/<str:model_id>/<str:field_name>/"
+    view.url_pattern = view.prefix_url_path(name)
     urlpatterns.append(
         path(view.url_pattern, view.as_view(), name=name)
     )

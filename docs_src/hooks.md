@@ -129,7 +129,7 @@ def use_related_form(field: models.Field) -> bool:
             return False
     return True
 
-  
+
 @hooks.register(EXCLUDE_FROM_RELATED_FORMS)
 def exclude_related_forms(field):
     if field.related_model in [Page, Image, Document]:
@@ -150,4 +150,39 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
     result = hook(context, instance)
     if result is not None:
         return result # <- bool
+```
+
+
+### wagtail_fedit.register_adapter_class
+
+Register an adapter class with the adapter registry.
+
+Example of how this hook is used in wagtail_hooks.py:
+
+```python
+@hooks.register(REGISTER_ADAPTER_CLASS)
+def register_adapter_class(registry):
+    registry.register(FieldAdapter)
+    registry.register(DomPositionedFieldAdapter)
+    registry.register(BlockAdapter)
+    registry.register(DomPositionedBlockAdapter)
+    registry.register(ModelAdapter)
+    registry.register(BackgroundImageFieldAdapter)
+```
+
+
+### wagtail_fedit.register_adapter_urls
+
+Register the adapter URLs.
+
+Used internally by the URLMixin class.
+
+Example of how this hook is used in wagtail_hooks.py:
+
+```python
+@hooks.register(REGISTER_ADAPTER_URLS)
+def register_adapter_urls():
+    return [
+        path("my-view/", views.MyView.as_view(), name="my_view")
+    ]
 ```

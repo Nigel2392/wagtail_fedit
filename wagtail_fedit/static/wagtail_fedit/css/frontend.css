@@ -186,6 +186,8 @@ body:has(.wagtail-fedit-modal) {
     width: 100%;
     height: 100%;
     border: none;
+    z-index: 300;
+    position: relative;
     flex: 1;
 }
 .wagtail-fedit-modal-wrapper .wagtail-fedit-close-button {

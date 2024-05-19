@@ -6,8 +6,10 @@ import { WagtailFeditPublishMenu } from "./components/menu";
 import {
     BaseFuncEditor,
     WagtailFeditFuncEditor,
-    BlockFieldEditor,
-    DomPositionedBlockFieldEditor,
+    FieldEditor,
+    DomPositionedFieldEditor,
+    BlockEditor,
+    DomPositionedBlockEditor,
     backgroundImageAdapter,
 } from "./editors/editors";
 import { Tooltip } from "./components/tooltips";
@@ -53,8 +55,10 @@ window.wagtailFedit = {
     },
     editors: {
         "wagtail_fedit.editors.BaseFuncEditor": BaseFuncEditor,
-        "wagtail_fedit.editors.BlockFieldEditor": BlockFieldEditor,
-        "wagtail_fedit.editors.DomPositionedBlockFieldEditor": DomPositionedBlockFieldEditor,
+        "wagtail_fedit.editors.FieldEditor": FieldEditor,
+        "wagtail_fedit.editors.BlockEditor": BlockEditor,
+        "wagtail_fedit.editors.DomPositionedFieldEditor": DomPositionedFieldEditor,
+        "wagtail_fedit.editors.DomPositionedBlockEditor": DomPositionedBlockEditor,
         "wagtail_fedit.editors.WagtailFeditFuncEditor": WagtailFeditFuncEditor,
     },
     funcs: {

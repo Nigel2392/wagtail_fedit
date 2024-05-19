@@ -166,3 +166,39 @@ for hook in hooks.get_hooks(ACTION_MENU_ITEM_IS_SHOWN):
         return result # <- bool
 ```
 """
+
+REGISTER_ADAPTER_CLASS = prefix("register_adapter_class")
+"""
+### wagtail_fedit.register_adapter_class
+Register an adapter class with the adapter registry.
+
+Example of how this hook is used in wagtail_hooks.py:
+
+```python
+@hooks.register(REGISTER_ADAPTER_CLASS)
+def register_adapter_class(registry):
+    registry.register(FieldAdapter)
+    registry.register(DomPositionedFieldAdapter)
+    registry.register(BlockAdapter)
+    registry.register(DomPositionedBlockAdapter)
+    registry.register(ModelAdapter)
+    registry.register(BackgroundImageFieldAdapter)
+```
+"""
+
+REGISTER_ADAPTER_URLS = prefix("register_adapter_urls")
+"""
+### wagtail_fedit.register_adapter_urls
+Register the adapter URLs.
+Used internally by the URLMixin class.
+
+Example of how this hook is used in wagtail_hooks.py:
+
+```python
+@hooks.register(REGISTER_ADAPTER_URLS)
+def register_adapter_urls():
+    return [
+        path("my-view/", views.MyView.as_view(), name="my_view")
+    ]
+```
+"""

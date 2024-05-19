@@ -42,6 +42,7 @@ class ModelAdapter(BlockFieldReplacementAdapter):
     template_name = "wagtail_fedit/editor/adapter_edit_handler.html"
     identifier = "model"
     field_required = False
+    js_constructor = "wagtail_fedit.editors.FieldEditor"
     usage_description = _("This adapter is used for directly editing a model instance.")
     keywords = BlockFieldReplacementAdapter.keywords + (
         Keyword(

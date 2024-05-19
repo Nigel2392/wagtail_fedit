@@ -7,10 +7,12 @@ from django.template import (
 from wagtail_fedit.adapters import (
     Keyword,
     BaseAdapter,
-    adapter_registry,
     BlockAdapter,
     FieldAdapter,
     ModelAdapter,
+)
+from wagtail_fedit.registry import (
+    registry as adapter_registry,
 )
 from wagtail_fedit.adapters.base import (
     BlockFieldReplacementAdapter,
@@ -637,7 +639,7 @@ class TestBlockAdapter(BaseFEditTest):
             FEDIT_PREVIEW_VAR,
             True,
         )
-        block_value, _ = block
+        block_value, _, parent, idx = block
         template = Template(
             "{% load fedit %}"
             f"{{% fedit test_block object.content block=block block_id=block_id id='{id}' %}}"
@@ -674,7 +676,7 @@ class TestBlockAdapter(BaseFEditTest):
             FEDIT_PREVIEW_VAR,
             True,
         )
-        block_value, _ = block
+        block_value, _, parent, idx = block
         template = Template(
             "{% load fedit %}"
             f"{{% fedit test_block object.content block=block block_id=block_id id='{id}' as test %}}"
@@ -710,7 +712,7 @@ class TestBlockAdapter(BaseFEditTest):
             FEDIT_PREVIEW_VAR,
             True,
         )
-        block_value, _ = block
+        block_value, _, parent, idx = block
         template = Template(
             "{% load fedit %}"
             f"{{% fedit test_block from_context block=block block_id=block_id id='{id}' %}}"
@@ -743,7 +745,7 @@ class TestBlockAdapter(BaseFEditTest):
             )
         )
         request.user = self.admin_user
-        block_value, _ = block
+        block_value, _, parent, idx = block
         template = Template(
             "{% load fedit %}"
             f"{{% fedit test_block from_context block=block block_id=block_id id='{id}' %}}"

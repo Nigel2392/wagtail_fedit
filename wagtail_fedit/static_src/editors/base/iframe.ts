@@ -28,6 +28,7 @@ class iFrame {
     private iframe: HTMLIFrameElement;
     private id: string;
     private className: string;
+    private resizeInterval: NodeJS.Timeout;
     executeOnloadImmediately: boolean = false;
     onLoad: NewFrameFunc;
     onError: FrameFunc;
@@ -93,6 +94,10 @@ class iFrame {
 
     destroy() {
         this.iframe.remove();
+        if (this.resizeInterval) {
+            clearInterval(this.resizeInterval);
+            delete this.resizeInterval;
+        }
     }
 
     update(url?: string, srcdoc?: string) {
@@ -133,18 +138,26 @@ class iFrame {
             if (this.onResize) {
                 this.onResize(0, lastHeight);
             }
-            let interval: NodeJS.Timeout;
+
+            if (this.resizeInterval) {
+                clearInterval(this.resizeInterval);
+            }
 
             if (this.onResize) {
-                interval = setInterval(() => {
+                this.resizeInterval = setInterval(() => {
                     if (!formElement) {
-                        clearInterval(interval);
+                        clearInterval(this.resizeInterval);
                         return;
                     }
-    
-                    if (lastHeight !== formElement.scrollHeight) {
-                        this.onResize(lastHeight, formElement.scrollHeight);
-                        lastHeight = formElement.scrollHeight;
+                    try {
+                        if (lastHeight !== formElement.scrollHeight) {
+                            this.onResize(lastHeight, formElement.scrollHeight);
+                            lastHeight = formElement.scrollHeight;
+                        }
+                    } catch (e) {
+                        clearInterval(this.resizeInterval);
+                        console.error(e);
+                        onError();
                     }
                 }, 25);
             }
@@ -152,7 +165,7 @@ class iFrame {
             const cancelButton = this.document.querySelector(".wagtail-fedit-cancel-button");
             if (cancelButton) {
                 cancelButton.addEventListener("click", () => {
-                    clearInterval(interval);
+                    clearInterval(this.resizeInterval);
                     this.onCancel();
                 });
             }

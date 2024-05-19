@@ -1,4 +1,12 @@
 from django.db import models
+from django.urls import (
+    path, reverse,
+)
+from django.http import (
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from django.utils.functional import cached_property
@@ -13,11 +21,15 @@ from wagtail.models import (
 )
 
 from .base import (
+    URLMixin,
     BlockFieldReplacementAdapter,
     DomPositionedMixin,
     AdapterError,
     Keyword,
     VARIABLES,
+)
+from ..views import (
+    BaseAdapterView,
 )
 from ..forms import (
     blocks as block_forms,
@@ -32,14 +44,79 @@ from ..toolbar import (
 )
 
 
+class BaseMoveButton(FeditAdapterComponent):
+    permissions = [
+        "wagtailadmin.access_admin",
+    ]
+    direction: str
 
-class BlockAdapter(BlockFieldReplacementAdapter):
+    def get_context_data(self):
+        return super().get_context_data() | {
+            "direction": self.direction,
+            "change_url": utils.shared_context_url(self.adapter.shared_context_string, reverse(
+                "wagtail_fedit:block-move",
+                kwargs=utils.get_reverse_kwargs(self.adapter)
+            ), action=self.direction),
+        }
+
+
+class MoveUpButton(BaseMoveButton):
+    template_name = "wagtail_fedit/content/buttons/move_up.html"
+    direction = "up"
+
+class MoveDownButton(BaseMoveButton):
+    template_name = "wagtail_fedit/content/buttons/move_down.html"
+    direction = "down"
+
+class BlockMoveAdapterView(BaseAdapterView):
+    adapter: "BlockAdapter"
+    
+
+    def post(self, request, *args, **kwargs):
+        
+        action = self.request.GET.get("action")
+        idx = self.adapter.block_index
+        parent = self.adapter.parent
+        if action.lower() == "up":
+            if idx > 0 and idx < len(parent):
+                parent[idx], parent[idx - 1] = parent[idx - 1], parent[idx]
+            else:
+                return JsonResponse({"error": "Cannot move block up"})
+
+        elif action.lower() == "down":
+            if idx < len(parent) - 1 and idx >= 0:
+                parent[idx], parent[idx + 1] = parent[idx + 1], parent[idx]
+            else:
+                return JsonResponse({"error": "Cannot move block down"})
+        else:
+            return JsonResponse({"error": "Invalid action"})
+        
+        if isinstance(self.adapter.object, RevisionMixin):
+            latest_revision = self.adapter.object.latest_revision
+            if latest_revision:
+                latest_revision.content = self.adapter.object.serializable_data()
+                latest_revision.save()
+            else:
+                self.adapter.object.save_revision(
+                    user=self.request.user,
+                )
+        else:
+            self.adapter.object.save()
+
+        return JsonResponse({
+            "success": True,
+        })
+
+
+
+class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
     """
     An adapter for editing Wagtail blocks.
     This will render the block and replace it on the frontend
     on successful form submission.
     """
     identifier = "block"
+    js_constructor = "wagtail_fedit.editors.BlockEditor"
     usage_description = "This adapter is used to edit a block of a streamfield."
     keywords = BlockFieldReplacementAdapter.keywords + (
         Keyword("block",
@@ -61,6 +138,8 @@ class BlockAdapter(BlockFieldReplacementAdapter):
         super().__init__(object, field_name, request, **kwargs)
 
         self.block = self.kwargs.pop("block", None)
+        self.parent = None
+        self.block_index = None
         if self.block:
             if not hasattr(self.block, "id") and not self.kwargs["block_id"]:
                 raise AdapterError("Invalid block type, block must have an `id` attribute or provide a `block_id`")
@@ -78,7 +157,7 @@ class BlockAdapter(BlockFieldReplacementAdapter):
             if not result:
                 raise AdapterError("Block not found; did you provide the correct block ID?")
             
-            self.block, _ = result
+            self.block, _, self.parent, self.block_index = result
 
     @cached_property
     def tooltip(self) -> str:
@@ -89,13 +168,30 @@ class BlockAdapter(BlockFieldReplacementAdapter):
         url = finder.get_edit_url(self.object)
         hash = f"#block-{self.kwargs['block_id']}-section"
         return f"{url}{hash}"
+    
+    @classmethod
+    def get_admin_urls(self) -> list:
+        return [
+            path(
+                BaseAdapterView.prefix_url_path("block-move"),
+                BlockMoveAdapterView.as_view(),
+                name="block-move"
+            )
+        ]
 
     def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
         buttons = super().get_toolbar_buttons()
-        if not self.kwargs["admin"]:
-            return buttons
-        
-        buttons.append(FeditAdapterAdminLinkButton(
+
+        if self.kwargs["admin"]:
+            buttons.append(FeditAdapterAdminLinkButton(
+                self.request, self,
+            ))
+
+        buttons.append(MoveDownButton(
+            self.request, self,
+        ))
+
+        buttons.append(MoveUpButton(
             self.request, self,
         ))
         return buttons
@@ -188,4 +284,5 @@ class BlockAdapter(BlockFieldReplacementAdapter):
     
 class DomPositionedBlockAdapter(DomPositionedMixin, BlockAdapter):
     identifier = "dom-block"
+    js_constructor = "wagtail_fedit.editors.DomPositionedBlockEditor"
     keywords = BlockAdapter.keywords

@@ -89,7 +89,7 @@ class BaseWagtailFeditEditor extends EventTarget {
 
     refetch(): Promise<any> {
         return new Promise((resolve, reject) => {
-            fetch(this.getRefetchUrl()).then((response) => {
+            fetch(this.refetchUrl).then((response) => {
                 return response.json();
             }).then((response) => {
                 if (!response.success) {
@@ -109,26 +109,6 @@ class BaseWagtailFeditEditor extends EventTarget {
         throw new Error("onResponse not implemented, cannot call super");
     }
 
-    getEditUrl() {
-        // build the edit url from relative edit url
-        const url = new URL(window.location.href);
-        url.pathname = this.editUrl;
-        if (this.sharedContext) {
-            url.searchParams.set("shared_context", this.sharedContext);
-        }
-        return url.toString();
-    }
-
-    getRefetchUrl() {
-        // build the edit url from relative edit url
-        const url = new URL(window.location.href);
-        url.pathname = this.refetchUrl;
-        if (this.sharedContext) {
-            url.searchParams.set("shared_context", this.sharedContext);
-        }
-        return url.toString();
-    }
-
     get frameOptions() {
         return {}
     }
@@ -141,7 +121,7 @@ class BaseWagtailFeditEditor extends EventTarget {
         }
 
         this.iframe = new iFrame({
-            url: this.getEditUrl(),
+            url: this.editUrl,
             id: "wagtail-fedit-iframe",
             className: null,
             executeOnloadImmediately: true,
@@ -156,7 +136,7 @@ class BaseWagtailFeditEditor extends EventTarget {
                         formData: formData,
                     });
 
-                    fetch(this.getEditUrl(), {
+                    fetch(this.editUrl, {
                         method: "POST",
                         body: formData,
                     }).then((response) => {

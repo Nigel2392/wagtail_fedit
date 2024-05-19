@@ -1,3 +1,4 @@
+import { getCookie } from "../../utils";
 import { BaseWagtailFeditEditor, WrapperElement } from "./base";
 
 export {
@@ -63,6 +64,20 @@ class WagtailFeditorAPI {
                 html(update);
                 return;
             }
+        });
+    }
+
+    async fetch(url: string, method: string, body: any) {
+        let headers = new Headers();
+        headers.append("X-Requested-With", "XMLHttpRequest");
+        headers.append("X-CSRFToken", getCookie("csrftoken"));
+
+        return fetch(url, {
+            method: method,
+            headers: headers,
+            body: JSON.stringify(body),
+        }).then((response) => {
+            return response.json();
         });
     }
 

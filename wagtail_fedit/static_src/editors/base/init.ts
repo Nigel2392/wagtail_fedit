@@ -5,6 +5,7 @@ export {
     initNewEditors,
     getEditorClass,
     setScrollParams,
+    refreshPage,
 };
 
 function getEditorClass(element: HTMLElement) {
@@ -48,6 +49,17 @@ function initNewEditors(wrapper: HTMLElement | Document = document) {
             }
         }
     }
+}
+
+function refreshPage() {
+    let url = window.location.href;
+    let scrollY = window.scrollY;
+    let scrollX = window.scrollX;
+
+    let urlObj = new URL(url);
+    urlObj.searchParams.set("scrollY", `${scrollY}`);
+    urlObj.searchParams.set("scrollX", `${scrollX}`);
+    window.location.href = urlObj.toString();
 }
 
 function setScrollParams(button: HTMLAnchorElement) {

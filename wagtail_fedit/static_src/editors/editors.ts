@@ -1,10 +1,13 @@
-import { BaseWagtailFeditEditor, ResponseObject } from "./base/base";
+import { BaseWagtailFeditEditor, ResponseObject, WrapperElement } from "./base/base";
+import { refreshPage } from "./base/init";
 
 export {
     BaseFuncEditor,
     WagtailFeditFuncEditor,
-    BlockFieldEditor,
-    DomPositionedBlockFieldEditor,
+    FieldEditor,
+    BlockEditor,
+    DomPositionedFieldEditor,
+    DomPositionedBlockEditor,
     backgroundImageAdapter,
 };
 
@@ -60,7 +63,7 @@ class WagtailFeditFuncEditor extends BaseFuncEditor {
 }
 
 
-class BlockFieldEditor extends BaseWagtailFeditEditor {
+class FieldEditor extends BaseWagtailFeditEditor {
     onResponse(response: ResponseObject) {
         return this.api.updateHtml((update) => {
             // Fade out the old block
@@ -98,7 +101,38 @@ class BlockFieldEditor extends BaseWagtailFeditEditor {
     }
 }
 
-class DomPositionedBlockFieldEditor extends BlockFieldEditor {
+
+type Constructor<T = any> = new (...args: any[]) => T;
+
+function MovableMixin<T extends Constructor>(base: T) {
+    return class extends base {
+        constructor(...args: any[]) {
+            super(...args);
+            
+            let directionButtons = this.wrapperElement.querySelectorAll("[data-direction]");
+            for (let i = 0; i < directionButtons.length; i++) {
+                let button = directionButtons[i] as HTMLElement;
+                let url = button.dataset.url;
+                button.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    this.api.fetch(url, "POST", {}).then((response: any) => {
+                        if (response.success) {
+                            refreshPage();
+                        } else {
+                            alert("Failed to move block: " + response.error);
+                        }
+                    });
+                });
+            }
+        }
+    }
+}
+
+class BlockEditor extends MovableMixin(FieldEditor) {
+}
+
+
+class DomPositionedFieldEditor extends FieldEditor {
     get buttonsElement() {
         let elem = this.wrapperElement.querySelector(".wagtail-fedit-buttons")
         return elem  as HTMLElement
@@ -134,10 +168,15 @@ class DomPositionedBlockFieldEditor extends BlockFieldEditor {
         document.title = this.initialTitle;
         this.contentElement.style.display = "block";
         this.iframe.destroy();
-        delete this.iframe;
         this.executeEvent(window.wagtailFedit.EVENTS.EDITOR_CLOSE);
+        delete this.iframe;
     }
 }
+
+class DomPositionedBlockEditor extends MovableMixin(DomPositionedFieldEditor) {
+    
+}
+
 
 function backgroundImageAdapter(element: HTMLElement, response: BackgroundImageResponse) {
     const url = response.url;

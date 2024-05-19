@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from django.apps import apps
 from django.utils.translation import gettext as _
 from django.utils.decorators import method_decorator
@@ -24,9 +24,11 @@ from wagtail.admin.views.generic import (
     WagtailAdminTemplateMixin,
 )
 
-from ..adapters import (
-    adapter_registry,
-    BaseAdapter,
+if TYPE_CHECKING:
+    from ..adapters import BaseAdapter
+
+from ..registry import (
+    registry as adapter_registry,
     RegistryLookUpError,
 )
 from ..utils import (
@@ -60,7 +62,7 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
 
         # Fetch the adapter class from the registry
         try:
-            self.adapter_class: BaseAdapter = adapter_registry[adapter_id]
+            self.adapter_class: "BaseAdapter" = adapter_registry[adapter_id]
         except RegistryLookUpError:
             return HttpResponseBadRequest(
                 INVALID.format(
@@ -123,7 +125,7 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
         else:
             self.shared_context = {}
 
-        self.adapter: BaseAdapter = self.adapter_class(
+        self.adapter: "BaseAdapter" = self.adapter_class(
             request=request,
             object=self.instance,
             field_name=field_name,
@@ -155,6 +157,18 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             model_name=model_name,
             model_id=model_id,
         )
+    
+    @classmethod
+    def prefix_url_path(cls, name: str, *suffix: str) -> str:
+        suffix_url = ""
+        
+        if suffix:
+            suffix_url = f"{'/'.join(suffix)}"
+        
+        if suffix_url and not suffix_url.endswith("/"):
+            suffix_url += "/"
+
+        return f"{name}/<str:adapter_id>/<str:app_label>/<str:model_name>/<str:model_id>/<str:field_name>/{suffix_url}"
     
     @property
     def template_name(self):

@@ -15,6 +15,7 @@ from django.core.signing import (
 from django.http import (
     HttpRequest,
 )
+from wagtail import hooks
 from ..settings import (
     SIGN_SHARED_CONTEXT,
     SHARE_WITH_SESSIONS,
@@ -24,6 +25,9 @@ from ..settings import (
 from ..utils import (
     FeditIFrameMixin,
     wrap_adapter,
+)
+from ..hooks import (
+    REGISTER_ADAPTER_URLS,
 )
 
 if TYPE_CHECKING:
@@ -225,6 +229,13 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
             self.meta_field     = None
 
     @classmethod
+    def on_register(cls, registry):
+        """
+        Called when the adapter is registered.
+        """
+        pass
+
+    @classmethod
     def get_usage_string(cls) -> str:
         """
         Return a string which describes how to use the adapter.
@@ -354,6 +365,9 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
             self.object.pk,
             self.field_name,
         ]
+    
+    def wrapped_context(self) -> dict:
+        return {}
 
     def get_element_id(self) -> str:
         """
@@ -404,7 +418,7 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
         """
         raise NotImplementedError
     
-    def encode_shared_context(self) -> dict:
+    def encode_shared_context(self) -> str:
         """
         Encode a dictionary to a string.
         This will be passed as a GET parameter to the iFrame.
@@ -460,10 +474,26 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
             pass
         return {}
     
-    
-class BlockFieldReplacementAdapter(BaseAdapter):
-    js_constructor = "wagtail_fedit.editors.BlockFieldEditor"
+        
+class URLMixin:
+    @classmethod
+    def on_register(cls, registry):
+        """
+        Called when the adapter is registered.
+        """
+        @hooks.register(REGISTER_ADAPTER_URLS)
+        def register_admin_urls():
+            return cls.get_admin_urls()
+        
+    @classmethod
+    def get_admin_urls(self) -> list:
+        """
+        Return a list of admin URLs for the adapter.
+        """
+        
+        return []
 
+class BlockFieldReplacementAdapter(BaseAdapter):
     def get_response_data(self, parent_context = None):
         data = super().get_response_data(parent_context)
         data["html"] = wrap_adapter(
@@ -477,4 +507,3 @@ class BlockFieldReplacementAdapter(BaseAdapter):
 class DomPositionedMixin(BaseAdapter):
     template_name = "wagtail_fedit/editor/adapter_iframe_dom_positioned.html"
     editable_template_name  = "wagtail_fedit/content/editable_dom_positioned_adapter.html"
-    js_constructor = "wagtail_fedit.editors.DomPositionedBlockFieldEditor"

@@ -25,10 +25,12 @@ from ..settings import (
     TIPPY_ENABLED,
 )
 from ..adapters import (
-    adapter_registry,
-    RegistryLookUpError,
     BaseAdapter,
     AdapterError,
+)
+from ..registry import (
+    registry as adapter_registry,
+    RegistryLookUpError,
 )
 from ..utils import (
     wrap_adapter,

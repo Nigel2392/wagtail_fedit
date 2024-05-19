@@ -2,6 +2,7 @@ from django.test import TestCase
 from wagtail import blocks
 from wagtail_fedit import forms as block_forms
 from wagtail_fedit import utils
+import copy
 from .base import TEST_BLOCK_DATA
 from ..models import (
     HeadingComponent,
@@ -53,23 +54,57 @@ class TestBlocks(TestCase):
             ("heading_component", HeadingComponent()),
             ("flat_menu_component", FlatMenuComponent())
         ])
-        self.stream_value = self.stream_block.to_python(TEST_BLOCK_DATA)
+        self.stream_value = self.stream_block.to_python(copy.deepcopy(TEST_BLOCK_DATA))
 
     def test_find_block(self):
-        block, contentpath = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)
+        block, contentpath, parent, idx = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)
         self.assertEqual(block.value["heading"], "AWESOME!!")
         self.assertEqual(block.value["subheading"], "RIGHT?!")
 
-        block, contentpath = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
+        block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
         self.assertEqual(block.value["link"]["text"], "Test Item 3")
         self.assertEqual(contentpath, ["3e9144fd-5fa5-47f8-917e-8fe87c15da01", "items", "a98a19c6-2ead-4e69-9ea2-3158c7e82976"])
 
         item = self.stream_block.get_block_by_content_path(self.stream_value, contentpath)
         self.assertEqual(item.value["link"]["text"], "Test Item 3")
 
-        block, contentpath = utils.find_block("invalid-id", self.stream_value)
+        block, contentpath, parent, idx = utils.find_block("invalid-id", self.stream_value)
         self.assertIsNone(block)
         self.assertEqual(contentpath, [])
+
+    def test_find_block_parent(self):
+        block, contentpath, parent, idx = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)
+        self.assertEqual(parent, self.stream_value)
+
+        block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
+        self.assertEqual(idx, 2)
+        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 3")
+    
+    def test_move_block_down(self):
+        block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
+        self.assertEqual(idx, 2)
+        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 3")
+
+        if idx < len(parent) - 1:
+            parent[idx], parent[idx + 1] = parent[idx + 1], parent[idx]
+        else:
+            self.fail("Block is already at the bottom")
+
+        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 4")
+        self.assertEqual(parent[idx + 1].value["link"]["text"], "Test Item 3")
+
+    def test_move_block_up(self):
+        block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
+        self.assertEqual(idx, 2)
+        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 3")
+
+        if idx > 0:
+            parent[idx], parent[idx - 1] = parent[idx - 1], parent[idx]
+        else:
+            self.fail("Block is already at the top")
+
+        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 2")
+        self.assertEqual(parent[idx - 1].value["link"]["text"], "Test Item 3")
 
     def test_get_form_class(self):
         block = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)[0]

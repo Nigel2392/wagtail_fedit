@@ -101,7 +101,6 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex: 1;
 }
 .wagtail-fedit-form-wrapper #wagtail-fedit-form .field > input
 .wagtail-fedit-form-wrapper #wagtail-fedit-form .field > * > input {

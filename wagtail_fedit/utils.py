@@ -199,28 +199,28 @@ def find_block(block_id, field, contentpath=None):
     if isinstance(field, ListValue):
         field = field.bound_blocks
 
-    for block in field:
+    for idx, block in enumerate(field):
         # Determine the block's name only if needed to avoid premature addition to contentpath.
         block_name = get_block_path(block)
         
         if getattr(block, "id", None) == block_id:
             # Append the block name here as it directly leads to the target.
-            return block, contentpath + [block_name]
+            return block, contentpath + [block_name], field, idx
         
         # Prepare to check children without altering the current path yet.
         if isinstance(block.value, blocks.StructValue):
-            for _, value in block.value.bound_blocks.items():
-                found, found_path = find_block(block_id, value, contentpath + [block_name])
+            for value in block.value.bound_blocks.values():
+                found, found_path, parent, block_index = find_block(block_id, value, contentpath + [block_name])
                 if found:
-                    return found, found_path
+                    return found, found_path, parent, block_index
 
         elif isinstance(block.value, (StreamValue, StreamValue.StreamChild, ListValue)):
-            found, found_path = find_block(block_id, block.value, contentpath + [block_name])
+            found, found_path, parent, block_index = find_block(block_id, block.value, contentpath + [block_name])
             if found:
-                return found, found_path
+                return found, found_path, parent, block_index
 
     # Return None and the current path if no block is found at this level.
-    return None, contentpath
+    return None, contentpath, field, -1
 
 
 
@@ -493,10 +493,33 @@ def base_adapter_context(adapter: "BaseAdapter", context: Union[Context, dict]) 
 
     return context
 
+def shared_context_url(shared_context: str, base_url: str, **kwargs) -> str:
+    """
+    Append the shared context to a URL.
+    """
+    kwargs["shared_context"] = shared_context
+    encoded = urlencode(kwargs)
+    return f"{base_url}?{encoded}"
+
+def get_reverse_kwargs(adapter: "BaseAdapter") -> dict:
+    reverse_kwargs = {
+        "adapter_id": adapter.identifier,
+        "app_label":  adapter.object._meta.app_label,
+        "model_name": adapter.object._meta.model_name,
+        "model_id":   adapter.object.pk,
+    }
+
+    if adapter.field_name is not None:
+        reverse_kwargs["field_name"] = adapter.field_name
+
+    return reverse_kwargs
 
 def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, run_context_processors: bool = False) -> str:
     if not context:
         context = {}
+
+    shared = adapter.encode_shared_context()
+    adapter.shared_context_string = shared
 
     items: list[FeditAdapterComponent] = [
         *adapter.get_toolbar_buttons(),
@@ -509,22 +532,23 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
     items = [item.render() for item in items]
     items = list(filter(None, items))
 
-    reverse_kwargs = {
-        "adapter_id": adapter.identifier,
-        "app_label":  adapter.object._meta.app_label,
-        "model_name": adapter.object._meta.model_name,
-        "model_id":   adapter.object.pk,
-    }
-
-    if adapter.field_name is not None:
-        reverse_kwargs["field_name"] = adapter.field_name
-
-    shared = adapter.encode_shared_context()
     js_constructor = adapter.get_js_constructor()
+
+    reverse_kwargs = get_reverse_kwargs(adapter)
+    edit_url = shared_context_url(shared, reverse(
+        "wagtail_fedit:edit",
+        kwargs=reverse_kwargs,
+    ))
     
+    refetch_url = shared_context_url(shared, reverse(
+        "wagtail_fedit:refetch",
+        kwargs=reverse_kwargs,
+    ))
+
     return render_to_string(
         adapter.get_editable_template_names(),
         {
+            **adapter.wrapped_context(),
             "identifier": adapter.identifier,
             "adapter": adapter,
             "buttons": items,
@@ -533,14 +557,8 @@ def wrap_adapter(request: HttpRequest, adapter: "BaseAdapter", context: dict, ru
             "js_constructor": js_constructor,
             "shared_context": adapter.kwargs,
             "adapter_context": context,
-            "edit_url": reverse(
-                "wagtail_fedit:edit",
-                kwargs=reverse_kwargs,
-            ),
-            "refetch_url": reverse(
-                "wagtail_fedit:refetch",
-                kwargs=reverse_kwargs,
-            ),
+            "edit_url": edit_url,
+            "refetch_url": refetch_url,
         },
         request=request if run_context_processors else None,
     )
