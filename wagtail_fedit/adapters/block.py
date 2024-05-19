@@ -73,6 +73,11 @@ class BlockMoveAdapterView(BaseAdapterView):
     
 
     def post(self, request, *args, **kwargs):
+
+        if not self.adapter.kwargs["movable"]:
+            return JsonResponse({
+                "error": "Block is not movable"
+            })
         
         action = self.request.GET.get("action")
         idx = self.adapter.block_index
@@ -199,7 +204,7 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
             buttons.append(MoveUpButton(
                 self.request, self,
             ))
-            
+
         return buttons
 
     def get_header_title(self):
