@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-25 12:49+0200\n"
+"POT-Creation-Date: 2024-05-20 00:52+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,23 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\tester\wagtail_fedit\adapters\block.py:110
+#: .\tester\wagtail_fedit\adapters\block.py:235
 #, python-format
 msgid "Edit block %(block_label)s for %(model_name)s '%(model_string)s'"
 msgstr "Bewerk blok %(block_label)s voor %(model_name)s '%(model_string)s'"
 
-#: .\tester\wagtail_fedit\adapters\field.py:72
+#: .\tester\wagtail_fedit\adapters\field.py:74
 #, python-format
 msgid "Edit model '%(instance_string)s' for %(model_name)s '%(model_string)s'"
 msgstr ""
 "Bewerk model %(instance_string)s voor %(model_name)s '%(model_string)s'"
 
-#: .\tester\wagtail_fedit\adapters\field.py:78
+#: .\tester\wagtail_fedit\adapters\field.py:80
 #, python-format
 msgid "Edit field '%(field_name)s' for %(model_name)s '%(model_string)s'"
 msgstr "Bewerk veld %(field_name)s voor %(model_name)s' %(model_string)s'"
 
-#: .\tester\wagtail_fedit\adapters\field.py:92
+#: .\tester\wagtail_fedit\adapters\field.py:94
 #, python-format
 msgid ""
 "You must publish %(model)s and the related object of type "
@@ -44,16 +44,16 @@ msgstr ""
 "%(related_verbose_name)s (%(related_model)s) publiceren om wijzigingen "
 "zichtbaar te maken."
 
-#: .\tester\wagtail_fedit\adapters\field.py:116
+#: .\tester\wagtail_fedit\adapters\field.py:118
 msgid "Publishing related object required."
 msgstr "Publicatie van gerelateerd object vereist."
 
-#: .\tester\wagtail_fedit\adapters\field.py:117
-#: .\tester\wagtail_fedit\utils.py:71
+#: .\tester\wagtail_fedit\adapters\field.py:119
+#: .\tester\wagtail_fedit\utils.py:86
 msgid "The object you are editing supports drafts."
 msgstr "Het object dat u bewerkt ondersteunt concepten."
 
-#: .\tester\wagtail_fedit\adapters\field.py:118
+#: .\tester\wagtail_fedit\adapters\field.py:120
 #, python-format
 msgid ""
 "You must publish the related object of type %(type)s (%(model)s) to make any "
@@ -62,11 +62,12 @@ msgstr ""
 "U moet het gerelateerde object van het type %(type)s (%(model)s) publiceren "
 "om wijzigingen zichtbaar te maken."
 
-#: .\tester\wagtail_fedit\adapters\models.py:41
+#: .\tester\wagtail_fedit\adapters\models.py:46
 msgid "This adapter is used for directly editing a model instance."
 msgstr "Deze adapter wordt gebruikt voor het direct bewerken van een model."
 
-#: .\tester\wagtail_fedit\adapters\models.py:108
+#: .\tester\wagtail_fedit\adapters\models.py:138
+#, python-format
 msgid "Edit model %(type)s '%(instance_string)s'"
 msgstr "Bewerk model %(type)s '%(instance_string)s'"
 
@@ -126,6 +127,14 @@ msgstr "{} is vereist"
 msgid "View in Wagtail admin"
 msgstr "Bekijk in Wagtail admin"
 
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\move_down.html:1
+msgid "Move block down"
+msgstr "Verplaats blok omlaag"
+
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\content\buttons\move_up.html:1
+msgid "Move block up"
+msgstr "Verplaats blok omhoog"
+
 #: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\action_confirm.html:32
 msgid "Are you sure you want to continue?"
 msgstr "Weet u zeker dat u wilt doorgaan?"
@@ -167,33 +176,33 @@ msgstr ""
 "Dit object heeft meer wijzigingen. <a href=\"%(view_more_url)s\">Bekijk alle "
 "wijzigingen.</a>"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:55
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:59
 msgid "Locked"
 msgstr "Vergrendeld"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:59
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:63
 msgid "This object is locked"
 msgstr "Dit object is vergrendeld"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:60
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:64
 msgid "You are still able to edit this object."
 msgstr "U kunt dit object nog steeds bewerken."
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:68
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:73
 msgid "This object is locked and cannot be edited."
 msgstr "Dit object is vergrendeld en kan niet worden bewerkt."
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:90
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:96
 msgid "Edit in Wagtail Admin"
 msgstr "Bewerk in Wagtail Admin"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:94
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:95
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:100
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:101
 msgid "Save"
 msgstr "Opslaan"
 
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:101
-#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:102
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:107
+#: .\tester\wagtail_fedit\templates\wagtail_fedit\editor\base_iframe.html:108
 msgid "Close"
 msgstr "Sluiten"
 
@@ -209,60 +218,60 @@ msgstr "Bekijk live pagina"
 msgid "Revision Management"
 msgstr "Revisiebeheer"
 
-#: .\tester\wagtail_fedit\utils.py:68
-#: .\tester\wagtail_fedit\views\adapters.py:49
+#: .\tester\wagtail_fedit\utils.py:83
+#: .\tester\wagtail_fedit\views\adapters.py:52
 msgid "Validation Errors"
 msgstr "Validatiefouten"
 
-#: .\tester\wagtail_fedit\utils.py:70
+#: .\tester\wagtail_fedit\utils.py:85
 msgid "Publishing Required"
 msgstr "Publicatie vereist"
 
-#: .\tester\wagtail_fedit\utils.py:72
+#: .\tester\wagtail_fedit\utils.py:87
 #, python-format
 msgid "You must publish %(model)s to make any changes visible."
 msgstr "U moet %(model)s publiceren om wijzigingen zichtbaar te maken."
 
-#: .\tester\wagtail_fedit\utils.py:74
+#: .\tester\wagtail_fedit\utils.py:89
 msgid "No Publishing Required"
 msgstr "Geen publicatie vereist"
 
-#: .\tester\wagtail_fedit\utils.py:75
+#: .\tester\wagtail_fedit\utils.py:90
 msgid "The object you are editing does not support drafts."
 msgstr "Het object dat u bewerkt ondersteunt geen concepten."
 
-#: .\tester\wagtail_fedit\utils.py:76
+#: .\tester\wagtail_fedit\utils.py:91
 msgid ""
 "You are not required to publish this object to make this change visible."
 msgstr ""
 "U hoeft dit object niet te publiceren om deze wijziging zichtbaar te maken."
 
-#: .\tester\wagtail_fedit\utils.py:90
+#: .\tester\wagtail_fedit\utils.py:105
 #, python-format
 msgid "Edit %(type)s '%(model)s'"
 msgstr "Bewerk %(type)s '%(model)s'"
 
-#: .\tester\wagtail_fedit\views\adapters.py:66
+#: .\tester\wagtail_fedit\views\adapters.py:69
 msgid "Adapter ID"
 msgstr "Adapter-ID"
 
-#: .\tester\wagtail_fedit\views\adapters.py:76
+#: .\tester\wagtail_fedit\views\adapters.py:79
 msgid "Model"
 msgstr "Model"
 
-#: .\tester\wagtail_fedit\views\adapters.py:83
+#: .\tester\wagtail_fedit\views\adapters.py:86
 msgid "view this page"
 msgstr "Bekijk deze pagina"
 
-#: .\tester\wagtail_fedit\views\adapters.py:101
+#: .\tester\wagtail_fedit\views\adapters.py:104
 msgid "Field name"
 msgstr "Veldnaam"
 
-#: .\tester\wagtail_fedit\views\adapters.py:109
+#: .\tester\wagtail_fedit\views\adapters.py:112
 msgid "field name"
 msgstr "veldnaam"
 
-#: .\tester\wagtail_fedit\views\adapters.py:135
+#: .\tester\wagtail_fedit\views\adapters.py:138
 msgid "edit this field"
 msgstr "bewerken van dit veld"
 
@@ -289,7 +298,7 @@ msgid ""
 "That means that any changes you make will be immediately visible to everyone."
 msgstr ""
 "Dit betekent dat alle wijzigingen die u aanbrengt, onmiddellijk zichtbaar "
-"zijnvoor iedereen."
+"zijn voor iedereen."
 
 #: .\tester\wagtail_fedit\views\editable.py:267
 msgid "You can always choose to unpublish it."
@@ -429,20 +438,52 @@ msgstr "Gewijzigd '%(field)s' van '%(old)s' naar '%(new)s' (Frontend)"
 msgid "Edit Field"
 msgstr "Bewerk veld"
 
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:53
+msgid "Model Changed (Frontend)"
+msgstr "Model gewijzigd (Frontend)"
+
 #: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:54
+msgid "A model was changed from the frontend"
+msgstr "Een model is gewijzigd vanaf de frontend"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:62
+msgid "Changed '%(model)s' (Frontend)"
+msgstr "Gewijzigd '%(model)s' (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:68
 msgid "Block Changed (Frontend)"
 msgstr "Blok gewijzigd (Frontend)"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:55
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:69
 msgid "A block was changed from the frontend"
 msgstr "Een blok is gewijzigd vanaf de frontend"
 
-#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:68
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:82
 #, python-format
 msgid ""
 "Changed block \"%(block)s\" on field \"%(field)s\" (%(block_id)s, Frontend)"
 msgstr ""
 "Blok \"%(block)s\" gewijzigd op veld \"%(field)s\" (%(block_id)s, Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:90
+msgid "Block Moved (Frontend)"
+msgstr "Blok verplaatst (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:91
+msgid "A block was moved from the frontend"
+msgstr "Een blok is verplaatst vanaf de frontend"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:103
+msgid "Moved block on field (Frontend)"
+msgstr "Blok verplaatst op veld (Frontend)"
+
+#: .\tester\wagtail_fedit\wagtail_hooks\log_actions.py:105
+msgid ""
+"Moved block \"%(block)s\" on field \"%(field)s\" %(direction)s "
+"(%(block_id)s, Frontend)"
+msgstr ""
+"Blok \"%(block)s\" verplaatst op veld \"%(field)s\" %(direction)s "
+"(%(block_id)s, Frontend)"
 
 #~ msgid "Edit block"
 #~ msgstr "Bewerk blok"
