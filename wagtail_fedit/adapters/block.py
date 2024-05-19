@@ -132,6 +132,10 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
             absolute=True,
             help_text="if passed; the adapter will add a quick- link to the Wagtail Admin for this block."
         ),
+        Keyword("movable",
+            absolute=True,
+            help_text="if passed; the adapter will add move buttons to the toolbar."
+        )
     )
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
@@ -187,13 +191,15 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
                 self.request, self,
             ))
 
-        buttons.append(MoveDownButton(
-            self.request, self,
-        ))
+        if self.kwargs["movable"]:
+            buttons.append(MoveDownButton(
+                self.request, self,
+            ))
 
-        buttons.append(MoveUpButton(
-            self.request, self,
-        ))
+            buttons.append(MoveUpButton(
+                self.request, self,
+            ))
+            
         return buttons
 
     def get_header_title(self):

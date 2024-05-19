@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.core.management.color import color_style, supports_color
-from wagtail_fedit.adapters import adapter_registry
+from wagtail_fedit.registry import registry as adapter_registry
 from wagtail_fedit.utils import TEMPLATE_TAG_NAME
 from wagtail_fedit.settings import SHARE_WITH_SESSIONS
 

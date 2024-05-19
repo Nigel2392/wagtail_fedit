@@ -775,19 +775,21 @@
 
 ==========
 
-    {% fedit block instance.modelfield !admin !inline block: blocks.Block ?block_id: str %}
+    {% fedit block instance.modelfield !admin !inline !movable block: blocks.Block ?block_id: str %}
       This adapter is used to edit a block of a streamfield.
        * admin: if passed; the adapter will add a quick- link to the Wagtail Admin for this block.
        * inline: if passed; the adapter will be rendered with inline styles.
+       * movable: if passed; the adapter will add move buttons to the toolbar.
        * block: the block instance to edit. This can be a regular block instance or a BoundBlock.
        * block_id: the ID of the block to edit, required if block is not a BoundBlock.
 
 ==========
 
-    {% fedit dom-block instance.modelfield !admin !inline block: blocks.Block ?block_id: str %}
+    {% fedit dom-block instance.modelfield !admin !inline !movable block: blocks.Block ?block_id: str %}
       This adapter is used to edit a block of a streamfield.
        * admin: if passed; the adapter will add a quick- link to the Wagtail Admin for this block.
        * inline: if passed; the adapter will be rendered with inline styles.
+       * movable: if passed; the adapter will add move buttons to the toolbar.
        * block: the block instance to edit. This can be a regular block instance or a BoundBlock.
        * block_id: the ID of the block to edit, required if block is not a BoundBlock.
 

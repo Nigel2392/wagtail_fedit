@@ -119,7 +119,7 @@ function MovableMixin<T extends Constructor>(base: T) {
                         if (response.success) {
                             refreshPage();
                         } else {
-                            alert("Failed to move block: " + response.error);
+                            response.error ? alert("Failed to move block: " + response.error) : alert("Failed to move block");
                         }
                     }).catch((error: any) => {
                         console.error("Failed to move block", error);
