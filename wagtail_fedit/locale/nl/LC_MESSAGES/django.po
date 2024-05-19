@@ -485,6 +485,12 @@ msgstr ""
 "Blok \"%(block)s\" verplaatst op veld \"%(field)s\" %(direction)s "
 "(%(block_id)s, Frontend)"
 
+msgid "up"
+msgstr "omhoog"
+
+msgid "down"
+msgstr "omlaag"
+
 #~ msgid "Edit block"
 #~ msgstr "Bewerk blok"
 
