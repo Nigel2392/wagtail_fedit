@@ -108,6 +108,23 @@ class BlockMoveAdapterView(BaseAdapterView):
         else:
             self.adapter.object.save()
 
+        with translation.override(None):
+            log(
+                instance=self.adapter.object,
+                action="wagtail_fedit.move_block",
+                user=self.request.user,
+                data={
+                    "model_id": self.adapter.object.pk,
+                    "model_name": self.adapter.object._meta.model_name,
+                    "app_label": self.adapter.object._meta.app_label,
+                    "field_name": self.adapter.meta_field.verbose_name,
+                    "block_label": self.adapter.block.block.label,
+                    "block_id": self.adapter.kwargs["block_id"],
+                    "direction": action,
+                },
+                content_changed=True,
+            )
+
         return JsonResponse({
             "success": True,
         })

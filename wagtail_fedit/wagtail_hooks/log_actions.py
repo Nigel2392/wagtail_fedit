@@ -84,3 +84,28 @@ def register_core_log_actions(actions):
                 "field": gettext(data["verbose_field_name"]),
                 "block_id": data["block_id"],
             }
+        
+    @actions.register_action("wagtail_fedit.move_block")
+    class BlockMovedFormatter(LogFormatter):
+        label = _("Block Moved (Frontend)")
+        message = _("A block was moved from the frontend")
+        must = [
+            "field_name",
+            "block_label",
+            "block_id",
+            "direction",
+        ]
+
+        def format_message(self, log_entry):
+            data = log_entry.data
+
+            if not all([key in data for key in self.must]):
+                return _("Moved block on field (Frontend)")
+
+            return _("Moved block \"%(block)s\" on field \"%(field)s\" %(direction)s (%(block_id)s, Frontend)") % {
+                "block": gettext(data["block_label"]),
+                "field": gettext(data["field_name"]),
+                "direction": gettext(data["direction"]),
+                "block_id": data["block_id"],
+            }
+    
