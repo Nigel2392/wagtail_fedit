@@ -18,6 +18,7 @@ from wagtail.blocks import (
 )
 from wagtail.models import (
     RevisionMixin,
+    Revision,
 )
 
 from .base import (
@@ -97,14 +98,9 @@ class BlockMoveAdapterView(BaseAdapterView):
             return JsonResponse({"error": "Invalid action"})
         
         if isinstance(self.adapter.object, RevisionMixin):
-            latest_revision = self.adapter.object.latest_revision
-            if latest_revision:
-                latest_revision.content = self.adapter.object.serializable_data()
-                latest_revision.save()
-            else:
-                self.adapter.object.save_revision(
-                    user=self.request.user,
-                )
+            self.adapter.object.save_revision(
+                user=self.request.user,
+            )
         else:
             self.adapter.object.save()
 

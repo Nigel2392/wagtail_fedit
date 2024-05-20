@@ -87,8 +87,7 @@ class BaseFeditView(LocaleMixin, ObjectViewMixin, FeditPermissionCheck, Template
 
         if issubclass(self.model, RevisionMixin) and self.object.latest_revision_id:
             instance: RevisionMixin  = self.object
-            revision: RevisionMixin = instance.latest_revision
-            self.object = revision.as_object()
+            self.object = instance.get_latest_revision_as_object()
             self.is_preview = True
         else:
             self.is_preview = False
