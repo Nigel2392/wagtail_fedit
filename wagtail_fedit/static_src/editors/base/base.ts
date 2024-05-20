@@ -116,6 +116,7 @@ class BaseWagtailFeditEditor extends EventTarget {
     openIframe(wrapper: HTMLElement, fn: (iframe: iFrame) => void) {
 
         if (this.iframe) {
+            wrapper.appendChild(this.iframe.element);
             fn(this.iframe);
             return;
         }
