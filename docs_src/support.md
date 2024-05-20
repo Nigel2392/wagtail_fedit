@@ -1,5 +1,16 @@
 // Title: Supported Features
 // Previous: permissions.md
+
+# Supported Features
+
+A list of features that are supported out of the box.
+
+## Permissions
+
+Permissions are included out of the box.
+We will automatically check if the user has the correct permissions to edit the object.
+If they do not, they cannot access the editable page.
+
 ## Revisions
 
 Revision support is included out of the box.
