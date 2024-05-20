@@ -74,6 +74,10 @@ class BlockMoveAdapterView(BaseAdapterView):
     
 
     def post(self, request, *args, **kwargs):
+        if not isinstance(self.adapter, BlockAdapter):
+            return JsonResponse({
+                "error": "Invalid adapter type"
+            })
 
         if not self.adapter.kwargs["movable"]:
             return JsonResponse({

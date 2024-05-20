@@ -41,6 +41,9 @@ Your block and field are wrapped in a `div`, any CSS for your templates should k
 
 ## Implemented
 
+* Editing fields/blocks on the frontend
+* Moving blocks on the frontend
+* High compatibility with custom widgets and blocks
 * Revision Support
 * Locked Support
 * Draft Support
@@ -48,4 +51,3 @@ Your block and field are wrapped in a `div`, any CSS for your templates should k
 * Workflow Support
 * Permissions
 * Audit Logs
-* Full block capabilities on Frontend Editing
