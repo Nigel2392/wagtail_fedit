@@ -1,5 +1,6 @@
 from django.db.models.base import Model as Model
 from django.http import HttpRequest
+from django.urls import reverse
 from django.template import (
     Context, Template,
     TemplateSyntaxError,
@@ -22,6 +23,8 @@ from wagtail_fedit.utils import (
     FIELD_TEMPLATE_VAR,
     INSTANCE_TEMPLATE_VAR,
     base_adapter_context,
+    shared_context_url,
+    get_reverse_kwargs,
     find_block,
 )
 from wagtail_fedit.templatetags.fedit import (
@@ -622,7 +625,7 @@ class TestBaseAdapter(BaseFEditTest):
         )
 
 
-class TestBlockAdapter(BaseFEditTest):
+class BlockAdapterTest(BaseFEditTest):
 
     def test_render(self):
         id = get_adapter_id()
@@ -696,6 +699,152 @@ class TestBlockAdapter(BaseFEditTest):
             tpl,
             wrap_adapter(request, adapters[id], {})
         )
+
+    def test_move_block_up(self):
+        id = get_adapter_id()
+        streamfield = self.basic_model.content
+
+        second_streamfield_listvalue_item = "ec3d73d1-fd01-49ba-840a-d44586ac0025"
+
+        block = find_block(second_streamfield_listvalue_item, streamfield)
+        block_value, _, parent, idx = block
+        if idx != 1:
+            self.fail(f"Expected 1, got {idx}")
+
+        self.assertEqual(
+            parent[idx].value["link"]["text"],
+            "Test Item 2",
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        adapter = TestBlockAdapter(
+            self.basic_model,
+            "content",
+            request,
+            id=id,
+            block=block_value,
+            block_id=second_streamfield_listvalue_item,
+            movable=True,
+        )
+
+        url = shared_context_url(
+            adapter.encode_shared_context(),
+            reverse(
+                "wagtail_fedit:block-move",
+                kwargs=get_reverse_kwargs(adapter)
+            ),
+            action="up",
+        )
+
+        self.client.force_login(self.admin_user)
+
+        response = self.client.post(url)
+        if response.status_code != 200:
+            self.fail(f"Expected 200, got {response.status_code}")
+
+        self.assertDictEqual(
+            json.loads(response.content.decode("utf-8")),
+            {
+                "success": True,
+            }
+        )
+
+        self.basic_model.refresh_from_db()
+
+        streamfield = self.basic_model.content
+        block = find_block(second_streamfield_listvalue_item, streamfield)
+        block_value, _, parent, idx = block
+
+        if idx != 0:
+            self.fail(f"Expected 0, got {idx}")
+            
+        self.assertDictEqual(
+            parent[idx].value,
+            block_value.value,
+        )
+
+        self.assertEqual(
+            parent[idx].value["link"]["text"],
+            "Test Item 2",
+        )
+
+
+    def test_move_block_down(self):
+        id = get_adapter_id()
+        streamfield = self.basic_model.content
+
+        first_streamfield_listvalue_item = "c757f54d-0df5-4b35-8a06-4174f180ec41"
+
+        block = find_block(first_streamfield_listvalue_item, streamfield)
+        block_value, _, parent, idx = block
+        if idx != 0:
+            self.fail(f"Expected 0, got {idx}")
+
+        self.assertEqual(
+            parent[idx].value["link"]["text"],
+            "Test Item 1",
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        adapter = TestBlockAdapter(
+            self.basic_model,
+            "content",
+            request,
+            id=id,
+            block=block_value,
+            block_id=first_streamfield_listvalue_item,
+            movable=True,
+        )
+
+        url = shared_context_url(
+            adapter.encode_shared_context(),
+            reverse(
+                "wagtail_fedit:block-move",
+                kwargs=get_reverse_kwargs(adapter)
+            ),
+            action="down",
+        )
+
+        self.client.force_login(self.admin_user)
+
+        response = self.client.post(url)
+        if response.status_code != 200:
+            self.fail(f"Expected 200, got {response.status_code}")
+
+        self.assertDictEqual(
+            json.loads(response.content.decode("utf-8")),
+            {
+                "success": True,
+            }
+        )
+
+        self.basic_model.refresh_from_db()
+
+        streamfield = self.basic_model.content
+        block = find_block(first_streamfield_listvalue_item, streamfield)
+        block_value, _, parent, idx = block
+
+        if idx != 1:
+            self.fail(f"Expected 1, got {idx}")
+            
+        self.assertDictEqual(
+            parent[idx].value,
+            block_value.value,
+        )
+
+        self.assertEqual(
+            parent[idx].value["link"]["text"],
+            "Test Item 1",
+        )
+
 
     def test_render_from_context(self):
         id = get_adapter_id()
