@@ -44,6 +44,22 @@ class BaseWagtailFeditEditor extends EventTarget {
         this.iframe = null;
         this.init();
 
+        let buttonWrapper = this.wrapperElement.firstElementChild as HTMLElement;
+        if (!this.wrapperElement.querySelector(".wagtail-fedit-adapter-wrapper")) {
+            let imgTag = this.wrapperElement.querySelector("img");
+            if (imgTag) {
+                imgTag.addEventListener("load", () => {
+                    if ((buttonWrapper.clientHeight - 15) > this.wrapperElement.clientHeight) { // Some leeway for padding
+                        buttonWrapper.classList.add("wagtail-fedit-buttons--overflow");
+                    }
+                });
+            } else {
+                if ((buttonWrapper.clientHeight - 15) > this.wrapperElement.clientHeight) { // Some leeway for padding
+                    buttonWrapper.classList.add("wagtail-fedit-buttons--overflow");
+                }
+            }
+        }
+
         if (window.location.hash === `#${this.wrapperElement.id}`) {
             this.openEditor();
             this.focus();

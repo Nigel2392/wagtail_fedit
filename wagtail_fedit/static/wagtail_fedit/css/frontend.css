@@ -32,15 +32,19 @@ html, body {
 .wagtail-fedit-adapter-wrapper:not(.wagtail-fedit-block):has(.wagtail-fedit-adapter-wrapper) > .wagtail-fedit-buttons {
     right: 30px;
 }
+.wagtail-fedit-adapter-wrapper:has(.wagtail-fedit-block):has(.wagtail-fedit-model) > .wagtail-fedit-buttons {
+    right: 60px;
+}
 .wagtail-fedit-buttons {
     display: flex;
-    flex-wrap: wrap;
-    max-height: 100%;
     gap: 0.15em;
     border-radius: 0.5em;
     position: absolute;
     right: 0;
     z-index: 1;
+}
+.wagtail-fedit-buttons--overflow {
+    flex-direction: row-reverse !important;
 }
 
 .wagtail-fedit-adapter-wrapper.wagtail-fedit-inline {
