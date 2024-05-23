@@ -802,6 +802,7 @@ class BlockAdapterTest(BaseFEditTest):
             block=block_value,
             block_id=first_streamfield_listvalue_item,
             movable=True,
+            addable=True,
         )
 
         url = shared_context_url(

@@ -188,16 +188,21 @@ def get_block_path(block):
 def find_block(block_id, field, contentpath=None):
     """
     Find a block in a StreamField or ListBlock by its ID.
+
+    Returns a tuple of (block, contentpath, parent_block, block_index) where:
+    - block is the block with the given ID
+    - contentpath is a list of block names leading to the block
+    - parent_block is the parent block of the block with the given ID
+    - block_index is the index of the block within the parent block's value list
     """
     if contentpath is None:
         contentpath = []
 
     # Check and cast field to iterable if necessary, but do not append non-StreamValue names to contentpath here.
-    if not isinstance(field, StreamValue) and not hasattr(field, "__iter__"):
+    if not isinstance(field, (StreamValue, ListValue)) and not hasattr(field, "__iter__"):
         field = [field]
 
     # Adjust for ListValue to get the iterable bound_blocks.
-    parent_block = field
     if isinstance(field, ListValue):
         field = field.bound_blocks
 
@@ -207,7 +212,7 @@ def find_block(block_id, field, contentpath=None):
         
         if getattr(block, "id", None) == block_id:
             # Append the block name here as it directly leads to the target.
-            return block, contentpath + [block_name], parent_block, idx
+            return block, contentpath + [block_name], field, idx
         
         # Prepare to check children without altering the current path yet.
         if isinstance(block.value, blocks.StructValue):
@@ -222,7 +227,7 @@ def find_block(block_id, field, contentpath=None):
                 return found, found_path, parent, block_index
 
     # Return None and the current path if no block is found at this level.
-    return None, contentpath, parent_block, -1
+    return None, [], None, -1
 
 
 
