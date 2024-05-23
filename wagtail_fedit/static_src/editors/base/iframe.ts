@@ -1,5 +1,6 @@
 export {
-    iFrame,
+    BaseIFrame,
+    FormIFrame,
     FrameOptions,
 };
 
@@ -12,7 +13,7 @@ type FrameOptions = {
     onLoad?: NewFrameFunc;
     onError?: FrameFunc;
     onCancel?: FrameFunc;
-    onResize?: (h: number) => void;
+    onResize?: (oldH: number, newH: number) => void;
 };
 
 type NewFrameFunc = (options: { newFrame: HTMLIFrameElement }) => void;
@@ -22,13 +23,13 @@ interface iFrameWindow extends Window {
     initBlockWidget: (id: string) => void;
 }
 
-class iFrame {
-    private url: string;
-    private srcdoc: string;
-    private iframe: HTMLIFrameElement;
-    private id: string;
-    private className: string;
-    private resizeInterval: NodeJS.Timeout;
+class BaseIFrame {
+    url: string;
+    srcdoc: string;
+    iframe: HTMLIFrameElement;
+    id: string;
+    className: string;
+    resizeInterval: NodeJS.Timeout;
     executeOnloadImmediately: boolean = false;
     onLoad: NewFrameFunc;
     onError: FrameFunc;
@@ -36,29 +37,17 @@ class iFrame {
     onResize: (oldH: number, newH: number) => void;
 
     constructor(options: FrameOptions) {
-        const {
-            id,
-            className,
-            srcdoc = null,
-            url = null,
-            onLoad = () => {},
-            onError = () => {},
-            onCancel = () => {},
-            onResize = () => {},
-            executeOnloadImmediately = false,
-        } = options;
 
-
-        this.url = url;
-        this.srcdoc = srcdoc;
+        this.url = options.url;
+        this.srcdoc = options.srcdoc;
         this.iframe = null;
-        this.id = id;
-        this.className = className;
-        this.onResize = onResize;
-        this.executeOnloadImmediately = executeOnloadImmediately;
-        this.onLoad = onLoad;
-        this.onError = onError;
-        this.onCancel = onCancel;
+        this.id = options.id;
+        this.className = options.className;
+        this.onResize = options.onResize;
+        this.executeOnloadImmediately = options.executeOnloadImmediately;
+        this.onLoad = options.onLoad;
+        this.onError = options.onError;
+        this.onCancel = options.onCancel;
         this.render();
     }
 
@@ -77,19 +66,15 @@ class iFrame {
     }
 
     get window(): iFrameWindow {
-        return this.element.contentWindow as iFrameWindow;
+        return this.element?.contentWindow as iFrameWindow;
     }
 
     get mainElement() {
         return this.document?.querySelector("#main");
     }
 
-    get formElement(): HTMLFormElement {
-        return this.document?.querySelector("#wagtail-fedit-form");
-    }
-
-    get formWrapper() {
-        return this.document?.querySelector(".wagtail-fedit-form-wrapper");
+    get scrollableElement() {
+        return this.document.body;
     }
 
     destroy() {
@@ -128,13 +113,13 @@ class iFrame {
         iframe.id = this.id;
         iframe.className = this.className;
         iframe.onload = () => {
-            if (!this.formElement) {
+            if (!this.scrollableElement) {
                 onError();
                 return;
             }
             
-            let formElement = this.formElement;
-            let lastHeight = formElement.scrollHeight;
+            let scrollableElement = this.scrollableElement;
+            let lastHeight = scrollableElement.scrollHeight;
             if (this.onResize) {
                 this.onResize(0, lastHeight);
             }
@@ -145,14 +130,14 @@ class iFrame {
 
             if (this.onResize) {
                 this.resizeInterval = setInterval(() => {
-                    if (!formElement) {
+                    if (!scrollableElement) {
                         clearInterval(this.resizeInterval);
                         return;
                     }
                     try {
-                        if (lastHeight !== formElement.scrollHeight) {
-                            this.onResize(lastHeight, formElement.scrollHeight);
-                            lastHeight = formElement.scrollHeight;
+                        if (lastHeight !== scrollableElement.scrollHeight) {
+                            this.onResize(lastHeight, scrollableElement.scrollHeight);
+                            lastHeight = scrollableElement.scrollHeight;
                         }
                     } catch (e) {
                         clearInterval(this.resizeInterval);
@@ -162,14 +147,13 @@ class iFrame {
                 }, 25);
             }
 
-            const cancelButton = this.document.querySelector(".wagtail-fedit-cancel-button");
-            if (cancelButton) {
-                cancelButton.addEventListener("click", () => {
-                    clearInterval(this.resizeInterval);
-                    this.onCancel();
-                });
+            this._onLoad(iframe);
+            
+            if (!onLoad) {
+                return;
             }
-            if (this.document.readyState === "complete" || this.executeOnloadImmediately) {
+
+            if (this.executeOnloadImmediately || this.document.readyState === "complete") {
                 onLoad({ newFrame: iframe });
             } else {
                 iframe.contentWindow.addEventListener("DOMContentLoaded", () => {
@@ -181,5 +165,37 @@ class iFrame {
             onError();
         };
         return iframe;
+    }
+
+    _onLoad(iframe: HTMLIFrameElement) {
+
+    }
+}
+
+class FormIFrame extends BaseIFrame {
+    get scrollableElement() {
+        return this.document.querySelector(".wagtail-fedit-form-wrapper") as HTMLElement;
+    }
+
+    get formElement(): HTMLFormElement {
+        return this.document?.querySelector("#wagtail-fedit-form");
+    }
+
+    get formWrapper() {
+        return this.document?.querySelector(".wagtail-fedit-form-wrapper");
+    }
+
+    _onLoad(iframe: HTMLIFrameElement) {
+        super._onLoad(iframe);
+        
+        const cancelButton = this.document.querySelector(".wagtail-fedit-cancel-button");
+        if (cancelButton) {
+            cancelButton.addEventListener("click", () => {
+                clearInterval(this.resizeInterval);
+                if (this.onCancel) {
+                    this.onCancel();
+                }
+            });
+        }
     }
 }

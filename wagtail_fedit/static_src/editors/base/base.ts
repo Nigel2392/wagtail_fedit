@@ -1,12 +1,13 @@
 import { initNewEditors } from "./init";
 import { WagtailFeditorAPI } from "./api";
 import { EditorModal } from "../../components/modal";
-import { iFrame } from "./iframe";
+import { FormIFrame } from "./iframe";
 
 export {
     BaseWagtailFeditEditor,
     ResponseObject,
     WrapperElement,
+    newCloseButton,
 };
 
 
@@ -29,7 +30,7 @@ class BaseWagtailFeditEditor extends EventTarget {
     api: WagtailFeditorAPI;
     sharedContext: string;
     editBtn: HTMLElement;
-    iframe: iFrame;
+    iframe: FormIFrame;
     modal: EditorModal;
     opened: boolean;
 
@@ -105,6 +106,24 @@ class BaseWagtailFeditEditor extends EventTarget {
         })
     }
 
+    refetchParent(fallback: () => void | null) {
+        let body = document.body;
+        let parent = this.wrapperElement.parentElement;
+        while (parent && parent !== body) {
+            if (parent.classList.contains("wagtail-fedit-initialized")) {
+                (parent as WrapperElement).editorAPI.refetch().then(() => {
+                    initNewEditors(parent as HTMLElement);
+                });
+                return;
+            }
+            parent = parent.parentElement;
+        }
+
+        if (fallback) {
+            fallback();
+        }
+    }
+
     onResponse(response: ResponseObject): any | Promise<any> {
         throw new Error("onResponse not implemented, cannot call super");
     }
@@ -113,7 +132,7 @@ class BaseWagtailFeditEditor extends EventTarget {
         return {}
     }
 
-    openIframe(wrapper: HTMLElement, fn: (iframe: iFrame) => void) {
+    openIframe(wrapper: HTMLElement, fn: (iframe: FormIFrame) => void) {
 
         if (this.iframe) {
             wrapper.appendChild(this.iframe.element);
@@ -121,7 +140,7 @@ class BaseWagtailFeditEditor extends EventTarget {
             return;
         }
 
-        this.iframe = new iFrame({
+        this.iframe = new FormIFrame({
             url: this.editUrl,
             id: "wagtail-fedit-iframe",
             className: null,
@@ -221,19 +240,16 @@ class BaseWagtailFeditEditor extends EventTarget {
     openEditor() {
         if (!this.modal) {
             this.modal = new EditorModal({
-                modalId: this.wrapperElement.id,
+                modalId: `${this.wrapperElement.id}-modal`,
             });
         }
 
         this.opened = true;
 
         this.openIframe((this.modal as any), (iframe) => {
-            const closeBtn = document.createElement("button");
-            closeBtn.innerHTML = "&times;";
-            closeBtn.classList.add("wagtail-fedit-close-button");
-            closeBtn.addEventListener("click", this.closeEditor.bind(this));
-
-            this.modal.appendChild(closeBtn);
+            this.modal.appendChild(
+                newCloseButton(this.closeEditor.bind(this))
+            );
 
             this.executeEvent(window.wagtailFedit.EVENTS.EDITOR_OPEN, {
                 iframe: this.iframe,
@@ -271,4 +287,12 @@ class BaseWagtailFeditEditor extends EventTarget {
         this.wrapperElement.dispatchEvent(event);
         document.dispatchEvent(event);
     }
+}
+
+function newCloseButton(closeFn: () => void) {
+    const button = document.createElement("button");
+    button.innerHTML = "&times;";
+    button.classList.add("wagtail-fedit-close-button");
+    button.addEventListener("click", closeFn);
+    return button;
 }

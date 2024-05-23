@@ -72,10 +72,14 @@ class WagtailFeditorAPI {
         headers.append("X-Requested-With", "XMLHttpRequest");
         headers.append("X-CSRFToken", getCookie("csrftoken"));
 
+        if (!(body instanceof FormData)) {
+            body = JSON.stringify(body);
+        }
+
         return fetch(url, {
             method: method,
             headers: headers,
-            body: JSON.stringify(body),
+            body: body,
         }).then((response) => {
             return response.json();
         });

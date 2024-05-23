@@ -16,7 +16,8 @@ from wagtail.models import (
     DraftStateMixin,
     WorkflowMixin,
     LockableMixin,
-    PreviewableMixin
+    PreviewableMixin,
+    RevisionMixin,
 )
 from wagtail.admin.admin_url_finder import AdminURLFinder
 from wagtail.blocks.stream_block import StreamValue
@@ -196,6 +197,7 @@ def find_block(block_id, field, contentpath=None):
         field = [field]
 
     # Adjust for ListValue to get the iterable bound_blocks.
+    parent_block = field
     if isinstance(field, ListValue):
         field = field.bound_blocks
 
@@ -205,7 +207,7 @@ def find_block(block_id, field, contentpath=None):
         
         if getattr(block, "id", None) == block_id:
             # Append the block name here as it directly leads to the target.
-            return block, contentpath + [block_name], field, idx
+            return block, contentpath + [block_name], parent_block, idx
         
         # Prepare to check children without altering the current path yet.
         if isinstance(block.value, blocks.StructValue):
@@ -220,7 +222,7 @@ def find_block(block_id, field, contentpath=None):
                 return found, found_path, parent, block_index
 
     # Return None and the current path if no block is found at this level.
-    return None, contentpath, field, -1
+    return None, contentpath, parent_block, -1
 
 
 
@@ -471,6 +473,33 @@ def lock_info(object, user) -> _lock_info:
         locked_for_user = False
 
     return _lock_info(lock, locked_for_user)
+    
+def insert_many(parent: Union[StreamValue, ListValue], idx, blocks):
+    if len(parent) == 0 or idx == len(parent) - 1:
+        parent.extend(blocks)
+    elif idx < len(parent) - 1:
+        if isinstance(parent, StreamValue):
+            for i, block in enumerate(blocks):
+                parent.insert(idx + i + 1, block)
+                parent._raw_data[idx + i + 1] = block.get_prep_value()
+        elif isinstance(parent, ListValue):
+            for i, block in enumerate(blocks):
+                parent.insert(idx + i + 1, block)
+    else:
+        raise IndexError("Cannot add block, index out of range ({} > {})".format(idx, len(parent) - 1))
+
+def save_revision(instance: models.Model, user: Any) -> models.Model:
+    """
+    Save a revision for a model instance.
+    """
+    if isinstance(instance, RevisionMixin):
+        instance.save_revision(
+            user=user,
+        )
+    else:
+        instance.save()
+    return instance
+
 
 def _flatten_context(context: dict) -> dict:
     if hasattr(context, "flatten"):

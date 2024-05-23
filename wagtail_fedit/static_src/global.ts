@@ -13,12 +13,16 @@ import {
     backgroundImageAdapter,
 } from "./editors/editors";
 import { Tooltip } from "./components/tooltips";
-import { iFrame } from "./editors/base/iframe";
+import {
+    BaseIFrame,
+    FormIFrame,
+} from "./editors/base/iframe";
 
 export {
     BaseWagtailFeditEditor,
     Tooltip,
-    iFrame,
+    BaseIFrame,
+    FormIFrame,
 };
 
 type EditorCallback = (targetElement: HTMLElement, response: any) => void;

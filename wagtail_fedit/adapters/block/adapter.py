@@ -1,11 +1,6 @@
 from django.db import models
 from django.urls import (
-    path, reverse,
-)
-from django.http import (
-    HttpResponseBadRequest,
-    HttpResponseForbidden,
-    JsonResponse,
+    path,
 )
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
@@ -18,10 +13,9 @@ from wagtail.blocks import (
 )
 from wagtail.models import (
     RevisionMixin,
-    Revision,
 )
 
-from .base import (
+from ..base import (
     URLMixin,
     BlockFieldReplacementAdapter,
     DomPositionedMixin,
@@ -29,106 +23,32 @@ from .base import (
     Keyword,
     VARIABLES,
 )
-from ..views import (
+from ...views import (
     BaseAdapterView,
 )
-from ..forms import (
+from ...forms import (
     blocks as block_forms,
 )
-from .. import utils
+from ... import utils
 from wagtail.admin.admin_url_finder import (
     AdminURLFinder,
 )
-from ..toolbar import (
+from ...toolbar import (
     FeditAdapterComponent,
     FeditAdapterAdminLinkButton,
 )
 
-
-class BaseMoveButton(FeditAdapterComponent):
-    permissions = [
-        "wagtailadmin.access_admin",
-    ]
-    direction: str
-
-    def get_context_data(self):
-        return super().get_context_data() | {
-            "direction": self.direction,
-            "change_url": utils.shared_context_url(self.adapter.shared_context_string, reverse(
-                "wagtail_fedit:block-move",
-                kwargs=utils.get_reverse_kwargs(self.adapter)
-            ), action=self.direction),
-        }
+from .buttons import (
+    MoveUpButton,
+    MoveDownButton,
+    AddableButton,
+)
 
 
-class MoveUpButton(BaseMoveButton):
-    template_name = "wagtail_fedit/content/buttons/move_up.html"
-    direction = "up"
-
-class MoveDownButton(BaseMoveButton):
-    template_name = "wagtail_fedit/content/buttons/move_down.html"
-    direction = "down"
-
-class BlockMoveAdapterView(BaseAdapterView):
-    adapter: "BlockAdapter"
-    
-
-    def post(self, request, *args, **kwargs):
-        if not isinstance(self.adapter, BlockAdapter):
-            return JsonResponse({
-                "error": "Invalid adapter type"
-            })
-
-        if not self.adapter.kwargs["movable"]:
-            return JsonResponse({
-                "error": "Block is not movable"
-            })
-        
-        action = self.request.GET.get("action")
-        idx = self.adapter.block_index
-        parent = self.adapter.parent
-        if action.lower() == "up":
-            if idx > 0 and idx < len(parent):
-                parent[idx], parent[idx - 1] = parent[idx - 1], parent[idx]
-            else:
-                return JsonResponse({"error": "Cannot move block up"})
-
-        elif action.lower() == "down":
-            if idx < len(parent) - 1 and idx >= 0:
-                parent[idx], parent[idx + 1] = parent[idx + 1], parent[idx]
-            else:
-                return JsonResponse({"error": "Cannot move block down"})
-        else:
-            return JsonResponse({"error": "Invalid action"})
-        
-        if isinstance(self.adapter.object, RevisionMixin):
-            self.adapter.object.save_revision(
-                user=self.request.user,
-            )
-        else:
-            self.adapter.object.save()
-
-        with translation.override(None):
-            log(
-                instance=self.adapter.object,
-                action="wagtail_fedit.move_block",
-                user=self.request.user,
-                data={
-                    "model_id": self.adapter.object.pk,
-                    "model_name": self.adapter.object._meta.model_name,
-                    "app_label": self.adapter.object._meta.app_label,
-                    "field_name": self.adapter.meta_field.verbose_name,
-                    "block_label": self.adapter.block.block.label,
-                    "block_id": self.adapter.kwargs["block_id"],
-                    "direction": action,
-                },
-                content_changed=True,
-            )
-
-        return JsonResponse({
-            "success": True,
-        })
-
+from .views import (
+    BlockMoveAdapterView,
+    BlockAddAdapterView,
+)
 
 
 class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
@@ -156,8 +76,12 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
         ),
         Keyword("movable",
             absolute=True,
-            help_text="if passed; the adapter will add move buttons to the toolbar."
-        )
+            help_text="if passed; the adapter will add 'move' buttons to the toolbar."
+        ),
+        Keyword("addable",
+            absolute=True,
+            help_text="if passed; the adapter will add an 'add' button to the toolbar."
+        ),
     )
 
     def __init__(self, object: models.Model, field_name: str, request: HttpRequest, **kwargs):
@@ -185,6 +109,9 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
             
             self.block, _, self.parent, self.block_index = result
 
+            if self.block_index == -1:
+                raise AdapterError("Block not found; did you provide the correct block ID?")
+
     @cached_property
     def tooltip(self) -> str:
         return self.get_header_title()
@@ -202,7 +129,12 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
                 BaseAdapterView.prefix_url_path("block-move"),
                 BlockMoveAdapterView.as_view(),
                 name="block-move"
-            )
+            ),
+            path(
+                BaseAdapterView.prefix_url_path("block-add"),
+                BlockAddAdapterView.as_view(),
+                name="block-add"
+            ),
         ]
 
     def get_toolbar_buttons(self) -> list[FeditAdapterComponent]:
@@ -213,14 +145,15 @@ class BlockAdapter(URLMixin, BlockFieldReplacementAdapter):
                 self.request, self,
             ))
 
-        if self.kwargs["movable"]:
-            buttons.append(MoveDownButton(
-                self.request, self,
-            ))
-
-            buttons.append(MoveUpButton(
-                self.request, self,
-            ))
+        buttons.append(AddableButton(
+            self.request, self,
+        ))
+        buttons.append(MoveDownButton(
+            self.request, self,
+        ))
+        buttons.append(MoveUpButton(
+            self.request, self,
+        ))
 
         return buttons
 

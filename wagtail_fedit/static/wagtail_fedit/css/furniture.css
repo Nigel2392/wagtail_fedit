@@ -177,6 +177,10 @@ main > div.nice-padding::-webkit-scrollbar-thumb:hover {
     padding: 0;
     width: 1.5rem;
 }
+.c-sf-add-button .icon {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
 /* .content-wrapper.content-wrapper:has(.nice-padding > .fedit-full)  .buttons { */
     /* justify-content: flex-start; */
 /* } */

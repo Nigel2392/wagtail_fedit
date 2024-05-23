@@ -1,5 +1,7 @@
-import { BaseWagtailFeditEditor, ResponseObject, WrapperElement } from "./base/base";
-import { refreshPage } from "./base/init";
+import { EditorModal } from "../components/modal";
+import { FormIFrame } from "../global";
+import { BaseWagtailFeditEditor, ResponseObject, WrapperElement, newCloseButton } from "./base/base";
+import { initNewEditors, refreshPage } from "./base/init";
 
 export {
     BaseFuncEditor,
@@ -104,6 +106,7 @@ class FieldEditor extends BaseWagtailFeditEditor {
 
 type Constructor<T = BaseWagtailFeditEditor> = new (...args: any[]) => T;
 
+
 function MovableMixin<T extends Constructor>(base: T) {
     return class extends base {
         constructor(...args: any[]) {
@@ -114,10 +117,12 @@ function MovableMixin<T extends Constructor>(base: T) {
                 let button = directionButtons[i] as HTMLElement;
                 let url = button.dataset.url;
                 button.addEventListener("click", (e) => {
+                    
                     e.preventDefault();
+                    
                     this.api.fetch(url, "POST", {}).then((response: any) => {
                         if (response.success) {
-                            refreshPage();
+                            this.refetchParent(refreshPage);
                         } else {
                             response.error ? alert("Failed to move block: " + response.error) : alert("Failed to move block");
                         }
@@ -131,7 +136,67 @@ function MovableMixin<T extends Constructor>(base: T) {
     }
 }
 
-class BlockEditor extends MovableMixin(FieldEditor) {
+
+function AddableMixin<T extends Constructor>(base: T) {
+    return class extends base {
+        constructor(...args: any[]) {
+            super(...args);
+            
+            let addButton = this.wrapperElement.querySelector("[data-add]") as HTMLElement;
+            if (!addButton) {
+                console.error("\"Add\" button not found, cannot further initialize AddableMixin");
+                return;
+            }
+
+            const url = addButton.dataset.url;
+            const addModal = new EditorModal({
+                modalId: `${this.wrapperElement.id}-modal`,
+            });
+            addButton.addEventListener("click", (e) => {
+                e.preventDefault();
+                addModal.openModal();
+                const addiFrame = new FormIFrame({
+                   id: "wagtail-fedit-iframe",
+                   className: null,
+                   url: url,
+                   onLoad: ({ newFrame: HTMLIFrameElement }) => {
+
+                        addiFrame.formElement.onsubmit = (e) => {
+                            e.preventDefault();
+
+                            const formData = new FormData(addiFrame.formElement);
+                            this.api.fetch(url, "POST", formData).then((response: any) => {
+                                if (response.success) {
+                                    addModal.closeModal();
+                                    this.refetchParent(refreshPage);
+                                } else {
+                                    response.error ? alert("Failed to add block: " + response.error) : alert("Failed to add block");
+                                }
+                            }).catch((error: any) => {
+                                console.error("Failed to add block", error);
+                                alert("Failed to add block");
+                            });
+                        };
+                    }
+                });
+    
+                addiFrame.destroy();
+                addModal.appendChild(addiFrame.element);
+
+                addModal.appendChild(
+                    newCloseButton(
+                        addModal.closeModal.bind(addModal)
+                    )
+                );
+
+            });
+        }
+    }
+}
+
+
+class BlockEditor extends AddableMixin(MovableMixin(FieldEditor)) {
+
 }
 
 
@@ -176,7 +241,7 @@ class DomPositionedFieldEditor extends FieldEditor {
     }
 }
 
-class DomPositionedBlockEditor extends MovableMixin(DomPositionedFieldEditor) {
+class DomPositionedBlockEditor extends AddableMixin(MovableMixin(DomPositionedFieldEditor)) {
 
 }
 

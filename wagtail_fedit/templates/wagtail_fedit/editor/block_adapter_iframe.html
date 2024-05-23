@@ -1,0 +1,21 @@
+{% extends "./base_iframe.html" %}
+
+{% comment %} {% block header %}{% endblock %} {% endcomment %}
+
+{% block info %}{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    {{ media.css }}
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }}
+    {{ media.js }}
+{% endblock %}
+
+{% block padded %}
+    <div class="wagtail-fedit-form-wrapper nice-padding">
+        {% include "./block_adapter_add_form.html" with edit_url=edit_url form_attrs=form_attrs form=form meta_field=meta_field %}
+    </div>
+{% endblock %}

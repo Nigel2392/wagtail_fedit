@@ -34,7 +34,9 @@ html, body {
 }
 .wagtail-fedit-buttons {
     display: flex;
-    gap: 0.5em;
+    flex-wrap: wrap;
+    max-height: 100%;
+    gap: 0.15em;
     border-radius: 0.5em;
     position: absolute;
     right: 0;
@@ -181,8 +183,8 @@ body:has(.wagtail-fedit-modal) {
         max-height: 100%;
     }
 }
-.wagtail-fedit-modal-wrapper iframe,
-.wagtail-fedit-adapter-wrapper iframe {
+.wagtail-fedit-modal-wrapper #wagtail-fedit-iframe,
+.wagtail-fedit-adapter-wrapper #wagtail-fedit-iframe {
     width: 100%;
     height: 100%;
     border: none;
@@ -209,6 +211,7 @@ body:has(.wagtail-fedit-modal) {
     background-color: rgb(255, 255, 255);
     color: rgb(172, 27, 27);
     cursor: pointer;
+    z-index: 400;
 }
 .wagtail-fedit-modal-wrapper .wagtail-fedit-close-button:hover {
     background-color: rgb(172, 27, 27);

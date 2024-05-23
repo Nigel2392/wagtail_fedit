@@ -180,6 +180,10 @@ class BaseAdapter(FeditIFrameMixin, metaclass=AdapterMeta):
     required_kwargs: tuple[str]
     absolute_tokens: tuple[str]
     _defaults:       dict[str, Any]
+    
+    # Set by utils.wrap_adapter
+    # Automatically sets the encoded context string on the adapter.
+    shared_context_string: str
 
     # How the adapter is identified on inside of the templatetag.
     identifier              = None

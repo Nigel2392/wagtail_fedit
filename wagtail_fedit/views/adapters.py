@@ -149,6 +149,10 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             True,
         )
 
+        could_respond = self.before_dispatch()
+        if isinstance(could_respond, HttpResponse):
+            return could_respond
+
         return super().dispatch(
             request,
             adapter_id=adapter_id,
@@ -158,6 +162,9 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             model_id=model_id,
         )
     
+    def before_dispatch(self) -> HttpResponse | None:
+        pass
+
     @classmethod
     def prefix_url_path(cls, name: str, *suffix: str) -> str:
         suffix_url = ""
