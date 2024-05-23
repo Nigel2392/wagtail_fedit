@@ -198,7 +198,9 @@ def find_block(block_id, field, contentpath=None):
     if contentpath is None:
         contentpath = []
 
-    # Check and cast field to iterable if necessary, but do not append non-StreamValue names to contentpath here.
+    parent_block = field
+
+    # Check and cast field to iterable if necessary, but do not append non-StreamValue names to contentpath here.    
     if not isinstance(field, (StreamValue, ListValue)) and not hasattr(field, "__iter__"):
         field = [field]
 
@@ -212,7 +214,7 @@ def find_block(block_id, field, contentpath=None):
         
         if getattr(block, "id", None) == block_id:
             # Append the block name here as it directly leads to the target.
-            return block, contentpath + [block_name], field, idx
+            return block, contentpath + [block_name], parent_block, idx
         
         # Prepare to check children without altering the current path yet.
         if isinstance(block.value, blocks.StructValue):

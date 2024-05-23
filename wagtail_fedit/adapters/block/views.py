@@ -58,14 +58,21 @@ class BlockMoveAdapterView(BaseAdapterView):
         parent = self.adapter.parent
         if action.lower() == "up":
             if idx > 0 and idx < len(parent):
-                parent[idx], parent[idx - 1] = parent[idx - 1], parent[idx]
+                if isinstance(parent, StreamValue):
+                    parent._raw_data[idx], parent._raw_data[idx - 1] = parent._raw_data[idx - 1], parent._raw_data[idx]
+                    parent[idx], parent[idx - 1] = parent[idx - 1], parent[idx]
+                elif isinstance(parent, ListValue):
+                    parent.bound_blocks[idx], parent.bound_blocks[idx - 1] = parent.bound_blocks[idx - 1], parent.bound_blocks[idx]
             else:
                 return JsonResponse({"error": "Cannot move block up"})
 
         elif action.lower() == "down":
             if idx < len(parent) - 1 and idx >= 0:
-                parent[idx], parent[idx + 1] = parent[idx + 1], parent[idx]
-
+                if isinstance(parent, StreamValue):
+                    parent._raw_data[idx], parent._raw_data[idx + 1] = parent._raw_data[idx + 1], parent._raw_data[idx]
+                    parent[idx], parent[idx + 1] = parent[idx + 1], parent[idx]
+                elif isinstance(parent, ListValue):
+                    parent.bound_blocks[idx], parent.bound_blocks[idx + 1] = parent.bound_blocks[idx + 1], parent.bound_blocks[idx]
                 # if isinstance(parent, StreamValue):
                     # parent._raw_data[idx], parent._raw_data[idx + 1] = parent._raw_data[idx + 1], parent._raw_data[idx]
             else:

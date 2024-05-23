@@ -5,6 +5,9 @@ from django.template import (
     Context, Template,
     TemplateSyntaxError,
 )
+from wagtail.blocks import (
+    BlockWidget,
+)
 from wagtail_fedit.adapters import (
     Keyword,
     BaseAdapter,
@@ -29,6 +32,9 @@ from wagtail_fedit.utils import (
 )
 from wagtail_fedit.templatetags.fedit import (
     wrap_adapter,
+)
+from ..models import (
+    MenuItemBlock,
 )
 from .base import (
     BaseFEditTest,
@@ -712,7 +718,7 @@ class BlockAdapterTest(BaseFEditTest):
             self.fail(f"Expected 1, got {idx}")
 
         self.assertEqual(
-            parent[idx].value["link"]["text"],
+            parent.bound_blocks[idx].value["link"]["text"],
             "Test Item 2",
         )
 
@@ -763,12 +769,12 @@ class BlockAdapterTest(BaseFEditTest):
             self.fail(f"Expected 0, got {idx}")
             
         self.assertDictEqual(
-            parent[idx].value,
+            parent.bound_blocks[idx].value,
             block_value.value,
         )
 
         self.assertEqual(
-            parent[idx].value["link"]["text"],
+            parent.bound_blocks[idx].value["link"]["text"],
             "Test Item 2",
         )
 
@@ -785,7 +791,7 @@ class BlockAdapterTest(BaseFEditTest):
             self.fail(f"Expected 0, got {idx}")
 
         self.assertEqual(
-            parent[idx].value["link"]["text"],
+            parent.bound_blocks[idx].value["link"]["text"],
             "Test Item 1",
         )
 
@@ -827,8 +833,7 @@ class BlockAdapterTest(BaseFEditTest):
             }
         )
 
-        self.basic_model.refresh_from_db()
-
+        self.basic_model = self.basic_model.__class__.objects.get(pk=self.basic_model.pk)
         streamfield = self.basic_model.content
         block = find_block(first_streamfield_listvalue_item, streamfield)
         block_value, _, parent, idx = block
@@ -837,15 +842,91 @@ class BlockAdapterTest(BaseFEditTest):
             self.fail(f"Expected 1, got {idx}")
             
         self.assertDictEqual(
-            parent[idx].value,
+            parent.bound_blocks[idx].value,
             block_value.value,
         )
 
         self.assertEqual(
-            parent[idx].value["link"]["text"],
+            parent.bound_blocks[idx].value["link"]["text"],
             "Test Item 1",
         )
 
+    def test_add_block(self):
+        id = get_adapter_id()
+        streamfield = self.basic_model.content
+
+        first_streamfield_listvalue_item = "c757f54d-0df5-4b35-8a06-4174f180ec41"
+
+        block = find_block(first_streamfield_listvalue_item, streamfield)
+        block_value, _, parent, idx = block
+        if idx != 0:
+            self.fail(f"Expected 0, got {idx}")
+
+        self.assertEqual(
+            parent.bound_blocks[idx].value["link"]["text"],
+            "Test Item 1",
+        )
+
+        request = self.request_factory.get(
+            self.get_editable_url(
+                self.basic_model.pk, self.basic_model._meta.app_label, self.basic_model._meta.model_name,
+            )
+        )
+        adapter = TestBlockAdapter(
+            self.basic_model,
+            "content",
+            request,
+            id=id,
+            block=block_value,
+            block_id=first_streamfield_listvalue_item,
+            movable=True,
+            addable=True,
+        )
+
+        url = shared_context_url(
+            adapter.encode_shared_context(),
+            reverse(
+                "wagtail_fedit:block-add",
+                kwargs=get_reverse_kwargs(adapter)
+            ),
+        )
+
+        block_value = {
+            "wagtail-fedit-block-add-count": 1,
+            "wagtail-fedit-block-add-0-deleted": "",
+            "wagtail-fedit-block-add-0-order": 0,
+            "wagtail-fedit-block-add-0-type": "item",
+            "wagtail-fedit-block-add-0-value-link-text": "Test Item Addition",
+        }
+
+        self.client.force_login(self.admin_user)
+
+        response = self.client.post(url, block_value)
+        if response.status_code != 200:
+            self.fail(f"Expected 200, got {response.status_code} ({response.content})")
+
+        self.assertDictEqual(
+            json.loads(response.content.decode("utf-8")),
+            {
+                "success": True,
+            }
+        )
+
+        self.basic_model.refresh_from_db()
+
+        streamfield = self.basic_model.content
+        block = find_block(first_streamfield_listvalue_item, streamfield)
+        block_value, _, parent, idx = block
+
+        if idx != 0:
+            self.fail(f"Expected 1, got {idx}")
+
+        link_text = parent.bound_blocks[idx + 1].value["link"]["text"]
+
+        self.assertEqual(
+            link_text,
+            "Test Item Addition",
+        )
 
     def test_render_from_context(self):
         id = get_adapter_id()

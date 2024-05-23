@@ -78,33 +78,33 @@ class TestBlocks(TestCase):
 
         block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
         self.assertEqual(idx, 2)
-        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 3")
+        self.assertEqual(parent.bound_blocks[idx].value["link"]["text"], "Test Item 3")
     
     def test_move_block_down(self):
         block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
         self.assertEqual(idx, 2)
-        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 3")
+        self.assertEqual(parent.bound_blocks[idx].value["link"]["text"], "Test Item 3")
 
         if idx < len(parent) - 1:
             parent[idx], parent[idx + 1] = parent[idx + 1], parent[idx]
         else:
             self.fail("Block is already at the bottom")
 
-        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 4")
-        self.assertEqual(parent[idx + 1].value["link"]["text"], "Test Item 3")
+        self.assertEqual(parent.bound_blocks[idx].value["link"]["text"], "Test Item 4")
+        self.assertEqual(parent.bound_blocks[idx + 1].value["link"]["text"], "Test Item 3")
 
     def test_move_block_up(self):
         block, contentpath, parent, idx = utils.find_block("a98a19c6-2ead-4e69-9ea2-3158c7e82976", self.stream_value)
         self.assertEqual(idx, 2)
-        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 3")
+        self.assertEqual(parent.bound_blocks[idx].value["link"]["text"], "Test Item 3")
 
         if idx > 0:
             parent[idx], parent[idx - 1] = parent[idx - 1], parent[idx]
         else:
             self.fail("Block is already at the top")
 
-        self.assertEqual(parent[idx].value["link"]["text"], "Test Item 2")
-        self.assertEqual(parent[idx - 1].value["link"]["text"], "Test Item 3")
+        self.assertEqual(parent.bound_blocks[idx].value["link"]["text"], "Test Item 2")
+        self.assertEqual(parent.bound_blocks[idx - 1].value["link"]["text"], "Test Item 3")
 
     def test_get_form_class(self):
         block = utils.find_block("d543a6bf-34dc-4365-a3fa-d302561930ae", self.stream_value)[0]
