@@ -136,6 +136,8 @@ class AdapterNode(Node):
                     except AttributeError:
                         raise TemplateSyntaxError(f"Object {model.__class__.__name__} does not have attribute {getter}")
                     
+        if PAGE_TEMPLATE_VAR in context and isinstance(obj, Page):
+            kwargs["wagtail_template_page_instance"] = obj
 
         request = context.get("request")
         adapter = self.adapter(

@@ -220,6 +220,9 @@ class BaseAdapterView(FeditIFrameMixin, FeditPermissionCheck, WagtailAdminTempla
             # Wagtail uses this internally; for example in `{% wagtailpagecache %}`
             extra[PAGE_TEMPLATE_VAR] = self.instance
 
+        if "wagtail_template_page_instance" in self.adapter.kwargs:
+            extra[PAGE_TEMPLATE_VAR] = self.adapter.kwargs["wagtail_template_page_instance"]
+
         # Form context; used for rendering the modal.
         if "form" in kwargs:
             extra.update({
