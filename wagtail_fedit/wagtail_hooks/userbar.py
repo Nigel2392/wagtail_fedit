@@ -204,11 +204,11 @@ def fedit_admin_js():
     ))
 
 @hooks.register("construct_wagtail_userbar")
-def add_fedit_userbar_item(request, items):
+def add_fedit_userbar_item(request, items, page):
     model = access_userbar_model(request)
 
     if not model:
-        model = retrieve_page_model(items)
+        model = page
 
     local_items = []
     
