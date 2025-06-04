@@ -17,6 +17,7 @@ jobs:
       - name: Install Wagtail 6.1
         run:
           pip install wagtail==6.1
+          pip install django==4.2
       - name: Migrate database
         run: |
           python wagtail_fedit/test/manage.py makemigrations
